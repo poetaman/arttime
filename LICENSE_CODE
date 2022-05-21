@@ -1,4 +1,12 @@
-                    GNU GENERAL PUBLIC LICENSE
+ADDENDUM NOTE:
+  Please refer to file LICENSE_ADDENDUM_CFLA in the same directory
+  to read the addendum to this license. In case of conflicting
+  statements, the statement/clauses of LICENSE_ADDENDUM_CFLA shall
+  override the statements in this document. Where there is no conflict,
+  the contents of this document applies as the license for code in this
+  repository.
+  
+GNU GENERAL PUBLIC LICENSE (with ADDENDUM, read ADDENDUM NOTE above)
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
