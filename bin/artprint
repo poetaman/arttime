@@ -1,0 +1,317 @@
+#!/usr/bin/env zsh
+# Copyrights 2022 Aman Mehra.
+# Check ../LICENSE_CODE, ../LICENSE_ART, and ../LICENSE_ADDENDUM_CFLA
+# files to know the terms of license
+
+zmodload zsh/zutil
+zparseopts -D -E -F - \
+    t:=title_arg \
+    s:=subtitle_arg \
+    a:=artname_arg \
+    h=help_arg \
+    -tc:=titlecolor_arg \
+    -sc:=subtitlecolor_arg \
+    -ac:=artcolor_arg \
+    -theme:=theme_arg \
+    -width:=width_arg \
+    -height:=height_arg \
+    -style:=style_arg \
+    -debug=debug_arg \
+    -help=help_arg \
+    || return
+
+function printhelp {
+read -r -d '' VAR <<-'EOF'
+Name:
+    artprint    print text art, part of arttime repository
+
+Invocation:
+    artprint [OPTIONS]...
+
+Description:
+    artprint prints text art with optional title/subtitle in center of
+    terminal screen, or indented to height/width passed in optional 
+    arguments.
+    
+    Why artprint? To provide a consistent display of text art in multiple
+    applications. While artprint is a program in the arttime repository and
+    used by arttime to print art on screen, is not tied or limited
+    to arttime. One can use artprint to bring the beauty if text art
+    to various aspects of their deveopment environment, without having
+    to reinvent the wheel.
+
+    Call for artists (copied from arttime's help page $ arttime -h):
+    Much good ascii art was created during web 1.0,
+    but the artform declined after that. arttime intends to be a
+    platform/repository for hosting/displaying ascii/ansi art,
+    as ascii/ansi does have its natural home on a terminal (instead
+    of a wall of an arts museum). In doing so it also encourages sharing art,
+    a not so common drift with the arrival of NFTs (where monkey stickers
+    are being priced at hundreds of thousands of US dollars).
+    The repository already provides a curated library of good ascii art
+    (mixed at times with computer-generated text version of digital images).
+    
+    Read LICENSE_ART for license of art files, and LICENSE_CODE for
+    license of code in arttime's repository (which artprint is part of).
+
+Options:
+    There are options to specify what art to display, colors,
+    string styling, etc. artprint looks for text art files in a directory
+    relative to its own location (let's call it artdir):
+        artdir="<dir_of_artprint>/../share/arttime/textart/*"
+    Note: directory path has name 'arttime' instead of 'artprint' as artprint
+    is part of arttime repository, which intends to be a platform/repository
+    of text art.
+
+    -a          artfile in artdir, or full path to a art file (default: trex)
+    -t          title message placed under art (default: line 1 in artfile)
+    -s          subtitle message (default: none, not printed)
+
+    --ac        art color*, value between [1,15]
+    --tc        title color*, value between [1,15]
+    --sc        subttile color, value between [1,15]
+    --theme     when given it overrides above color options [light,dark]
+
+    --width     width of output (default: tty width)
+    --height    height of output (default: tty height)
+    --style     process title and subtitle strings to certain "styles"
+                For instance, value of 0 (--style 0) uses regular underline
+                value of 1 (--style 1) uses curly underlines, among other
+                things. Not all terminal emulators support curly underlines.
+                Possible values: [0,1] (default: 0)
+    -h, --help  Print this help string, and exit
+
+    *Note: artfile can have ANSI color sequences embedded in it.
+    In that case, those escape sequences and their location override how
+    art/title is colored. Also, ANSI escape sequences embedded in an art
+    file can exceed the capability of underlying terminal emulator, in
+    which case colors will not be displayed correctly. A future option can
+    filter ANSI escape sequences for such terminals.
+
+Examples:
+    $ artprint
+        prints trex art with default title message from the file named trex
+        in artdir
+    $ artprint -t "Hello World - Jurrasic"
+        prints trex art with "Hello World - trex" under the trex ASCII art
+    $ artprint -t "Hello World - Jurrasic" --ac 2 --style 1
+        prints "Hello World — Jurrasic" (en dash replaced with em dash)
+        under the trex ascii art colored in color 2 (green)
+EOF
+echo $VAR
+}
+
+if [[ ! -z $help_arg[-1] ]]; then
+    printhelp
+    exit 0
+fi
+
+title="${title_arg[-1]}"
+subtitle="${subtitle_arg[-1]}"
+artcolor="${artcolor_arg[-1]}"
+titlecolor="${titlecolor_arg[-1]}"
+subtitlecolor="${subtitlecolor_arg[-1]}"
+artname="${artname_arg[-1]}"
+theme="${theme_arg[-1]}"
+widtharg="${width_arg[-1]}"
+heightarg="${height_arg[-1]}"
+style="${style_arg[-1]}"
+debug="${debug_arg[-1]}"
+
+# directories
+bindir="${0:a:h}"
+artdir="$bindir/../share/arttime/textart"
+
+if [[ ! -z $debug ]]; then
+    tchar="|"
+else
+    tchar=" "
+fi
+
+if [[ -z $artname ]]; then
+    artfile="$artdir/trex"
+else
+    if [[ -f "${artname/#\~/$HOME}" ]]; then
+        artfile="${artname/#\~/$HOME}"
+    else
+        artfile="$artdir/${artname}"
+    fi
+fi
+
+if [[ ! -f "$artfile" ]]; then
+    echo "W: file $artfile not found, no textart will be shown" >/dev/stderr
+    artfile="/dev/null"
+fi
+
+art=$(tail -n +2 "$artfile")
+
+if [[ -z $title ]]; then
+    title=$(head -n1 "$artfile")
+elif [[ $title = "-" ]]; then 
+    title=""
+fi
+
+if [[ ! -z $widtharg ]]; then
+    termwidth=$widtharg
+else
+    termwidth=$COLUMNS
+fi
+
+if [[ ! -z $heightarg ]]; then
+    termheight=$heightarg
+else
+    termheight=$LINES
+fi
+
+if ! command -v ansifilter &> /dev/null; then
+    filterexternal="0"
+    function findtextwidth {
+        local textnoansi=$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$1)
+        echo "${#textnoansi}"
+    }
+else
+    filterexternal="1"
+    function findtextwidth {
+        local textnoansi=$(ansifilter --ignore-csi <<<$1)
+        echo "${#textnoansi}"
+    }
+fi
+
+textwidth=0;
+textheight=0;
+if [[ $filterexternal = "0" ]] then
+    #textwidth=$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$art | wc -L)
+    #textheight=$(wc -l <<<$art)
+    while IFS= read -r line; do
+        if [[ "${#line}" -gt $textwidth ]]; then
+            textwidth=${#line};
+        fi;
+        textheight=$((textheight+1))
+    done <<<$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$art);
+else
+    #textwidth=$(ansifilter --ignore-csi <<<$art | wc -L)
+    #textheight=$(wc -l <<<$art)
+    while IFS= read -r line; do
+        if [[ "${#line}" -gt $textwidth ]]; then
+            textwidth=${#line};
+        fi; 
+        textheight=$((textheight+1))
+    done <<<$(ansifilter --ignore-csi <<<$art);
+fi
+
+# NOTE For some reason 6 works better than suspected 4 lines
+# perhaps there is a hidden source of empty lines
+if [[ -z $title ]]; then
+    if [[ -z $subtitle ]]; then
+        shiftheight=$(((termheight-textheight-2)/2))
+    else
+        shiftheight=$(((termheight-textheight-4)/2))
+    fi
+else
+    shiftheight=$(((termheight-textheight-6)/2))
+fi
+
+shiftwidth=$(((termwidth-textwidth)/2))
+
+# Note: FreeBSD's pr doesn't accept 0 for value of argument -o, hence
+# the prshiftopt instead of passing -o $shiftwidth when $shiftwidth is 0
+if [[ ! $shiftwidth -gt 0 ]]; then
+    shiftwidth=0
+    prshiftopt=''
+else
+    prshiftopt='-o'"$shiftwidth"
+fi
+
+if [[ ! $shiftheight -gt 0 ]]; then
+    shiftheight=0
+fi
+
+printf "%$((termwidth-1)).s$tchar\n" " " {0..$shiftheight}
+
+if [[ -z $artcolor ]]; then
+    if [[ -z "$theme" || "$theme" = "dark" ]]; then
+        printf "\e[0m\e[1m\e[38;5;1m"
+    else
+        printf "\e[0m\e[1m\e[38;5;m"
+    fi
+else
+    printf "\e[0m\e[1m\e[38;5;${artcolor}m"
+fi
+pr -t $prshiftopt <<<"$art" | while IFS= read -r line; do
+    artlinewidth=$(findtextwidth $line)
+    printf "%s%$((termwidth-${artlinewidth}-1))s$tchar\n" "$line" " "
+done
+
+#echo "$textwidth, $shiftwidth"
+if [[ $style = "0" || $style = "" ]]; then
+    title="${title//❝/“}"
+    title="${title//❞/”}"
+    subtitle="${subtitle//❝/“}"
+    subtitle="${subtitle/❞/”}"
+else
+    title="${title//“/❝}"
+    title="${title//”/❞}"
+    title="${title/#\"/❝ }"
+    title="${title/\" \-/ ❞ —}"
+    title="${title/%\"/ ❞}"
+    subtitle="${subtitle//“/❝}"
+    subtitle="${subtitle//”/❞}"
+    subtitle="${subtitle/#\"/❝ }"
+    subtitle="${subtitle/\" \-/ ❞ —}"
+    subtitle="${subtitle/%\"/ ❞}"
+fi
+
+
+if [[ ! -z "$title" ]]; then
+    titlewidth=$(findtextwidth $title)
+    printf "%$((termwidth-1)).s$tchar\n" " "
+    if [[ -z $titlecolor ]]; then
+        if [[ -z "$theme" || "$theme" = "dark" ]]; then
+            printf "\e[0m\e[38;5;2m\e[3m"
+        else
+            printf "\e[0m\e[38;5;m\e[3m"
+        fi
+    else
+        printf "\e[0m\e[38;5;${titlecolor}m\e[3m"
+    fi
+    shiftwidth=$(((termwidth-${titlewidth})/2))
+    if [[ ! $shiftwidth -gt 0 ]]; then
+        shiftwidth=0
+    fi
+    padwidth=$((termwidth-shiftwidth-${titlewidth}-1))
+    if [[ ! $padwidth -gt 0 ]]; then
+        padwidth=0
+    fi
+    printf "%${shiftwidth}s%${titlewidth}s%${padwidth}s$tchar" " " "$title" " "
+    #/usr/bin/fmt -c -w $termwidth <<< "$title"  | while IFS= read -r line; do
+    #    printf "%s%$((termwidth-${#line}-1))s$tchar" "$line" " "
+    #done
+fi
+
+if [[ ! -z "$subtitle" ]]; then
+    subtitlewidth=$(findtextwidth $subtitle)
+    #printf "%$((termwidth-1)).s$tchar\n" " "
+    if [[ -z $subtitlecolor ]]; then
+        if [[ -z "$theme" || "$theme" = "dark" ]]; then
+            printf "\e[0m\e[38;5;6m"
+        else
+            printf "\e[0m\e[38;5;m"
+        fi
+    else
+        printf "\e[0m\e[38;5;${subtitlecolor}m"
+    fi
+    shiftwidth=$(((termwidth-${subtitlewidth})/2))
+    if [[ ! $shiftwidth -gt 0 ]]; then
+        shiftwidth=0
+    fi
+    padwidth=$((termwidth-shiftwidth-${subtitlewidth}-1))
+    if [[ ! $padwidth -gt 0 ]]; then
+        padwidth=0
+    fi
+    printf "\n%${shiftwidth}s%${subtitlewidth}s%${padwidth}s$tchar" " " "$subtitle" " "
+    #/usr/bin/fmt -c -w $termwidth <<< "$subtitle" | while IFS= read -r line; do
+    #    printf "%s%$((termwidth-${#line}-1))s$tchar" "$line" " "
+    #done
+fi
+#printf "%$((termwidth-1))s$tchar" " "
+
