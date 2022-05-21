@@ -1,0 +1,1186 @@
+#!/usr/bin/env zsh
+# Copyrights 2022 Aman Mehra.
+# Check ../LICENSE_CODE, ../LICENSE_ART, and ../LICENSE_ADDENDUM_CFLA
+# files to know the terms of license
+
+zmodload zsh/zselect
+zmodload zsh/zutil
+zmodload zsh/datetime
+
+# NOTE: enable minute/nonblocking mode if/when its functional, or remove it completely
+#   m=minute_arg \
+#   n=nonblocking_arg \
+# This means all functions ending in _nonblocking are unreachable for now 
+
+zparseopts -D -E -F - \
+    a:=artname_arg \
+    b:=flipartname_arg \
+    t:=title_arg \
+    s:=samples_arg \
+    g:=goal_arg \
+    h=help_arg \
+    -theme:=theme_arg \
+    -tc:=titlecolor_arg \
+    -ac:=artcolor_arg \
+    -style:=style_arg \
+    -debug=debug_arg \
+    -nolearn=nolearn_arg \
+    -help=help_arg \
+    || return
+
+function printhelp {
+read -r -d '' VAR <<-'EOF'
+Name:
+    arttime     beauty of text art meets functionality of clock/timer
+
+Invocation:
+    arttime [OPTIONS]...
+
+Description:
+    arttime brings curated text-art to otherwise artless terminal emulators
+    of starving developers (and other users who can use terminal emulators).
+    While doing so, it blends display of art (a not-so-techie thing) with
+    functionality of a nifty clock/timer which is a retake on the
+    stereotypical alarms/timers. With one line of title message under the
+    art, it also provides one line of opportunity for developers to
+    display their activism (a not-so-techie thing either) or just attach
+    a functional message for themselves for usual developer activity
+    on terminal (like "debug the failing build tonight").
+
+    Animation: Some great ascii artists of web 1.0 era have produced text
+    art that when displayed one after another creates an illusion of motion.
+    To support their vision, arttime can be passed two art files (called
+    "a-art", and "b-art") that it flip-flops displaying every second.
+    A current restriction is that both pieces of art must be of same height,
+    or else only "a-art" is displayed.
+    
+    Call for artists: Much good ascii art was created during web 1.0, 
+    but the artform declined after that. arttime intends to be a 
+    platform/repository for hosting/displaying ascii/ansi art,
+    as ascii/ansi does have its natural home on a terminal (instead
+    of a wall of an arts museum). In doing so it also encourages sharing art,
+    a not so common drift with the arrival of NFTs (where monkey stickers
+    are being priced at hundreds of thousands of US dollars).
+    The repository already provides a curated library of good ascii art
+    (mixed at times with computer-generated text version of digital images).
+    
+    Read LICENSE_ART for license of art files, and LICENSE_CODE for
+    license of code in arttime's repository.
+
+    Another note: This application was created at the outskirts of
+    Silicon Valley which has a buzzing scene of tarot-card readers (for 
+    unknown reasons). This inspired the author to add a key-binding to
+    emulate tarot-card experience. Pressing and holding a key ('j')
+    on the keyboard for a couple seconds makes the application settle 
+    on a randomly selected art file (emulating a tarot-card picking).
+    arttime can serve as a free source of "receving message from the
+    universe", or just a laugh. The author takes no responsibility for
+    the meaning one derives from such activity of playing with The Random.
+
+Layout:
+    The layout of arttime is simple. Text art with one line of message
+    and one line for clock/timer is kept horizontally and vertically
+    centered on the terminal, even when terminal size is changed.
+
+    Current time is always shown underlined, another time is either
+    start time (when arttime was started), or goal time. Layout/meaning
+    of times shown in the application:
+        - When the application starts, it displays:
+          <start_time> | time elapsed <elapsed_time> | <current_time>
+        - When goal time is set, it shows:
+          <current_time> | time pending <pending_time> | <goal_time>
+        - When goal time passes, it shows:
+          <current_time> | goal passed! <goal_up_time> | <goal_time>
+        - When goal time is cleared, it shows:
+          <start_time> | time elapsed <elapsed_time> | <current_time>
+
+    Colors, underlines, and invert-coloring helps distinguish the
+    between times.
+
+Notifications:
+    Aside from inverting the colors of goal time to show that goal has been
+    reached, arttime aims to issue desktop notification for as many platforms
+    as possible. Currently it is tested to work work on macOS alone.
+    But it should work for Linux Desktop Enviornments with notify-send.
+    
+    Note: arttime is a suspendable (Ctrl-z), and continuable application.
+    The only caveat is that arttime won't issue notification if it is kept
+    suspended around the time when goal is reached. Notification will be 
+    deferred to the time when it is continued again. In future this behavior
+    might change, but for now if you expect to get notification, don't
+    suspend arttime.
+    
+Kebindings:
+    arttime is a text user interface (TUI), and is controlled by pressing
+    various keys on computer's keyboard. Passing/pressing 'h' to the
+    application toggles between currently displayed art, and a "help" art 
+    page that lists all of the keybindings. By default the application starts
+    in help/learn mode, and displays the help art. To disable this behavior
+    pass option --nolearn to arttime command, or put that in an alias for
+    arttime in your shell's configuration file.
+
+Options:
+    There are options to control art displayed at launch, colors, string
+    styling, setting a timer/alarm, controlling time sampling rate, etc. 
+    arttime looks for text art files in a directory relative to
+    its own location (let's call it artdir):
+        artdir="<dir_of_arttime>/../share/arttime/textart/*"
+
+    -a          a-art art file name in artdir, or full path to a art file
+                (default: butterfly)
+    -b          b-art art file name in artdir, or fill path to a art file 
+                (no default)
+    -t          title message placed under art (default: line 1 in artfiles)
+    -s          samples per second, range: [1,10] (default: 1)
+                Lower value causes lower CPU utilization at the expense of
+                occasional increment of 2 seconds instead of 1 second in
+                elapsed time display. The error doesn't accumulate, and will
+                always be in range of (0sec, 1sec).
+                Value of 10 will cause the elapsed time display to work like
+                an ideal clock, though at the expense of higher
+                CPU utilization (1.5% instead of 0.25% for s=1
+                on authors laptop)
+    -g          goal time. arttime calls alarm/countdown time as "goal time"
+                The reason it's both alarm/countdown time is either format
+                can be specified. Goal can be 1) "10s" from current time, or 
+                2) "May 3 1:15PM IST" (IST stands for Indian Standard Time).
+                Both variants should be entered without quotes.
+                Note: style 2) is currently only supported if "date" command
+                on the system points to GNU date. macOS/BSD's default date
+                command does not interpret arbitrary date time format
+                strings. In future some standard formats that work out of
+                the box with macOS/BSD default date command will be added.
+
+    --ac        art color*, value between [1,15]
+    --tc        title color*, value between [1,15]
+    --theme     when given it overrides above color options [light,dark]
+
+    --style     process title and subtitle strings to certain "styles"
+                For instance, value of 0 (--style 0) uses regular underline
+                value of 1 (--style 1) uses curly underlines, among other
+                things. Not all terminal emulators support curly underlines.
+                Possible values: [0,1] (default: 0)
+
+    --nolearn   By default arttime displays a keybinding help/learn art
+                page upon launch instead of showing some beautiful art.
+                Passing this option turns off that behavior, and makes
+                arttime display intended text art upon launch.
+                The help/learn page can still be toggled by pressing 'h'
+                at any time while application is running.
+    -h, --help  Print this help string, and exit
+
+    *Note: artfile can have ANSI color sequences embedded in it.
+    In that case, those escape sequences and their location override how
+    art/title is colored. Also, ANSI escape sequences embedded in an art
+    file can exceed the capability of underlying terminal emulator, in
+    which case colors will not be displayed correctly. A future option can
+    filter ANSI escape sequences for such terminals.
+
+Examples:
+    $ arttime
+        prints help/learn art on launch, pressing 'h' shows default a-art
+        (butterfly)
+    $ arttime --nolearn -t "Hello World - Butterfly"
+        prints butterfly art with "Hello World - Butterfly" under
+        the trex ASCII art
+    $ arttime --nolearn -t "Hello World - Butterfly" --ac 2 --style 1
+        prints "Hello World — Butterfly" (en dash replaced with em dash)
+        under the butterfly ascii art colored in color 2 (green)
+    $ arttime --nolearn -a winnepooh -b winnepooh2
+        performs 2-framed animation, toggles between a-art and b-art
+    $ arttime --nolearn -s 10
+        sample time 10 times per second to see if it has progressed
+        into next second. Art and/or time is still updated only once
+        every second, but value of 10 for s avoids occasional second
+        increments by 2. There is also a keybinding in arttime to
+        change sample rate while application is running. Just press
+        's', type a number between [1,10] and press enter.
+EOF
+echo $VAR
+}
+
+if [[ ! -z $help_arg[-1] ]]; then
+    printhelp
+    exit 0
+fi
+
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Darwin;;
+    CYGWIN*)    machine=Cygwin;;
+    MINGW*)     machine=MinGw;;
+    *BSD)       machine=BSD;;
+    *)          machine="UNKNOWN:${unameOut}"
+esac
+
+# directories
+bindir="${0:a:h}"
+artdir="$bindir/../share/arttime/textart"
+
+datecmd="date"
+#if [[ $machine = "Darwin" || $machine = "BSD" ]]; then
+#    datecmd='gdate'
+#else
+#    datecmd='date'
+#fi
+
+function getaart {
+    if [[ $helpactive = "1" ]]; then
+        echo $restoreartname
+    else
+        echo $artname
+    fi
+}
+
+function getbart {
+    if [[ $helpactive = "1" ]]; then
+        if [[ -z $restoreflipartname ]]; then
+            return 1
+        else
+            echo $restoreflipartname
+        fi
+    else
+        if [[ -z $flipartname ]]; then
+            return 1
+        else
+            echo $flipartname
+        fi
+    fi
+}
+
+# Function to push desktop notifications
+function notifydesktop {
+    local notifytitle="ARTTIME"
+    local notifysubtitle="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
+    local notifymessage="Goal $goal reached!\ra-art: $(getaart)"
+    if bart=$(getbart); then
+        notifymessage+=", b-art: $(getbart)"
+    else
+        notifymessage+=", b:art: none"
+    fi
+    notifymessage+="\rID: $$"
+    if [[ $machine = "Darwin" ]]; then
+        local notifystr="display notification \"$notifymessage\" with title \"$notifytitle\" subtitle \"$notifysubtitle\" sound name \"Blow\""
+        osascript -e $notifystr 2>/dev/null
+    elif [[ $machine = "Linux" ]]; then
+	paplay /usr/share/sounds/freedesktop/stereo/message-new-instant.oga 2>/dev/null &
+        notify-send -u critical $notifytitle "$notifysubtitle\r$notifymessage" 2>/dev/null
+    fi
+}
+
+# Look at TODO note on lines 6-9, minute/nonblocking mode is disabled
+#updateonminute="${minute_arg[-1]}"
+#nonblocking="${nonblocking_arg[-1]}"
+updateonminute=""
+nonblocking=""
+# The following options are functional, and complete
+artname="${artname_arg[-1]}"
+title="${title_arg[-1]}"
+flipartname="${flipartname_arg[-1]}"
+theme="${theme_arg[-1]}"
+samples="${samples_arg[-1]}"
+goal="${goal_arg[-1]}"
+termwidth="$COLUMNS"
+termheight="$LINES"
+timeformat="%s|%b %d, %I:%M%p"
+artcolorarg="${artcolor_arg[-1]}"
+titlecolorarg="${titlecolor_arg[-1]}"
+style="${style_arg[-1]}"
+debug="${debug_arg[-1]}"
+nolearn="${nolearn_arg[-1]}"
+
+if [[ ! -z $debug ]]; then
+    tchar="|"
+    debugopt="--debug"
+else
+    tchar=" "
+    debugopt=""
+fi
+
+if [[ ! -z "$nolearn" ]]; then
+    if [[ -z "$artname" ]]; then
+        artname="butterfly"
+    fi
+    helpactive="0"
+    restoreartname="help"
+    if [[ ! -z "$flipartname" ]]; then
+        restoreflipartname="$flipartname"
+    fi
+else
+    helpactive="1"
+    if [[ -z "$artname" ]]; then
+        restoreartname="butterfly"
+    else
+        restoreartname="$artname"
+    fi
+    if [[ ! -z "$flipartname" ]]; then
+        restoreflipartname="$flipartname"
+    fi
+    artname="help"
+fi
+
+
+if [[ $artcolorarg = "" ]]; then
+    artcolorarg="1"
+elif ! [[ $artcolorarg =~ ^([0-9]|1[0-5])$ ]]; then
+    echo "W: artcolor (--ac) accepts takes range [0:15], defaulting to 1" >&2
+    artcolorarg="1"
+fi
+
+if [[ $titlecolorarg = "" ]]; then
+    titlecolorarg="2"
+elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
+    echo "W: titlecolor (--tc) accepts takes range [0:15] defaulting to 2" >&2
+    titlecolorarg="2"
+fi
+
+function tputset {
+tput -S <<HERE
+    smcup
+    civis
+    rmam
+HERE
+}
+
+function tputreset {
+tput -S <<HERE
+    rmcup
+    smam
+    cnorm
+HERE
+}
+
+
+regexpart='[[:space:]]*([0-9]+)([hms])[[:space:]]*'
+regex1='^'$regexpart'$'
+regex2='^'$regexpart$regexpart'$'
+regex3='^'$regexpart$regexpart$regexpart'$'
+
+function getseconds {
+    amount="$1"
+    suffix="$2"
+    if [[ $suffix = "h" ]]; then
+        echo $(( amount*3600 ))
+    elif [[ $suffix = "m" ]]; then
+        echo $(( amount*60 ))
+    elif [[ $suffix = "s" ]]; then
+        echo $amount
+    fi
+}
+function setgoaltime {
+    local currenttime=$(strftime '%s')
+    goaltime=""
+    if [[ $goal =~ $regex1 ]]; then
+        goaltime=$(getseconds $match[1] $match[2])
+        goaltime=$(( currenttime+goaltime ))
+    elif [[ $goal =~ $regex2 ]]; then
+        local goaltime1=$(getseconds $match[1] $match[2])
+        local goaltime2=$(getseconds $match[3] $match[4])
+        goaltime=$(( currenttime+goaltime1+goaltime2 ))
+    elif [[ $goal =~ $regex3 ]]; then
+        local goaltime1=$(getseconds $match[1] $match[2])
+        local goaltime2=$(getseconds $match[3] $match[4])
+        local goaltime3=$(getseconds $match[5] $match[6])
+        goaltime=$(( currenttime+goaltime1+goaltime2+goaltime3 ))
+    elif goaltime=$($datecmd -d $goal '+%s' 2>/dev/null ); then
+        if [[ $goaltime -gt $currenttime ]]; then
+        elif goaltime=$($datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
+            if [[ $goaltime -gt $currenttime ]]; then
+                tput cup 0 0
+                tput el
+                printf "Today's $goal has passed, setting goal time to tomorrow's $goal"
+                sleep 2
+            else
+                goaltime=""
+            fi
+        fi
+    else
+        goaltime=""
+    fi
+    #echo "$ goal:$goal, goaltime:$goaltime"
+    if [[ ! -z $goaltime ]]; then
+        if goaltimestr=$($datecmd -d "@$goaltime" "+%b %d, %I:%M%p" 2>/dev/null); then
+        elif goaltimestr=$($datecmd -jf "%s" $goaltime "+%b %d, %I:%M%p" 2>/dev/null); then
+        else
+            goaltimestr=""
+        fi
+    else
+        goaltimestr=""
+    fi
+    #echo "$ goal:$goal, goaltime:$goaltime, goaltimestr:$goaltimestr"
+}
+
+if [[ ! -z $goal ]]; then
+    setgoaltime
+    if [[ -z $goaltime ]]; then
+        echo "Err: Goal time must be a valid time format representing future time"
+        exit 0
+    fi
+else
+    goaltime=""
+fi
+
+
+if [[ ! -z $updateonminute ]]; then
+    sleeptime="60"
+    nonblocking="1"
+else
+    sleeptime="1"
+    if [[ ! -z $nonblocking ]]; then
+        nonblocking="1"
+    else
+        nonblocking="0"
+    fi
+fi
+
+sleeptimecenti=""
+sleeptimefloat=""
+function setsleeptimecenti {
+    if [[ -z $samples || ! $samples =~ ^[1-9]\|[1-9][0-9]+$ ]]; then
+        samples="1"
+    fi
+    sleeptimecenti=$((sleeptime*100/samples))
+    sleeptimefloat=$((sleeptime*1.0/samples))
+    if [[ $sleeptimecenti = "0" || ! $sleeptimecenti -gt 10 ]]; then
+        sleeptimecenti="10"
+        sleeptimefloat="0.1"
+    fi
+}
+
+setsleeptimecenti
+
+sttycmd='/bin/stty'
+sttyorig=$($sttycmd -g)
+# NOTE: disable showing characters typed by user while showing dino
+$sttycmd -echo
+$sttycmd -icanon min 0 time 0 
+
+function setcolors {
+    if [[ -z "$theme" || "$theme" = "dark" ]]; then
+        artcolor="$artcolorarg"
+        titlecolor="$titlecolorarg"
+        subtitlecolor="6"
+        starttimecolor="5"
+        deltatimecolor="3"
+        currenttimecolor="5"
+        theme="dark"
+    else
+        artcolor=""
+        titlecolor="8"
+        subtitlecolor="8"
+        starttimecolor="4"
+        deltatimecolor="1"
+        currenttimecolor="4"
+    fi
+}
+setcolors
+
+prevartname=""
+artstringht=""
+flipartstringht=""
+belowstr=""
+artht=""
+flipartht=""
+function setartstring {
+    artstring=$($bindir/artprint -a "$artname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style")
+    if [[ ! -z $flipartname ]]; then
+        flipartstring=$($bindir/artprint -a "$flipartname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style")
+    fi
+    if [[ $artname != $prevartname ]]; then
+        #echo "here, $artname, $prevartname"
+        if [[ -f "${artname/#\~/$HOME}" ]]; then
+            artfile="${artname/#\~/$HOME}"
+        else
+            artfile="$artdir/${artname}"
+        fi
+        if [[ ! -f "$artfile" ]]; then
+            artfile="/dev/null"
+        fi
+        artht=$(tail -n +2 $artfile | wc -l)
+        artstringht=$(wc -l <<<$artstring)
+        belowcurpos=$(($artstringht+1))
+        lastlinepos=$(($termheight-1))
+        belowstr=""
+        if [[ $belowcurpos = $lastlinepos ]]; then
+            #belowstr=$(printf "%$(($termwidth-1))s$tchar" " ")
+            printf -v tempstr "\n%$(($termwidth-1))s$tchar" " "
+            belowstr+=$tempstr
+        elif [[ $lastlinepos -gt $belowcurpos ]]; then
+            tempstr=""
+            for i in {$belowcurpos..$lastlinepos}; do
+                printf -v tempstr "\n%$(($termwidth-1))s$tchar" " "
+                belowstr+=$tempstr
+            done
+        else
+            belowstr=""
+        fi
+        if [[ ! -z "$flipartname" ]]; then
+            if [[ -f "${flipartname/#\~/$HOME}" ]]; then
+                flipartfile="${flipartname/#\~/$HOME}"
+            else
+                flipartfile="$artdir/${flipartname}"
+            fi
+            if [[ ! -f "$flipartfile" ]]; then
+                flipartfile="/dev/null"
+            fi
+            flipartht=$(tail -n +2 $flipartfile | wc -l)
+            flipartstringht=$(wc -l <<<$flipartstring)
+            if [[ "$flipartht" != "$artht" ]]; then
+                flipartname=""
+                prevartname="$artname"
+                return 1
+            fi
+        fi
+        prevartname="$artname"
+    fi
+    return 0
+    #echo "$flipartname, $flipartstringht, $artname, $artstringht, $belowstr"
+    #exit
+}
+
+# NOTE: tput sequences of at least printart and printtime
+# are better cached, rest is a low priority
+tput_cup00=$(tput cup 0 0)
+tput_sc=$(tput sc)
+tput_rc=$(tput rc)
+
+toggleflipart=""
+function printart {
+    usr1detected=""
+    trap 'trapusr1detected' USR1
+    if [[ ! -z $flipartname && ! -z $toggleflipart ]]; then
+        toggleflipart=""
+        if [[ -z $1 ]]; then
+            printf '%s\n' "${tput_cup00}${flipartstring}"
+        else
+            # NOTE: For now unreachable, might be needed in future
+            printf '%s\n' "${tput_cup00}$1${flipartstring/#*\\n/}"
+        fi
+    else
+        toggleflipart="1"
+        if [[ -z $1 ]]; then
+            printf '%s\n' "${tput_cup00}${artstring}"
+        else
+            printf '%s\n' "${tput_cup00}$1${artstring/#*\\n/}"
+        fi
+    fi
+    if [[ "$usr1detected" = "1" ]]; then
+        trapusr1_both
+    fi
+    trap 'trapusr1_both' USR1
+}
+if ! setartstring && [[ $helpactive != "1" ]]; then
+    printf "W: height of b art does not match that of a art. Try setting b art again."
+fi
+
+function setstyle {
+    if [[ $style = "0" || $style = "" ]]; then
+        currenttimestyle="\e[4m" # regular underline
+        passedgoalstyle="\e[7m" # reversed
+        style="0"
+    else
+        currenttimestyle="\e[4:3m" # curly underline
+        passedgoalstyle="\e[9m" # strike-through
+    fi
+}
+setstyle
+
+
+ignorewinch="0"
+resetstarttime="0"
+lasttime=""
+function printtime {
+    # NOTE: strftime is a builtin replacement for date command
+    currenttime=$(strftime $timeformat)
+    if [[ "$currenttime" = "$lasttime" ]]; then
+        return
+    else
+        usr1detected=""
+        trap 'trapusr1detected' USR1
+        if [[ ! -z $flipartname && ! -z $lasttime ]]; then
+            printart
+        fi
+    fi
+    lasttime="$currenttime"
+    currenttimearray=(${(s/|/)currenttime})
+    if [[ "$resetstarttime" == "1" ]]; then
+        starttime="$currenttime"
+        starttimearray=(${(s/|/)currenttime})
+    fi
+    if [[ ! -z $goaltime ]]; then
+        difftime=$((goaltime-currenttimearray[1]))
+        slackstring0="$currenttimearray[2]"
+        slackstring0style="$currenttimestyle"
+        slackstring4="$goaltimestr"
+        if [[ ! $difftime -gt 0 ]]; then
+            difftime=$(( -difftime ))
+            slackstring1=" | goal passed! "
+            slackstring4style="$passedgoalstyle"
+            if [[ ! -z $goal ]]; then
+                notifydesktop
+                goal=""
+            fi
+        else
+            slackstring1=" | time pending "
+            slackstring4style=""
+        fi
+    else
+        difftime=$((currenttimearray[1]-starttimearray[1]))
+        slackstring0="$starttimearray[2]"
+        slackstring4="$currenttimearray[2]"
+        slackstring4style="$currenttimestyle"
+        slackstring0style=""
+        slackstring1=" | time elapsed "
+    fi
+    hours=$((difftime/3600))
+    minutes=$((difftime%3600/60))
+    seconds=$((difftime%60))
+    slackstring2="${(l:2::0:)hours}h"
+    slackstring2="$slackstring2 ${(l:2::0:)minutes}m"
+    if [[ -z $updateonminute ]]; then
+        slackstring2="$slackstring2 ${(l:2::0:)seconds}s"
+    fi
+    slackstring3=" | "
+    #if [[ ! -z $TMUX ]]; then
+    #    #ignorewinch=$(tmux show-options -vp -t $TMUX_PANE @arttimeterm-ignorewinch 2>/dev/null)
+    #    if [ "$ignorewinch" != "1" ]; then
+    #        termwidth="$COLUMNS"
+    #    fi
+    #else
+    #    termwidth="$COLUMNS"
+    #fi
+    shiftwidth=$((($termwidth-${#slackstring0}-${#slackstring1}-${#slackstring2}-${#slackstring3}-${#slackstring4})/2))
+    # NOTE: following checks are needed so following math expressions do not fail during runtime
+    # when the term-width is changed to be too narrow for instance...
+    if [[ ! $shiftwidth -gt 0 ]]; then
+        shiftwidth=0
+    fi
+    padwidth=$(($termwidth-${#slackstring0}-${#slackstring1}-${#slackstring2}-${#slackstring3}-${#slackstring4}-${shiftwidth}-1))
+    if [[ ! $padwidth -gt 0 ]]; then
+        padwidth=0
+    fi
+    printf "\r%${shiftwidth}s\e[0m\e[38;5;${starttimecolor}m${slackstring0style}$slackstring0\e[0m\e[38;5;${subtitlecolor}m$slackstring1\e[0m\e[38;5;${deltatimecolor}m$slackstring2\e[0m\e[38;5;${subtitlecolor}m$slackstring3\e[0m\e[38;5;${currenttimecolor}m${slackstring4style}$slackstring4\e[0m%${padwidth}s$tchar" " " " "
+    #if [[ $1 = "1" && $belowstr != "" ]]; then
+    if [[ $1 = "1" ]]; then
+        printf '%s' "$tput_sc$belowstr$tput_rc"
+    fi
+    if [[ "$usr1detected" = "1" ]]; then
+        trapusr1_both
+    fi
+    trap 'trapusr1_both' USR1
+}
+
+killdone="0"
+
+function trapint_nonblocking {
+    trap -; kill ${1}; pkill -P $$; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
+}
+
+function trapint_blocking {
+    #while read dummy ; do : ; done
+    # exec 0>&- 2>dev/null;
+    trap -; pkill -P $$; tputreset; $sttycmd $sttyorig; set -e; (exit 130);
+}
+
+function trapexit_nonblocking {
+    trap -;
+    pkill -P $$;
+    if [[ "$killdone" = "0" ]]; then
+        kill ${1}; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
+    fi
+}
+
+function trapexit_blocking {
+    trap -; pkill -P $$; tputreset; $sttycmd $sttyorig;  set -e; (exit 1);
+}
+
+function trapstop_blocking {
+    tputreset; $sttycmd $sttyorig; trap - TSTP; suspend; # kill -TSTP $$
+}
+
+function trapstop_nonblocking {
+    tputreset; $sttycmd $sttyorig; trap - TSTP; suspend; # kill -TSTP $$
+}
+
+function trapcont_blocking {
+    trap "trapstop_blocking" TSTP;
+    #killdone="0"; 
+    sttyorig=$($sttycmd -g)
+    $sttycmd -echo
+    $sttycmd -icanon min 0 time 0 
+    tputset
+    printart
+    printtime
+}
+
+function trapcont_nonblocking {
+    trap "trapstop_nonblocking" TSTP;
+    #killdone="0"; 
+    sttyorig=$($sttycmd -g)
+    $sttycmd -echo
+    $sttycmd -icanon min 0 time 0 
+    tputset
+    printart
+    printtime
+}
+
+
+function askforconfirmation {
+    local response=""
+    printf "Do you really want to $1? [y/n]: "
+    read -k1 response
+    if [[ $response = "y" || $response = "Y" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+#setopt nomenucomplete
+#setopt menu_complete
+#zmodload -i zsh/complist
+tmpartname=""
+function artselector { local curcontext=artselector:::; tmpartname=""; printf "Press a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n"; vared -p "Enter artname: " -c tmpartname; }
+function _artselector { _files -W $artdir  }
+zstyle ':completion:artselector:*:' completer _artselector
+#zstyle ':completion:::*:default' completer _artselector menu no select
+autoload -Uz compinit
+compinit
+
+
+function usr1input_handler {
+    case "$1" in
+        "a"|"b")
+            $sttycmd $sttyorig
+            tput smcup
+            tput cup 0 0
+            tput cnorm
+            clear
+            artselector
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput rmcup
+            tputset
+            if [[ $tmpartname = "" ]]; then
+                if [[ $1 = "b" ]]; then
+                    flipartname=""
+                fi
+            elif [[ ! -f "$artdir/$tmpartname" ]]; then
+                tput cup 0 0
+                echo "$(tput el)No file found for art: $tmpartname"
+                zselect -t 200
+                while read dummy ; do : ; done 
+            else
+                if [[ $1 = "a" ]]; then
+                    artname="$tmpartname"
+                else
+                    flipartname="$tmpartname"
+                fi
+                helpactive="0"
+            fi
+            prevartname=""
+            if ! setartstring; then
+                tput cup 0 0
+                printf "W: height of b art does not match that of a art. Try setting b art again."
+                zselect -t 300
+                while read dummy ; do : ; done
+            fi
+            #printart
+            #tput sc
+            ;;
+        "x"|"y")
+            if ! command -v fzf-tmux; then
+                tput cup 0 0
+                echo "$(tput el)fzf binary not found, please install it"
+                zselect -t 200
+                while read dummy ; do : ; done 
+                return
+            fi
+            tputreset
+            $sttycmd $sttyorig
+            artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tputset
+            if [[ $artnametemp = "" ]]; then
+            elif [[ ! -f "$artdir/$artnametemp" ]]; then
+                tput cup 0 0
+                echo "$(tput el)No file found for art: $artnametemp"
+                zselect -t 200
+                while read dummy ; do : ; done 
+            else
+                if [[ $1 = "x" ]]; then
+                    artname="$artnametemp"
+                else
+                    flipartname="$artnametemp"
+                fi
+                helpactive="0"
+            fi
+            prevartname=""
+            if ! setartstring; then
+                tput cup 0 0
+                printf "W: height of b art does not match that of a art. Try setting b art again."
+                zselect -t 300
+                while read dummy ; do : ; done
+            fi
+            #printart
+            #tput sc
+            ;;
+        "j")
+            jrestoreartname="$artname"
+            jrestoreflipartname="$flipartname"
+            flipartname=""
+            local jresponse=""
+            for pathname in $artdir/*(.DNnoe['REPLY=$RANDOM']); do
+                artname=$(basename $pathname)
+                prevartname=""
+                setartstring
+                local questionstr="Select this? (y:select, n:next, c:cancel), name: $artname "
+                printart $questionstr
+                lasttime=""
+                printtime "1"
+                # NOTE: this pain to show same prompt twice is not explainable in a line's comment
+                # try removing one of the instances, and do exhaustive UI testing to know why its here
+                printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
+                jresponse=""
+                read -k1 jresponse
+                if [[ $jresponse = "y" || $jresponse = "c" ]]; then
+                    break
+                fi
+            done
+            # If response is not 'y', then restore the original state
+            if [[ $jresponse != "y" ]]; then
+                artname="$jrestoreartname"
+                flipartname="$jrestoreflipartname"
+                prevartname=""
+                setartstring
+                printart
+                lasttime=""
+                printtime "1"
+            else
+                # NOTE: commented and redundant "if" statement
+                # but makes the case we care for clear.
+                #if [[ $helpactive = "1" ]]; then
+                helpactive="0"
+                #fi
+            fi
+            ;;
+        "c")
+            if [[ -z $artcolor ]]; then
+                artcolor="0"
+            elif [[ $artcolor -eq 16 ]]; then
+                artcolor=""
+            else
+                artcolor=$(( (artcolor+1)%16 ))
+            fi
+            setartstring
+            #printart
+            ;;
+        "d")
+            echo "cliwallpaper[$$]: flipartname=$flipartname, lasttime=$lasttime, toggleflipart:$toggleflipart, artname:$artname, flipartht:$flipartht, artht:$artht, artstringht:$artstringht, flipartstringht:$flipartstringht" >> ~/cliwallpaper.log
+            ;;
+        "g")
+            tput cup 0 0
+            tput el
+            tempgoal=""
+            $sttycmd $sttyorig
+            tput cnorm
+            printf "Enter goal time: "
+            read tempgoal
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput civis
+            if [[ ! -z $tempgoal ]]; then
+                goal="$tempgoal"
+                setgoaltime
+                if [[ -z $goaltime ]]; then
+                    tput cup 0 0
+                    printf "Error: incorrect goal time value/format, try again"
+                    zselect -t 200
+                fi
+            fi
+            ;;
+        "h")
+            if [[ $helpactive = "0" ]]; then
+                helpactive="1"
+                restoreartname="$artname"
+                restoreflipartname="$flipartname"
+                artname="help"
+                flipartname=""
+            else
+                helpactive="0"
+                artname="$restoreartname"
+                flipartname="$restoreflipartname"
+            fi
+            prevartname=""
+            setartstring
+            local setartstringerr="$?"
+            printart;
+            lasttime="";
+            printtime "1"
+            if [[ $setartstringerr = "1" ]]; then
+                tput cup 0 0
+                printf "W: height of b art does not match that of a art. Try setting b art again."
+                read -t3 -k1
+            fi
+            ;;
+        "i")
+            local timestring="$(strftime '%b %d, %Y %I:%M:%S%p %Z | week %W')"
+            if [[ $helpactive = "1" ]]; then
+                if [[ $restoreflipartname != "" ]]; then
+                    printf "$timestring | a-art: $restoreartname, b-art: $restoreflipartname"
+                else
+                    printf "$timestring | a-art: $restoreartname, b-art: none"
+                fi
+            else
+                if [[ $flipartname != "" ]]; then
+                    printf "$timestring | a-art: $artname, b-art: $flipartname"
+                else
+                    printf "$timestring | a-art: $artname, b-art: none"
+                fi
+            fi
+            printf " | ID: $$\nPress any key to continue"
+            read -t5 -k1
+#tput -S <<HERE
+#            cup 1 0
+#            el
+#HERE
+            while read dummy ; do : ; done
+            ;;
+        "l")
+            $sttycmd $sttyorig
+            tput cnorm
+            if askforconfirmation "clear goal"; then
+                goal=""
+                goaltime=""
+                goaltimestr=""
+            fi
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput civis
+            ;;
+        "m")
+            tput cup 0 0
+            tput el
+            temptitle=""
+            $sttycmd $sttyorig
+            tput cnorm
+            #printf "Enter message (Ctrl-d to cancel): "
+            #read temptitle
+            vared -ep "Enter title message: " -c temptitle
+            readstatus="$?"
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput civis
+            if [[ $temptitle = "" || $readstatus != "0" ]]; then
+            elif [[ $temptitle = "-" ]]; then
+                title=' - '
+            elif [[ $temptitle = "orig" ]]; then
+                title=""
+            else
+                title="$temptitle"
+            fi
+            prevartname=""
+            setartstring
+            #printart
+            ;;
+        "r")
+            $sttycmd $sttyorig
+            tput cnorm
+            if askforconfirmation "reset start time, and goal"; then
+                resetstarttime="1"
+                goal=""
+                goaltime=""
+                goaltimestr=""
+            fi
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput civis
+            ;;
+        "q")
+            $sttycmd $sttyorig
+            tput cnorm
+            if askforconfirmation "quit arttime"; then
+                trap -;
+                pkill -P $$;
+                tputreset;
+                exit
+            fi
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput civis
+            ;;
+        "s")
+            tput cup 0 0
+            tput el
+            tempsamples=""
+            $sttycmd $sttyorig
+            tput cnorm
+            if [[ ! -z $updateonminute ]]; then
+                # XXX: look here
+                printf "Enter samples per minute (current value = $samples): "
+            else
+                printf "Enter samples per seconds (current value = $samples): "
+            fi
+            read tempsamples
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput civis
+            if [[ -z $tempsamples || ! $tempsamples =~ ^([1-9]\|[1-9][0-9]+)$ ]]; then
+                tput cup 0 0
+                printf "Error: samples should be an integer > 0"
+                zselect -t 200
+            else
+                samples="$tempsamples"
+                setsleeptimecenti
+                #echo "Samples: $samples, sleeptime: $sleeptime, sleeptimecenti: $sleeptimecenti"
+                #zselect -t 300
+            fi
+            ;;
+        "t")
+            if [[ -z $theme || $theme = "dark" ]]; then
+                theme="light"
+            else
+                theme="dark"
+            fi
+            setcolors
+            setartstring
+            #printart
+            ;;
+        *)
+            echo "Press 'h' to see which keys do what"
+            zselect -t 200
+            while read dummy ; do : ; done 
+            ;;
+    esac
+}
+
+usr1detected=""
+function trapusr1detected {
+    usr1detected="1"
+}
+
+function trapusr1_both {
+    # NOTE: disable C-z when executing this trap
+    trap '' TSTP
+tput -S <<HERE
+    sc
+    cup 0 0
+HERE
+    # slurp previous user input
+    userinput="$1"
+    if [[ -z $userinput ]]; then
+        #while read dummy ; do : ; done 
+        printf "\r ⌨ ";
+        read -t 2 -k userinput
+        printf "$userinput "
+    else
+        #while read dummy ; do : ; done 
+    fi
+    if [[ ! -z "$userinput" ]]; then
+        usr1input_handler $userinput
+    fi
+#tput -S <<HERE
+#    cup 0 0
+#    el
+#    rc
+#HERE
+    printart
+    lasttime=""
+    printtime "1"
+    resetstarttime="0"
+    userinput=""
+    if [[ $nonblocking = "1" ]]; then
+        trap "trapstop_nonblocking" TSTP
+    else
+        trap "trapstop_blocking" TSTP
+    fi
+}
+
+function arttime_blocking {
+    difftime="0"
+    hours="0"
+    minutes="0"
+    seconds="0"
+    starttime=$(strftime $timeformat)
+    starttimearray=(${(s/|/)starttime})
+    printtime "1"
+    trap "trapint_blocking" INT QUIT
+    trap "trapexit_blocking" EXIT TERM HUP
+    trap "trapusr1_both" USR1
+    trap "trapstop_blocking" TSTP
+    trap "trapcont_blocking" CONT
+    while true; do
+        #zselect -t "$sleeptimecenti"
+        read -t "$sleeptimefloat" -k tmpusrinput
+        if [[ $? = "0" ]]; then
+            trapusr1_both "$tmpusrinput"
+        fi
+        #if [[ -z $artcolor ]]; then
+        #    artcolor="0"
+        #elif [[ $artcolor -eq 16 ]]; then
+        #    artcolor=""
+        #else
+        #    artcolor=$(( (artcolor+1)%16 ))
+        #fi
+        #setartstring
+        #printart
+        printtime
+    done
+}
+
+
+function arttime_nonblocking {
+    difftime="0"
+    hours="0"
+    minutes="0"
+    seconds="0"
+    starttime=$(strftime $timeformat)
+    starttimearray=(${(s/|/)starttime})
+    printtime
+    trap "trapusr1_both" USR1
+    trap "trapcont_nonblocking" CONT
+    trap "trapstop_nonblocking" TSTP
+    while true; do
+        #ARGV0="arttimesleep" sleep $sleeptime &
+        zselect -t $sleeptimecenti &
+        sleeppid="$!"
+        trap "trapint_nonblocking $sleeppid" INT QUIT
+        trap "trapexit_nonblocking $sleeppid" EXIT TERM HUP
+        wait $sleeppid
+        printtime
+    done
+}
+
+function trapwinch {
+    trap '' WINCH
+    if [[ ! -z $TMUX ]]; then
+        ignorewinch=$(tmux show-options -vp -t $TMUX_PANE @arttimeterm-ignorewinch 2>/dev/null)
+        if [[ "$ignorewinch" != "1" ]]; then
+            if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
+                termwidth="$COLUMNS"
+                termheight="$LINES"
+                clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
+            fi
+        fi
+    else
+        if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
+            termwidth="$COLUMNS"
+            termheight="$LINES"
+            clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
+        fi
+    fi
+    trap 'trapwinch' WINCH
+}
+
+tputset
+printart
+trap 'trapwinch' WINCH
+if [[ $nonblocking = "1" ]]; then
+    arttime_nonblocking
+else
+    arttime_blocking
+fi
+tputreset
+$sttycmd $sttyorig
