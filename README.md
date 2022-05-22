@@ -26,5 +26,6 @@ Purpose/features:
 3. Animated art clock. ``$ arttime --nolearn -a military -b military2 -t "Say no to wars, yes to peace" --ac 4``
 ![arttime_animation](https://user-images.githubusercontent.com/71736629/169681999-65ad339a-d1ea-42cb-b2f9-093dd9a2a1be.gif)
 
-4. Timer and notification. ``arttime --nolearn`` then press ``g`` to enter a goal time like ``10s`` for 10 seconds. Check more formats supported by reading help documentation ``$ arttime -h``
-![arttime_timer](https://user-images.githubusercontent.com/71736629/169682479-6292f8b8-b70d-4dee-94e2-a23d64a8e74e.gif)
+4. Timer and notification. ``arttime --nolearn -a colorowl2 -b colorowl3 -t "We don't sleep at night - Owls"`` then press ``g`` to enter a goal time like ``6s`` for 6 seconds. Check more formats supported by reading help documentation ``$ arttime -h``
+![arttime_timer2](https://user-images.githubusercontent.com/71736629/169683033-b343526c-718a-4515-a1fa-52943a609e18.gif)
+
