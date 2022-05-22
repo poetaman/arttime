@@ -10,7 +10,6 @@ Purpose/features:
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
 - Random art selection makes it a fun game, or serious tarot-style reading for believers in The Random
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
-- Provide a curated text art library for users 
 - Provide a developer-centric experience: mindful suspension (Ctrl-z) and continuation
 - Works on macOS out of the box. No need to install homebrew, developer tools
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
@@ -63,7 +62,7 @@ alias arttime="<path_to_arttime_directory>/bin/arttime"
 
 # Troubleshooting
 - Some art does not render correctly?
-  - This is mostly because your terminal application does not support 24-bit true color. Some suggestions: 1. easiest for macOS [iTerm2](https://iterm2.com), 2. for multiple  OSes [Alacritty](https://alacritty.org), [WezTerm](https://wezfurlong.org/wezterm/), [Kitty](https://sw.kovidgoyal.net/kitty/) etc. Check the list maintained [here](https://gist.github.com/sindresorhus/bed863fb8bedf023b833c88c322e44f9#now-supporting-truecolour) to know more terminals that support true colors.
+  - This is mostly because your terminal application does not support 24-bit true color. Some suggestions: 1. easiest for macOS: [iTerm2](https://iterm2.com), 2. for multiple  OSes: [Alacritty](https://alacritty.org), [WezTerm](https://wezfurlong.org/wezterm/), [Kitty](https://sw.kovidgoyal.net/kitty/) etc. Check the list maintained [here](https://gist.github.com/sindresorhus/bed863fb8bedf023b833c88c322e44f9#now-supporting-truecolour) to know more terminals that support true colors.
   - Another possibility is your system does not have fonts for braille characters. Some of the above terminal emulators come with builtin fonts for missing characters, or on-the-fly find missing characters from fonts installed on your system. For that, make sure you atleast some font installed that has braille characters. 
 - No desktop notification?
   - Currently only macOS and Linux have been tested. They use the native technique so should work across versions. Pull requests for other OSes (BSD, windows, etc) will be considered if the technique is native enough
