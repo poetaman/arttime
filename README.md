@@ -52,7 +52,7 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 At the moment, only manual installation is possible.
 
 Follow these steps:
-1. Clone or download the git repository to a preffered location. Cloning is the preffered method to get future updates via ``git pull``.
+1. Clone or download the git repository to a preffered location. Cloning is the preferred method to get future updates via ``git pull``.
 2. Add this command to your ``.zshrc`` or ``.bashrc`` file, depending on your login shell.
 ```
 alias artprint="<path_to_arttime_directory>/bin/artprint"
