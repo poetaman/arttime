@@ -61,6 +61,16 @@ alias arttime="<path_to_arttime_directory>/bin/arttime"
 3. Open new terminal or source your respective ``.zshrc`` or ``.bashrc`` again.
 4. Run command ``arttime``
 
+# Troubleshooting
+- Some art does not render correctly?
+  - This is mostly because your terminal application does not support 24-bit true color. Some suggestions: 1. Easiest for macOS [iTerm2](https://iterm2.com), 2. for multiple  OSes [Alacritty](https://alacritty.org), [WezTerm](https://wezfurlong.org/wezterm/), [Kitty](https://sw.kovidgoyal.net/kitty/) etc. Check the list maintained [here](https://gist.github.com/sindresorhus/bed863fb8bedf023b833c88c322e44f9#now-supporting-truecolour) to know more terminals that support true colors.
+  - Another possibility is your system does not have fonts for braille characters. Some of the above terminal emulators come with builtin fonts for missing characters, or on-the-fly find missing characters from fonts installed on your system. For that, make sure you atleast some font installed that has braille characters. 
+- No desktop notification?
+  - Currently only macOS and Linux have been tested. They use the native technique so should work across versions. Pull requests for other OSes (BSD, windows, etc) will be considered if the technique is native enough
+- No notification sound on Linux?
+  - Sounds on Linux are played using [PulseAudio](https://en.wikipedia.org/wiki/PulseAudio)'s [paplay](https://linux.die.net/man/1/paplay) as that seems to be the most standard way. Other suggestions are welcome, and will be considered.
+
+
 # Acknowledgements
 1. text artists: mostly great text artists of web 1.0 era like [jgs (Joann Stark)](https://github.com/oldcompcz/jgs), et al.
 2. [ascii-image-converter](https://github.com/TheZoraiz/ascii-image-converter): So far the best digital image to colored text converter
