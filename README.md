@@ -16,6 +16,9 @@ Purpose/features:
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
 - Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
 
+# Call for artists
+Call for artists: Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images).
+
 # Screenshots
 1. Default start page. ``$ arttime``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 45 PM" src="https://user-images.githubusercontent.com/71736629/169680869-ae7e017d-490d-4c71-af46-70f8124cb263.png">
@@ -38,3 +41,11 @@ Purpose/features:
 7. Random art selection game, tarot-style. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (it's GIF makes loading this web page slow).
 
 https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-84b3-8e69affdf64f.mp4
+
+8. And much more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
+
+
+# Acknowledgements
+1. text artists: mostly great text artists of web 1.0 era like jgs (Joann Stark), et al.
+2. [ascii-image-converter](https://github.com/TheZoraiz/ascii-image-converter): So far the best digital image to text image converter
+3. [aewan](http://aewan.sourceforge.net): free ascii text coloring tool. Project seems stalled, but works. Tested on Linux VM running on aarch64 Macbook.
