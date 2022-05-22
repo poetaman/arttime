@@ -8,6 +8,7 @@ Purpose/features:
 - Provide developers with 1 line under art to display their activism
 - Random art selection makes it a fun game, or serious tarot-style reading
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
+- Provide a curated text art library for arttime users 
 - Works on macOS out of the box. No need to install homebrew, developer tools
 - Works on other Unixes like Linux/FreeBSD with only zsh as the dependency
 - Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
