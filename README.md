@@ -46,6 +46,6 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 
 # Acknowledgements
-1. text artists: mostly great text artists of web 1.0 era like jgs (Joann Stark), et al.
+1. text artists: mostly great text artists of web 1.0 era like [jgs (Joann Stark)](https://github.com/oldcompcz/jgs), et al.
 2. [ascii-image-converter](https://github.com/TheZoraiz/ascii-image-converter): So far the best digital image to text image converter
 3. [aewan](http://aewan.sourceforge.net): free ascii text coloring tool. Project seems stalled, but works. Tested on Linux VM running on aarch64 Macbook.
