@@ -16,6 +16,7 @@ Purpose/features:
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
 - Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
 - For consistent art & message display in multiple applications, a script ``artprint`` is also available in the same directory as ``arttime``.
+- Multiple ways to select text art: random, by name, via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
 
 Note: By default ``arttime`` is tuned to consume less power, so you will see an occasional increment of 2 seconds in elapsed time. This is ok as the error is always less than 1 second. If you don't want this to happen, set samples per second to 10 from command line ``-s 10`` or from within the application by pressing ``s`` after it starts. On my machine this increases CPU usage from ``0.3%`` to ``1.5%``. I use ``-s 10`` only during presentations.
 
@@ -29,7 +30,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 2. Default art. ``$ arttime`` then press ``h``, or ``arttime --nolearn``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 59 PM" src="https://user-images.githubusercontent.com/71736629/169680963-0cd5027d-5e21-4d3e-8eda-c21939f5d89d.png">
 
-3. Animated art clock. ``$ arttime --nolearn -a military -b military2 -t "Say no to wars, yes to peace" --ac 4``
+3. Animated art clock. ``$ arttime --nolearn -a military -b military2 -t "Say no to wars, yes to peace" --ac 4``. Note: animation works only if a-art and b-art height is same, which it is for many related arts.
 ![arttime_animation](https://user-images.githubusercontent.com/71736629/169681999-65ad339a-d1ea-42cb-b2f9-093dd9a2a1be.gif)
 
 4. Timer and notification. ``arttime --nolearn -a colorowl2 -b colorowl3 -t "We don't sleep at night - Owls"`` then press ``g`` to enter a goal time like ``6s`` for 6 seconds. Check more formats supported by reading help documentation ``$ arttime -h``. This is an example of colorful art too.
