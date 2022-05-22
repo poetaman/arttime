@@ -15,6 +15,7 @@ Purpose/features:
 - Works on macOS out of the box. No need to install homebrew, developer tools
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
 - Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
+- For consistent art & message display in multiple applications, a script ``artprint`` is also available in the same directory as ``arttime``.
 
 # Call for artists
 Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images).
@@ -44,6 +45,20 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 8. And much more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
+# Installation
+At the moment, only manual installation is possible.
+
+Follow these steps:
+1. Clone or download the git repository to a preffered location. Cloning is preffered for future updates via ``git pull``.
+2. Add this command to your ``.zshrc`` or ``.bashrc`` file, depending on your login shell.
+
+```
+alias artprint="<path_to_arttime_directory>/bin/artprint"
+alias arttime="<path_to_arttime_directory>/bin/arttime"
+```
+
+3. Open new terminal or source your respective ``.zshrc`` or ``.bashrc`` again.
+4. Run command ``arttime``
 
 # Acknowledgements
 1. text artists: mostly great text artists of web 1.0 era like [jgs (Joann Stark)](https://github.com/oldcompcz/jgs), et al.
