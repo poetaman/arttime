@@ -4,7 +4,7 @@
 Purpose/features:
 - Bring curated text/ascii art to artless terminals
 - Provide a simple yet smart alarm/timer for commandline
-- Native desktop notifications for timer
+- Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide developers with 1 line under art to display their activism
 - Random art selection makes it a fun game, or serious tarot-style reading
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
