@@ -8,7 +8,7 @@ Purpose/features:
 - Provide developers with 1 line under art to display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
-- Random art selection makes it a fun game, or serious tarot-style reading
+- Random art selection makes it a fun game, or serious tarot-style reading for believers in The Random
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
 - Provide a curated text art library for users 
 - Provide a developer-centric experience: mindful suspension (Ctrl-z) and continuation
