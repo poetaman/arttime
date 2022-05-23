@@ -877,9 +877,9 @@ function usr1input_handler {
             setartstring
             #printart
             ;;
-        "d")
-            echo "cliwallpaper[$$]: flipartname=$flipartname, lasttime=$lasttime, toggleflipart:$toggleflipart, artname:$artname, flipartht:$flipartht, artht:$artht, artstringht:$artstringht, flipartstringht:$flipartstringht" >> ~/cliwallpaper.log
-            ;;
+        #"d")
+        #    echo "cliwallpaper[$$]: flipartname=$flipartname, lasttime=$lasttime, toggleflipart:$toggleflipart, artname:$artname, flipartht:$flipartht, artht:$artht, artstringht:$artstringht, flipartstringht:$flipartstringht" >> ~/arttime_debug.log
+        #    ;;
         "g")
             tput cup 0 0
             tput el
