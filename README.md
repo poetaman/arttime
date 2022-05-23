@@ -16,7 +16,7 @@ Purpose/features:
 - Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
 - For consistent art & message display in multiple applications, a script ``artprint`` is also available in the same directory as ``arttime``.
 - Multiple ways to select text art: random, by name, via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
-- Sleep friendly: start arttime or reset timer (press ``r``) before putting computer to sleep. Find the elapsed time between sleep and wakeup. No, it doesn't consume power when computer is sleeping!
+- Sleep friendly: start arttime or reset timer (press ``r``) before putting computer to sleep. It will display the elapsed time since sleep when you wakeup the computer. This lets you know how much time you have been away from screen. It doesn't consume power when computer is sleeping!
 
 Note: By default ``arttime`` is tuned to consume less power, so you will see an occasional increment of 2 seconds in elapsed time. This is ok as the error is always less than 1 second. If you don't want this to happen, set samples per second to 10 from command line ``-s 10`` or from within the application by pressing ``s`` after it starts. On my machine this increases CPU usage from ``0.3%`` to ``1.5%``. I use ``-s 10`` only during presentations.
 
