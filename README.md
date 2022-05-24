@@ -56,15 +56,16 @@ At the moment, only manual installation is possible.
 
 Follow these steps:
 1. Clone or download the git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``.
-2. Add this command to your ``.zshrc`` or ``.bashrc`` file, depending on your login shell. For macOS it is ``.zshrc`` unless you have changed that.
+2. Add one of the following blocks of line to your ``.zshrc`` or ``.bashrc`` file, depending on your login shell. For macOS it is ``.zshrc`` unless you have changed that.
+```
+export PATH="<path_to_arttime_directory>/bin:$PATH"
+```
+OR
 ```
 alias artprint="<path_to_arttime_directory>/bin/artprint"
 alias arttime="<path_to_arttime_directory>/bin/arttime"
 ```
-OR
-```
-export PATH="<path_to_arttime_directory>/bin:$PATH"
-```
+
 3. Open new terminal or source your respective ``.zshrc`` or ``.bashrc`` again.
 4. Run command ``arttime``
 
