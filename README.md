@@ -20,7 +20,7 @@ Purpose/features:
 
 Note-1: By default ``arttime`` is tuned to consume less power, so you will see an occasional increment of 2 seconds in elapsed time. This is ok as the error is always less than 1 second. If you don't want this to happen, set samples per second to 10 from command line ``-s 10`` or from within the application by pressing ``s`` after it starts. On my machine this increases CPU usage from ``0.3%`` to ``1.5%``. I use ``-s 10`` only during presentations.
 
-Note-2: arttime is lean, and uses only around 6KB of your RAM while running.
+Note-2: arttime has been designed to be lean, and uses only around 6KB of your RAM while running!
 
 
 # Call for artists
