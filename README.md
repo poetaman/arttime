@@ -15,7 +15,7 @@ Purpose/features:
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
 - Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
 - For consistent art & message display in multiple applications, a script ``artprint`` is also available in the same directory as ``arttime``.
-- Multiple ways to select text art: random, by name, via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
+- Multiple ways to select text art: random, by name (with completion hints), via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
 - Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping!
 - Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/reportaman/arttime/blob/23360507eb5622d951728b5f71621a1df942e157/LICENSE_ADDENDUM_CFLA), please be mindful.
 
