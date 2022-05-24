@@ -5,10 +5,10 @@ Purpose/features:
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
 - Provide a simple yet smart alarm/timer for commandline
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
-- Provide a developer-centric experience: mindful suspension (Ctrl-z) and continuation. Doesn't take screen space or consume power while suspended. 
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
+- Provide developer-centric experience: mindful suspension (Ctrl-z) and continuation. Doesn't occupy terminal screen or consume power while suspended, but still shows correct elapsed time when continued.
 - Random art selection makes it a fun game, or serious tarot-style reading for believers in The Random
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
 - Works on macOS out of the box. No need to install homebrew, developer tools. Zero dependencies
