@@ -6,7 +6,7 @@ Purpose/features:
 - Provide a simple yet smart alarm/timer for commandline
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide a developer-centric experience: mindful suspension (Ctrl-z) and continuation. Doesn't take screen space or consume power while suspended. 
-- Provide developers with 1 line under art to display their activism
+- Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
 - Random art selection makes it a fun game, or serious tarot-style reading for believers in The Random
