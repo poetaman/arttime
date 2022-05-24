@@ -18,7 +18,10 @@ Purpose/features:
 - Multiple ways to select text art: random, by name, via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
 - Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping!
 
-Note: By default ``arttime`` is tuned to consume less power, so you will see an occasional increment of 2 seconds in elapsed time. This is ok as the error is always less than 1 second. If you don't want this to happen, set samples per second to 10 from command line ``-s 10`` or from within the application by pressing ``s`` after it starts. On my machine this increases CPU usage from ``0.3%`` to ``1.5%``. I use ``-s 10`` only during presentations.
+Note-1: By default ``arttime`` is tuned to consume less power, so you will see an occasional increment of 2 seconds in elapsed time. This is ok as the error is always less than 1 second. If you don't want this to happen, set samples per second to 10 from command line ``-s 10`` or from within the application by pressing ``s`` after it starts. On my machine this increases CPU usage from ``0.3%`` to ``1.5%``. I use ``-s 10`` only during presentations.
+
+Note-2: arttime is lean, and uses only around 6KB of your RAM while running.
+
 
 # Call for artists
 Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images).
