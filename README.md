@@ -8,7 +8,7 @@ Purpose/features:
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
-- Provide developer-centric experience: mindful suspension (Ctrl-z) and continuation. Doesn't occupy terminal screen or consume power while suspended, but still shows correct elapsed time when continued.
+- Support productivity: mindful suspension (``Ctrl-z``) and continuation (``fg``). Doesn't occupy terminal screen or consume power while suspended, but still shows correct elapsed time when continued.
 - Random art selection makes it a fun game, or serious tarot-style reading for believers in The Random
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
 - Works on macOS out of the box. No need to install homebrew, developer tools. Zero dependencies
