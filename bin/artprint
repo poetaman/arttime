@@ -36,8 +36,8 @@ Description:
     Why artprint? To provide a consistent display of text art in multiple
     applications. While artprint is a program in the arttime repository and
     used by arttime to print art on screen, is not tied or limited
-    to arttime. One can use artprint to bring the beauty if text art
-    to various aspects of their deveopment environment, without having
+    to arttime. One can use artprint to bring the beauty of text art
+    to various aspects of their development environment, without having
     to reinvent the wheel.
 
     Call for artists (copied from arttime's help page $ arttime -h):
