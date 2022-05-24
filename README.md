@@ -61,6 +61,10 @@ Follow these steps:
 alias artprint="<path_to_arttime_directory>/bin/artprint"
 alias arttime="<path_to_arttime_directory>/bin/arttime"
 ```
+OR
+```
+export PATH="<path_to_arttime_directory>/bin:$PATH"
+```
 3. Open new terminal or source your respective ``.zshrc`` or ``.bashrc`` again.
 4. Run command ``arttime``
 
