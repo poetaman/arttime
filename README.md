@@ -71,9 +71,9 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 9. And much more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
 # Installation
-At the moment, only manual installation is possible.
+At the moment, only manual installation is possible, but it's very simple as the code is self-contained.
 
-Follow these steps:
+Please follow these steps:
 1. Clone or download the git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``.
 2. Add one of the following block of lines to your ``.zshrc`` or ``.bashrc`` file, depending on your login shell. For macOS it is ``.zshrc`` unless you have changed that.
 ```
@@ -87,6 +87,8 @@ alias arttime="<path_to_arttime_directory>/bin/arttime"
 
 3. Open new terminal or source your respective ``.zshrc`` or ``.bashrc`` again.
 4. Run command ``arttime``
+
+In future an installation script will be added to the project.
 
 # Troubleshooting
 - Some art does not render correctly?
