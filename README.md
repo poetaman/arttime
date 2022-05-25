@@ -1,7 +1,9 @@
 Contents
 =================
 
+* [Contents](#contents)
 * [arttime](#arttime)
+   * [Purpose/features](#purposefeatures)
 * [Call for artists](#call-for-artists)
 * [Screenshots](#screenshots)
 * [Installation](#installation)
@@ -13,7 +15,7 @@ Contents
 # arttime
 🧜🏼‍♀️ Beauty of text art meets functionality of clock/timer ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
 
-Purpose/features:
+## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
 - Provide a simple yet smart alarm/timer for commandline
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
