@@ -1,3 +1,15 @@
+Contents
+=================
+
+* [arttime](#arttime)
+* [Call for artists](#call-for-artists)
+* [Screenshots](#screenshots)
+* [Installation](#installation)
+* [Troubleshooting](#troubleshooting)
+* [Acknowledgements](#acknowledgements)
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+
+
 # arttime
 🧜🏼‍♀️ Beauty of text art meets functionality of clock/timer ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
 
