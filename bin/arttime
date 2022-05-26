@@ -204,26 +204,36 @@ if [[ ! -z $help_arg[-1] ]]; then
     exit 0
 fi
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
+unamestr="$(uname -s)"
+case "${unamestr}" in
     Linux*)     machine=Linux;;
     Darwin*)    machine=Darwin;;
     CYGWIN*)    machine=Cygwin;;
     MINGW*)     machine=MinGw;;
     *BSD)       machine=BSD;;
-    *)          machine="UNKNOWN:${unameOut}"
+    *)          machine="UNKNOWN:${unamestr}"
 esac
 
 # directories
 bindir="${0:a:h}"
 artdir="$bindir/../share/arttime/textart"
 
-datecmd="date"
-#if [[ $machine = "Darwin" || $machine = "BSD" ]]; then
-#    datecmd='gdate'
-#else
-#    datecmd='date'
-#fi
+if [[ $machine = "Linux" ]]; then
+    datecmd="date"
+    dateisgnu="1"
+else
+    if command -v gdate &> /dev/null; then
+        datecmd="gdate"
+        dateisgnu="1"
+    else
+        datecmd="date"
+        if date -d '0' '+%s' &>/dev/null; then
+            dateisgnu="1"
+        else
+            dateisgnu="0"
+        fi
+    fi
+fi
 
 function getaart {
     if [[ $helpactive = "1" ]]; then
@@ -257,7 +267,7 @@ function notifydesktop {
     if bart=$(getbart); then
         notifymessage+=", b-art: $(getbart)"
     else
-        notifymessage+=", b:art: none"
+        notifymessage+=", b-art: none"
     fi
     notifymessage+="\rID: $$"
     if [[ $machine = "Darwin" ]]; then
@@ -895,9 +905,88 @@ function usr1input_handler {
                 goal="$tempgoal"
                 setgoaltime
                 if [[ -z $goaltime ]]; then
-                    tput cup 0 0
-                    printf "Error: incorrect goal time value/format, try again"
-                    zselect -t 200
+                    if [[ -z $datehelpstr ]]; then
+                        if [[ $dateisgnu = "1" ]]; then
+read -r -d '' datehelpstr <<-'EOF'
+Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
+You reached this help page because you entered an [31mincorrect[0m
+value for goal time or used an [31munrecognized[0m format.
+
+arttime supports two types of time formats: 1) Native, 2) External.
+External formats are enabled by GNU date, which is [32mINSTALLED[0m on your
+system, and should be preferred (as they can be very expressive).
+
+1) Native (simple, relative):
+    1m (1 minute from now)
+    30s (30 seconds from now)
+    48h (48 hours from now)
+    1h 1m 1s (1 hour 1 minute 1 seconds from now)
+    500m (500 minutes from now)
+    400m 100s (400 minutes and 100 seconds from now)
+    etc...
+
+2) External (simple/complex, absolute/relative, very expressive):
+    10AM (upcoming 10AM, local timezone unless specified)
+    10:30AM IST (upcoming 10:30AM Indian Standard Time)
+    May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
+        Note: there is no comma after date 'May 26'
+    next friday (upcoming friday)
+    1min, +1min, 1 min, +1 minute, +1 minutes (1 minute from now)
+    1min 30sec, 1min 30sec (1 minute 30 sec from now)
+    next friday +4 hours (4AM on next friday in local time zone)
+    next monday 1PM (1PM on next monday in local time zone)
+    next monday 1PM IST (1PM on next monday in Indian Standard Time)
+    and much more...
+    
+For detailed documentation on External date/time formats please refer:
+    Web:      https://www.gnu.org/software/coreutils/date 
+    Locally:  $ info '(coreutils) date invocation'
+and jump directly to the section on "Date input formats".
+EOF
+                    else
+read -r -d '' datehelpstr <<-'EOF'
+Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
+You reached this help page because you entered an [31mincorrect[0m
+value for goal time or used an [31munrecognized[0m format.
+
+arttime supports two types of time formats: 1) Native, 2) External.
+External formats are enabled by GNU date, which is [31mNOT INSTALLED[0m on your
+please search the web to find if/how to install GNU date on your system.
+If installed, it will open up the possibility of being very expressive in
+specifying goal date/time. After installing GNU date, restart arttime.
+
+1) Native (simple, relative, should work on your system):
+    1m (1 minute from now)
+    30s (30 seconds from now)
+    48h (48 hours from now)
+    1h 1m 1s (1 hour 1 minute 1 seconds from now)
+    500m (500 minutes from now)
+    400m 100s (400 minutes and 100 seconds from now)
+    etc...
+
+2) External (very expressive, though won't work on your system):
+    10AM (upcoming 10AM, local timezone unless specified)
+    10:30AM IST (upcoming 10:30AM Indian Standard Time)
+    May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
+        Note: there is no comma after date 'May 26'
+    next friday (upcoming friday)
+    1min, +1min, 1 min, +1 minute, +1 minutes (1 minute from now)
+    1min 30sec, 1min 30sec (1 minute 30 sec from now)
+    next friday +4 hours (4AM on next friday in local time zone)
+    next monday 1PM (1PM on next monday in local time zone)
+    next monday 1PM IST (1PM on next monday in Indian Standard Time)
+    and much more...
+    
+For detailed documentation on External date/time formats please refer:
+    Web:      https://www.gnu.org/software/coreutils/date 
+    Locally:  $ info '(coreutils) date invocation'
+and jump directly to the section on "Date input formats".
+EOF
+                        fi
+                    fi
+                    clear
+                    less -R <<<"$datehelpstr" 2>/dev/null
+                    tput smcup
                 fi
             fi
             ;;
