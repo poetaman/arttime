@@ -362,15 +362,18 @@ HERE
 }
 
 
-regexpart='[[:space:]]*([0-9]+)([hms])[[:space:]]*'
+regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
 regex1='^'$regexpart'$'
 regex2='^'$regexpart$regexpart'$'
 regex3='^'$regexpart$regexpart$regexpart'$'
+regex4='^'$regexpart$regexpart$regexpart$regexpart'$'
 
 function getseconds {
     amount="$1"
     suffix="$2"
-    if [[ $suffix = "h" ]]; then
+    if [[ $suffix = "d" ]]; then
+        echo $(( amount*86400 ))
+    elif [[ $suffix = "h" ]]; then
         echo $(( amount*3600 ))
     elif [[ $suffix = "m" ]]; then
         echo $(( amount*60 ))
@@ -393,6 +396,12 @@ function setgoaltime {
         local goaltime2=$(getseconds $match[3] $match[4])
         local goaltime3=$(getseconds $match[5] $match[6])
         goaltime=$(( currenttime+goaltime1+goaltime2+goaltime3 ))
+    elif [[ $goal =~ $regex4 ]]; then
+        local goaltime1=$(getseconds $match[1] $match[2])
+        local goaltime2=$(getseconds $match[3] $match[4])
+        local goaltime3=$(getseconds $match[5] $match[6])
+        local goaltime4=$(getseconds $match[7] $match[8])
+        goaltime=$(( currenttime+goaltime1+goaltime2+goaltime3+goaltime4 ))
     elif goaltime=$($datecmd -d $goal '+%s' 2>/dev/null ); then
         if [[ $goaltime -gt $currenttime ]]; then
         elif goaltime=$($datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
@@ -643,13 +652,20 @@ function printtime {
         slackstring0style=""
         slackstring1=" | time elapsed "
     fi
-    hours=$((difftime/3600))
+    days=$((difftime/86400))
+    hours=$((difftime%86400/3600))
     minutes=$((difftime%3600/60))
     seconds=$((difftime%60))
-    slackstring2="${(l:2::0:)hours}h"
-    slackstring2="$slackstring2 ${(l:2::0:)minutes}m"
+    if [[ $days != "0" ]]; then
+        #slackstring2="${(l:3::0:)days}d "
+        slackstring2="${days}d "
+    else
+        slackstring2=""
+    fi
+    slackstring2="$slackstring2${(l:2::0:)hours}h "
+    slackstring2="$slackstring2${(l:2::0:)minutes}m "
     if [[ -z $updateonminute ]]; then
-        slackstring2="$slackstring2 ${(l:2::0:)seconds}s"
+        slackstring2="$slackstring2${(l:2::0:)seconds}s"
     fi
     slackstring3=" | "
     #if [[ ! -z $TMUX ]]; then
@@ -896,7 +912,7 @@ function usr1input_handler {
             tempgoal=""
             $sttycmd $sttyorig
             tput cnorm
-            printf "Enter goal time: "
+            printf "Enter goal ('help' to learn): "
             read tempgoal
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -910,7 +926,7 @@ function usr1input_handler {
 read -r -d '' datehelpstr <<-'EOF'
 Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
 You reached this help page because you entered an [31mincorrect[0m
-value for goal time or used an [31munrecognized[0m format.
+value for goal time or used an [31munrecognized[0m format or entered 'help'.
 
 arttime supports two types of time formats: 1) Native, 2) External.
 External formats are enabled by GNU date, which is [32mINSTALLED[0m on your
@@ -920,10 +936,13 @@ system, and should be preferred (as they can be very expressive).
     1m (1 minute from now)
     30s (30 seconds from now)
     48h (48 hours from now)
+    2d 10s (2 days 10 seconds from now)
     1h 1m 1s (1 hour 1 minute 1 seconds from now)
     500m (500 minutes from now)
     400m 100s (400 minutes and 100 seconds from now)
     etc...
+
+Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
 
 2) External (simple/complex, absolute/relative, very expressive):
     10AM (upcoming 10AM, local timezone unless specified)
@@ -947,7 +966,7 @@ EOF
 read -r -d '' datehelpstr <<-'EOF'
 Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
 You reached this help page because you entered an [31mincorrect[0m
-value for goal time or used an [31munrecognized[0m format.
+value for goal time or used an [31munrecognized[0m format or entered 'help'.
 
 arttime supports two types of time formats: 1) Native, 2) External.
 External formats are enabled by GNU date, which is [31mNOT INSTALLED[0m on your
@@ -959,10 +978,13 @@ specifying goal date/time. After installing GNU date, restart arttime.
     1m (1 minute from now)
     30s (30 seconds from now)
     48h (48 hours from now)
+    2d 10s (2 days 10 seconds from now)
     1h 1m 1s (1 hour 1 minute 1 seconds from now)
     500m (500 minutes from now)
     400m 100s (400 minutes and 100 seconds from now)
     etc...
+
+Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
 
 2) External (very expressive, though won't work on your system):
     10AM (upcoming 10AM, local timezone unless specified)
