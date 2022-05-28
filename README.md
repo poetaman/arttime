@@ -34,17 +34,15 @@ Contents
 - Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/reportaman/arttime/blob/main/LICENSE_ADDENDUM_CFLA), please be mindful.
 - Best for privacy: Unlike commercial apps that connect to internet, track your activity and send/sell your data, arttime runs solely on your computer. It does not connect to internet, does not look at or track your data, and does not send any data outside your computer. Unlike binaries, arttime is a human-readable text file that can always be reviewed.
 
-Note-1: By default ``arttime`` is tuned to consume less power, so you will see an occasional increment of 2 seconds in elapsed time. This is ok as the error is always less than 1 second. If you don't want this to happen, set samples per second to 10 from command line ``-s 10`` or from within the application by pressing ``s`` after it starts. On my machine this increases CPU usage from ``0.3%`` to ``1.5%``. I use ``-s 10`` only during presentations. A future update might remove this requirement, always increment by 1, spread the error to every second, and still keep CPU usage around 0.3%.
-
-Note-2: arttime has been designed to be lean, and uses only around 6KB of your RAM while running!
-
+Note: arttime is tuned to consume less power and memory. It uses only about ~0.3% of CPU time while running, and only around 6KB of your RAM in steady state.
 
 # Call for artists
 Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images).
 
 # Screenshots
 1. Default start page. ``$ arttime``
-<img width="1019" alt="Screen Shot 2022-05-23 at 2 27 18 PM" src="https://user-images.githubusercontent.com/71736629/169908634-46536f1a-2f28-4d4b-bd4f-964b041b9450.png">
+<img width="1021" alt="Screen Shot 2022-05-27 at 7 36 33 PM" src="https://user-images.githubusercontent.com/71736629/170806539-c4b4f81d-5042-436f-8a79-b9cf61ad940e.png">
+
 
 2. Default art. ``$ arttime`` then press ``h``, or ``arttime --nolearn``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 59 PM" src="https://user-images.githubusercontent.com/71736629/169680963-0cd5027d-5e21-4d3e-8eda-c21939f5d89d.png">
