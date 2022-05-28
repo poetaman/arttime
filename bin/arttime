@@ -7,16 +7,18 @@ zmodload zsh/zselect
 zmodload zsh/zutil
 zmodload zsh/datetime
 
-# NOTE: enable minute/nonblocking mode if/when its functional, or remove it completely
+# NOTE: enable minute/nonblocking mode if/when its functional,
+# or remove it completely as sample rate is a waste now that
+# we account for execution delay in loop to set timer
 #   m=minute_arg \
 #   n=nonblocking_arg \
-# This means all functions ending in _nonblocking are unreachable for now 
+#   s:=samples_arg \
+# This means all functions ending in _nonblocking, etc are unreachable for now 
 
 zparseopts -D -E -F - \
     a:=artname_arg \
     b:=flipartname_arg \
     t:=title_arg \
-    s:=samples_arg \
     g:=goal_arg \
     h=help_arg \
     -theme:=theme_arg \
@@ -131,15 +133,6 @@ Options:
     -b          b-art art file name in artdir, or fill path to a art file 
                 (no default)
     -t          title message placed under art (default: line 1 in artfiles)
-    -s          samples per second, range: [1,10] (default: 1)
-                Lower value causes lower CPU utilization at the expense of
-                occasional increment of 2 seconds instead of 1 second in
-                elapsed time display. The error doesn't accumulate, and will
-                always be in range of (0sec, 1sec).
-                Value of 10 will cause the elapsed time display to work like
-                an ideal clock, though at the expense of higher
-                CPU utilization (1.5% instead of 0.25% for s=1
-                on authors laptop)
     -g          goal time. arttime calls alarm/countdown time as "goal time"
                 The reason it's both alarm/countdown time is either format
                 can be specified. Goal can be 1) "10s" from current time, or 
@@ -188,13 +181,6 @@ Examples:
         under the butterfly ascii art colored in color 2 (green)
     $ arttime --nolearn -a winnepooh -b winnepooh2
         performs 2-framed animation, toggles between a-art and b-art
-    $ arttime --nolearn -s 10
-        sample time 10 times per second to see if it has progressed
-        into next second. Art and/or time is still updated only once
-        every second, but value of 10 for s avoids occasional second
-        increments by 2. There is also a keybinding in arttime to
-        change sample rate while application is running. Just press
-        's', type a number between [1,10] and press enter.
 EOF
 echo $VAR
 }
@@ -279,9 +265,10 @@ function notifydesktop {
     fi
 }
 
-# Look at TODO note on lines 6-9, minute/nonblocking mode is disabled
+# Look at TODO note on lines 10-16, minute/nonblocking mode, sample rate is disabled
 #updateonminute="${minute_arg[-1]}"
 #nonblocking="${nonblocking_arg[-1]}"
+#samples="${samples_arg[-1]}"
 updateonminute=""
 nonblocking=""
 # The following options are functional, and complete
@@ -289,7 +276,6 @@ artname="${artname_arg[-1]}"
 title="${title_arg[-1]}"
 flipartname="${flipartname_arg[-1]}"
 theme="${theme_arg[-1]}"
-samples="${samples_arg[-1]}"
 goal="${goal_arg[-1]}"
 termwidth="$COLUMNS"
 termheight="$LINES"
@@ -453,21 +439,21 @@ else
     fi
 fi
 
-sleeptimecenti=""
-sleeptimefloat=""
-function setsleeptimecenti {
-    if [[ -z $samples || ! $samples =~ ^[1-9]\|[1-9][0-9]+$ ]]; then
-        samples="1"
-    fi
-    sleeptimecenti=$((sleeptime*100/samples))
-    sleeptimefloat=$((sleeptime*1.0/samples))
-    if [[ $sleeptimecenti = "0" || ! $sleeptimecenti -gt 10 ]]; then
-        sleeptimecenti="10"
-        sleeptimefloat="0.1"
-    fi
-}
+#sleeptimecenti=""
+#sleeptimefloat=""
+#function setsleeptimecenti {
+#    if [[ -z $samples || ! $samples =~ ^[1-9]\|[1-9][0-9]+$ ]]; then
+#        samples="1"
+#    fi
+#    sleeptimecenti=$((sleeptime*100/samples))
+#    sleeptimefloat=$((sleeptime*1.0/samples))
+#    if [[ $sleeptimecenti = "0" || ! $sleeptimecenti -gt 10 ]]; then
+#        sleeptimecenti="10"
+#        sleeptimefloat="0.1"
+#    fi
+#}
 
-setsleeptimecenti
+#setsleeptimecenti
 
 sttycmd='/bin/stty'
 sttyorig=$($sttycmd -g)
@@ -1122,33 +1108,33 @@ EOF
             $sttycmd -icanon min 0 time 0
             tput civis
             ;;
-        "s")
-            tput cup 0 0
-            tput el
-            tempsamples=""
-            $sttycmd $sttyorig
-            tput cnorm
-            if [[ ! -z $updateonminute ]]; then
-                # XXX: look here
-                printf "Enter samples per minute (current value = $samples): "
-            else
-                printf "Enter samples per seconds (current value = $samples): "
-            fi
-            read tempsamples
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
-            tput civis
-            if [[ -z $tempsamples || ! $tempsamples =~ ^([1-9]\|[1-9][0-9]+)$ ]]; then
-                tput cup 0 0
-                printf "Error: samples should be an integer > 0"
-                zselect -t 200
-            else
-                samples="$tempsamples"
-                setsleeptimecenti
-                #echo "Samples: $samples, sleeptime: $sleeptime, sleeptimecenti: $sleeptimecenti"
-                #zselect -t 300
-            fi
-            ;;
+        #"s")
+        #    tput cup 0 0
+        #    tput el
+        #    tempsamples=""
+        #    $sttycmd $sttyorig
+        #    tput cnorm
+        #    if [[ ! -z $updateonminute ]]; then
+        #        # XXX: look here
+        #        printf "Enter samples per minute (current value = $samples): "
+        #    else
+        #        printf "Enter samples per seconds (current value = $samples): "
+        #    fi
+        #    read tempsamples
+        #    $sttycmd -echo
+        #    $sttycmd -icanon min 0 time 0
+        #    tput civis
+        #    if [[ -z $tempsamples || ! $tempsamples =~ ^([1-9]\|[1-9][0-9]+)$ ]]; then
+        #        tput cup 0 0
+        #        printf "Error: samples should be an integer > 0"
+        #        zselect -t 200
+        #    else
+        #        samples="$tempsamples"
+        #        setsleeptimecenti
+        #        #echo "Samples: $samples, sleeptime: $sleeptime, sleeptimecenti: $sleeptimecenti"
+        #        #zselect -t 300
+        #    fi
+        #    ;;
         "t")
             if [[ -z $theme || $theme = "dark" ]]; then
                 theme="light"
@@ -1224,7 +1210,10 @@ function arttime_blocking {
     trap "trapcont_blocking" CONT
     while true; do
         #zselect -t "$sleeptimecenti"
-        read -t "$sleeptimefloat" -k tmpusrinput
+        epochtimereal=$EPOCHREALTIME
+        epochtimerealarray=("${(@s/./)epochtimereal}")
+        timetoepoch=$((1.0 - 0.$epochtimerealarray[2] + 0.01))
+        read -t "$timetoepoch" -k tmpusrinput
         if [[ $? = "0" ]]; then
             trapusr1_both "$tmpusrinput"
         fi
