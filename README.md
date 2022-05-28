@@ -34,7 +34,7 @@ Contents
 - Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/reportaman/arttime/blob/main/LICENSE_ADDENDUM_CFLA), please be mindful.
 - Best for privacy: Unlike commercial apps that connect to internet, track your activity and send/sell your data, arttime runs solely on your computer. It does not connect to internet, does not look at or track your data, and does not send any data outside your computer. Unlike binaries, arttime is a human-readable text file that can always be reviewed.
 
-Note: arttime is tuned to consume less power and memory. It uses only about ~0.3% of CPU time while running, and only around 6KB of your RAM in steady state.
+Note: arttime is tuned to consume less power and memory. It uses only about ~0.3% of CPU time while running, and only around 6KB of your RAM in steady state on my machine.
 
 # Call for artists
 Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images).
