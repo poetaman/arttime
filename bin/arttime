@@ -245,6 +245,27 @@ function getbart {
     fi
 }
 
+function notetimezone {
+    if [[ -z $TZ ]]; then
+        tzlong=$(readlink /etc/localtime | sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p')
+    else
+        if [[ -f $TZ ]]; then
+            tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${TZ:a})
+        else
+            tzlong=$TZ
+        fi
+        #if [[ -z $tzlong ]]; then
+        #    tzlong="$TZ"
+        #fi
+    fi
+    tzshort=$(strftime '%Z')
+}
+notetimezone
+tzlonginit="$tzlong"
+tzshortinit="$tzshort"
+tzlongcurrent="$tzlong"
+tzshortcurrent="$tzshort"
+
 # Function to push desktop notifications
 function notifydesktop {
     local notifytitle="ARTTIME"
@@ -279,7 +300,9 @@ theme="${theme_arg[-1]}"
 goal="${goal_arg[-1]}"
 termwidth="$COLUMNS"
 termheight="$LINES"
-timeformat="%s|%b %d, %I:%M%p"
+timeformatnz="%s|%b %d, %I:%M%p"
+timeformatz="%s|%b %d, %I:%M%p %Z"
+timeformat=$timeformatnz
 artcolorarg="${artcolor_arg[-1]}"
 titlecolorarg="${titlecolor_arg[-1]}"
 style="${style_arg[-1]}"
@@ -367,6 +390,7 @@ function getseconds {
         echo $amount
     fi
 }
+
 function setgoaltime {
     local currenttime=$(strftime '%s')
     goaltime=""
@@ -405,11 +429,14 @@ function setgoaltime {
     fi
     #echo "$ goal:$goal, goaltime:$goaltime"
     if [[ ! -z $goaltime ]]; then
-        if goaltimestr=$($datecmd -d "@$goaltime" "+%b %d, %I:%M%p" 2>/dev/null); then
-        elif goaltimestr=$($datecmd -jf "%s" $goaltime "+%b %d, %I:%M%p" 2>/dev/null); then
-        else
-            goaltimestr=""
-        fi
+        local tmpgoaltime=$(strftime $timeformat $goaltime)
+        local tmpgoaltimearray=(${(s/|/)tmpgoaltime})
+        goaltimestr=$tmpgoaltimearray[2]
+        #if goaltimestr=$($datecmd -d "@$goaltime" "+%b %d, %I:%M%p" 2>/dev/null); then
+        #elif goaltimestr=$($datecmd -jf "%s" $goaltime "+%b %d, %I:%M%p" 2>/dev/null); then
+        #else
+        #    goaltimestr=""
+        #fi
     else
         goaltimestr=""
     fi
@@ -753,13 +780,51 @@ function askforconfirmation {
 #setopt menu_complete
 #zmodload -i zsh/complist
 tmpartname=""
-function artselector { local curcontext=artselector:::; tmpartname=""; printf "Press a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n"; vared -p "Enter artname: " -c tmpartname; }
-function _artselector { _files -W $artdir  }
+function artselector {
+    local curcontext=artselector:::
+    tmpartname="";
+    printf "Press a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
+    vared -p "Enter artname: " -c tmpartname;
+}
+function _artselector {
+    _files -W $artdir
+}
 zstyle ':completion:artselector:*:' completer _artselector
 #zstyle ':completion:::*:default' completer _artselector menu no select
-autoload -Uz compinit
-compinit
 
+function zoneselector {
+    local restorepwd=$PWD
+    cd /usr/share/zoneinfo
+    local curcontext=zoneselector:::
+    tmpzonename="./"
+    printf "Press tab key to see possible zonename completions.\nPress Ctrl-d to see all possible zonenames\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
+    while [[ ! -f /usr/share/zoneinfo/$tmpzonename && ! -z $tmpzonename && $tmpzonename != "./orig" && $tmpzonename != "orig" ]]; do
+        if [[ $tmpzonename =~ ^[./]+$ ]]; then
+            tmpzonename="./"
+            vared -p "Enter zonename (press tab): " -c tmpzonename;
+        elif [[ -d /usr/share/zoneinfo/$tmpzonename ]]; then
+            if [[ $tmpzonename[-1] != "/" ]]; then
+                tmpzonename=$tmpzonename'/'
+            fi
+            vared -p "Enter zonename (press tab): " -c tmpzonename;
+        else
+            tmpzonename="./"
+            vared -p "Enter zonename (press tab): " -c tmpzonename;
+        fi
+    done
+    if [[ $tmpzonename = "./orig" || $tmpzonename = "./orig" ]]; then
+        tmpzonename=$tzlonginit
+    fi
+    tmpzonename=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${tmpzonename:a})
+    cd $restorepwd
+}
+function _zoneselector {
+    _files -W /usr/share/zoneinfo
+}
+zstyle ':completion:zoneselector:*:' completer _zoneselector
+
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
+autoload -Uz compinit && compinit
 
 function usr1input_handler {
     case "$1" in
@@ -1023,21 +1088,24 @@ EOF
             fi
             ;;
         "i")
-            local timestring="$(strftime '%b %d, %Y %I:%M:%S%p %Z | week %W')"
+            local tmpcurtime=$(strftime '%s')
+            local timestring="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
+            timestring+=" ($tzlongcurrent)"
+            timestring+="$(strftime ' | week %W')"
             if [[ $helpactive = "1" ]]; then
                 if [[ $restoreflipartname != "" ]]; then
-                    printf "$timestring | a-art: $restoreartname, b-art: $restoreflipartname"
+                    printf "$timestring \na-art: $restoreartname, b-art: $restoreflipartname"
                 else
-                    printf "$timestring | a-art: $restoreartname, b-art: none"
+                    printf "$timestring \na-art: $restoreartname, b-art: none"
                 fi
             else
                 if [[ $flipartname != "" ]]; then
-                    printf "$timestring | a-art: $artname, b-art: $flipartname"
+                    printf "$timestring \na-art: $artname, b-art: $flipartname"
                 else
-                    printf "$timestring | a-art: $artname, b-art: none"
+                    printf "$timestring \na-art: $artname, b-art: none"
                 fi
             fi
-            printf " | ID: $$\nPress any key to continue"
+            printf "\nID: $$\nPress any key to continue"
             read -t5 -k1
 #tput -S <<HERE
 #            cup 1 0
@@ -1144,6 +1212,36 @@ EOF
             setcolors
             setartstring
             #printart
+            ;;
+        "z")
+            $sttycmd $sttyorig
+            tput smcup
+            tput cup 0 0
+            tput cnorm
+            clear
+            zoneselector
+            $sttycmd -echo
+            $sttycmd -icanon min 0 time 0
+            tput rmcup
+            tputset
+            if [[ ! -z $tmpzonename ]]; then
+                TZ=$tmpzonename
+                notetimezone
+                tzlongcurrent="$tzlong"
+                tzshortcurrent="$tzshort"
+                if [[ $tzshortcurrent != $tzshortinit || $tzlongcurrent != $tzlonginit ]]; then
+                    timeformat=$timeformatz
+                else
+                    timeformat=$timeformatnz
+                fi
+                starttime=$(strftime $timeformat $starttimearray[1])
+                starttimearray=(${(s/|/)starttime})
+                if [[ ! -z $goaltime ]]; then
+                    local tmpgoaltime=$(strftime $timeformat $goaltime)
+                    local tmpgoaltimearray=(${(s/|/)tmpgoaltime})
+                    goaltimestr=$tmpgoaltimearray[2]
+                fi
+            fi
             ;;
         *)
             echo "Press 'h' to see which keys do what"
