@@ -797,7 +797,7 @@ function zoneselector {
     cd /usr/share/zoneinfo
     local curcontext=zoneselector:::
     tmpzonename="./"
-    printf "Press tab key to see possible zonename completions.\nPress Ctrl-d to see all possible zonenames\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
+    printf "Press tab key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
     while [[ ! -f /usr/share/zoneinfo/$tmpzonename && ! -z $tmpzonename && $tmpzonename != "./orig" && $tmpzonename != "orig" ]]; do
         if [[ $tmpzonename =~ ^[./]+$ ]]; then
             tmpzonename="./"
@@ -812,7 +812,7 @@ function zoneselector {
             vared -p "Enter zonename (press tab): " -c tmpzonename;
         fi
     done
-    if [[ $tmpzonename = "./orig" || $tmpzonename = "./orig" ]]; then
+    if [[ $tmpzonename = "./orig" || $tmpzonename = "orig" ]]; then
         tmpzonename=$tzlonginit
     fi
     tmpzonename=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${tmpzonename:a})
@@ -1092,6 +1092,7 @@ EOF
             local timestring="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
             timestring+=" ($tzlongcurrent)"
             timestring+="$(strftime ' | week %W')"
+            timestring+=" | ID: $$"
             if [[ $helpactive = "1" ]]; then
                 if [[ $restoreflipartname != "" ]]; then
                     printf "$timestring \na-art: $restoreartname, b-art: $restoreflipartname"
@@ -1105,7 +1106,7 @@ EOF
                     printf "$timestring \na-art: $artname, b-art: none"
                 fi
             fi
-            printf "\nID: $$\nPress any key to continue"
+            printf "\nPress any key to continue"
             read -t5 -k1
 #tput -S <<HERE
 #            cup 1 0
