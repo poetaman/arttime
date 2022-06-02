@@ -17,8 +17,7 @@ Contents
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
-- Provide a simple yet smart alarm/timer for commandline.
-- Always shows some delta in time, which is hard to track by looking outside the window or looking at your phone/computer clock.
+- Provide a simple yet smart alarm/timer for commandline. Always shows some delta in time, which is hard to track by looking outside the window or looking at your phone/computer clock.
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
