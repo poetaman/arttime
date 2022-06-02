@@ -97,7 +97,7 @@ In future an installation script will be added to the project.
   - Currently only macOS and Linux have been tested. They use the native technique so should work across versions. Pull requests for other OSes (BSD, windows, etc) will be considered if the technique is native enough
 - No notification sound on Linux?
   - Sounds on Linux are played using [PulseAudio](https://en.wikipedia.org/wiki/PulseAudio)'s [paplay](https://linux.die.net/man/1/paplay) as that seems to be the most standard way. Other suggestions are welcome, and will be considered.
-- Timezone is not reset back correctly for BSD Unixes?
+- Timezone is not reset back correctly within arttime for BSD Unixes?
   - This is a known issue, BSD's ``/etc/localtime`` is not a softlink the way it is on Linux and macOS. Workaround: ``sudo rm /etc/localtime && ln -s /usr/share/<Area>/<Location> /etc/localtime``. Here ``<Area>/<Location>`` should be the appropriate timezone. Check (Names_of_time_zones)[https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones]. In future, arttime might make an exception for BSD unix to parse the timezone database, but its better avoided.
 
 
