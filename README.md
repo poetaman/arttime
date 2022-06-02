@@ -17,7 +17,7 @@ Contents
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
-- Provide a simple yet smart alarm/timer for commandline. Always shows some delta in time, which is hard to track by looking outside the window or looking at your phone/computer clock.
+- Provide a simple yet smart alarm/timer for commandline. Always shows some delta in time, which is hard to track by looking outside the window or looking at your phone/computer clock. Provides easy/interative timezone switching.
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
@@ -42,8 +42,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 # Screenshots
 1. Default start page. ``$ arttime``
-<img width="1021" alt="Screen Shot 2022-05-27 at 7 36 33 PM" src="https://user-images.githubusercontent.com/71736629/170806539-c4b4f81d-5042-436f-8a79-b9cf61ad940e.png">
-
+<img width="1014" alt="Screen Shot 2022-06-02 at 2 58 07 PM" src="https://user-images.githubusercontent.com/71736629/171746645-8be032bc-6181-4e11-8eab-c76402437b18.png">
 
 2. Default art. ``$ arttime`` then press ``h``, or ``arttime --nolearn``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 59 PM" src="https://user-images.githubusercontent.com/71736629/169680963-0cd5027d-5e21-4d3e-8eda-c21939f5d89d.png">
