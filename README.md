@@ -43,7 +43,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 ## What does and doesn't constitute text art?
    - Does: Manually drawn text art in some text art editing editor/program, this is most text art in the collection.
-   - Does: Manually coded algorithm (not AI) generated text art like from artist with initials ``D.H.`` in this repository.
+   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository.
    - Doesn't: Output of a program that converts digital image (jpeg, etc) to a similar looking text version. Such art does sparingly exist in the collection of this repository, though it is only to show how arttime can be used. It is not a priority for curation, unless there is a strong reason.
    - Doesn't: AI generated "text art", its not a priority for curation here.
 
