@@ -42,8 +42,8 @@ Note: arttime is tuned to consume less power and memory. It uses only about ~0.3
 Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images). If you are a text artist, please feel free to leave a link to your work in [arttime discussions](https://github.com/reportaman/arttime/discussions).
 
 ## What does and doesn't constitute text art?
-   - Does: Manually drawn text art in some text art editing editor/program, this is most text art in the collection.
-   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository.
+   - Does: Manually typed/composed text in some text editor/program, this is most text art in the collection.
+   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository, example: [gravity](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/gravity), [concentricfield](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/concentricfield), [globe](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/globe).
    - Doesn't: Output of a program that converts digital image (jpeg, etc) to a similar looking text version. Such art does sparingly exist in the collection of this repository, though it is only to show how arttime can be used. It is not a priority for curation, unless there is a strong reason.
    - Doesn't: AI generated "text art", its not a priority for curation here.
 
