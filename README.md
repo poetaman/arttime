@@ -43,7 +43,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 ## What does and doesn't constitute text art?
    - Does: Manually typed/composed text in some text editor/program, this is most text art in the collection.
-   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository, example: [gravity](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/gravity), [concentricfield](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/concentricfield), [globe](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/globe).
+   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository, example: [gravity (D.H. 1992)](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/gravity), [concentricfield (D.H. 1991)](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/concentricfield), [globe (D.H. 1991)](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/globe).
    - Doesn't: Output of a program that converts digital image (jpeg, etc) to a similar looking text version. Such art does sparingly exist in the collection of this repository, though it is only to show how arttime can be used. It is not a priority for curation, unless there is a strong reason.
    - Doesn't: AI generated "text art", its not a priority for curation here.
 
