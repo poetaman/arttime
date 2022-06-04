@@ -38,7 +38,13 @@ Contents
 Note: arttime is tuned to consume less power and memory. It uses only about ~0.3% of CPU time while running, and only around 6KB of RAM in steady state on my machine.
 
 # Call for artists
-Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images).
+Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images). If you are a text artist, please feel free to leave a link to your work in [arttime discussions](https://github.com/reportaman/arttime/discussions).
+
+## What does and doesn't constitute text art?
+   - Does: Manually drawn text art in some text art editing editor/program, this is most text art in the collection.
+   - Does: Manually coded algorithm (not AI) generated text art like from artist with initials ``D.H.`` in this repository.
+   - Doesn't: Output of a program that converts digital image (jpeg, etc) to a similar looking text version. Such art does sparingly exist in the collection of this repository, though it is only to show how arttime can be used. It is not a priority for curation, unless there is a strong reason.
+   - Doesn't: AI generated "text art", its not a priority for curation here.
 
 # Screenshots
 1. Default start page. ``$ arttime``
