@@ -5,6 +5,7 @@ Contents
 * [arttime](#arttime)
    * [Purpose/features](#purposefeatures)
 * [Call for artists](#call-for-artists)
+   * [What does and doesn't constitute text art?](#what-does-and-doesnt-constitute-text-art)
 * [Screenshots](#screenshots)
 * [Installation](#installation)
 * [Troubleshooting](#troubleshooting)
