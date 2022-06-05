@@ -1309,6 +1309,9 @@ function arttime_blocking {
     trap "trapcont_blocking" CONT
     while true; do
         #zselect -t "$sleeptimecenti"
+        if [[ $winchdetected = "1" ]]; then
+            trapwinch
+        fi
         epochtimereal=$EPOCHREALTIME
         epochtimerealarray=("${(@s/./)epochtimereal}")
         timetoepoch=$((1.0 - 0.$epochtimerealarray[2] + 0.01))
@@ -1324,8 +1327,12 @@ function arttime_blocking {
         #    artcolor=$(( (artcolor+1)%16 ))
         #fi
         #setartstring
-        #printart
-        printtime
+        if [[ $winchdetected = "1" ]]; then
+            trapwinch
+        else
+            #printart
+            printtime
+        fi
     done
 }
 
@@ -1352,8 +1359,14 @@ function arttime_nonblocking {
     done
 }
 
+winchdetected="0"
+
+function setwinch {
+    winchdetected="1"
+}
+
 function trapwinch {
-    trap '' WINCH
+    winchdetected="0"
     if [[ ! -z $TMUX ]]; then
         ignorewinch=$(tmux show-options -vp -t $TMUX_PANE @arttimeterm-ignorewinch 2>/dev/null)
         if [[ "$ignorewinch" != "1" ]]; then
@@ -1370,12 +1383,14 @@ function trapwinch {
             clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
         fi
     fi
-    trap 'trapwinch' WINCH
+    if [[ $winchdetected = "1" ]]; then
+        trapwinch
+    fi
 }
 
 tputset
 printart
-trap 'trapwinch' WINCH
+trap 'setwinch' WINCH
 if [[ $nonblocking = "1" ]]; then
     arttime_nonblocking
 else
