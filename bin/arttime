@@ -247,7 +247,12 @@ function getbart {
 
 function notetimezone {
     if [[ -z $TZ ]]; then
-        tzlong=$(readlink /etc/localtime | sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p')
+        if [[ -L /etc/localtime ]]; then
+            tzlong=$(readlink /etc/localtime | sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p')
+        else
+            echo "W: make /etc/localtime a symlink for faster load time" >/dev/stderr
+            tzlong=$(find /usr/share/zoneinfo/* -type f | while read fname; do cmp -s /etc/localtime "$fname" && sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p'<<<"$fname" && break; done)
+        fi
     else
         if [[ -f $TZ ]]; then
             tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${TZ:a})
