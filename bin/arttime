@@ -724,7 +724,10 @@ function trapint_nonblocking {
 function trapint_blocking {
     #while read dummy ; do : ; done
     # exec 0>&- 2>dev/null;
-    trap -; pkill -P $$; tputreset; $sttycmd $sttyorig; set -e; (exit 130);
+    #trap -; pkill -P $$; tputreset; $sttycmd $sttyorig; set -e; (exit 130);
+    trapintactive="1"
+    trapusr1_both "q"
+    trapintactive="0"
 }
 
 function trapexit_nonblocking {
@@ -1176,7 +1179,12 @@ EOF
                 trap -;
                 pkill -P $$;
                 tputreset;
-                exit
+                if [[ $trapintactive = "1" ]]; then
+                    set -e
+                    (exit 130)
+                else
+                    exit
+                fi
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -1307,8 +1315,8 @@ function arttime_blocking {
     starttime=$(strftime $timeformat)
     starttimearray=(${(s/|/)starttime})
     printtime "1"
-    trap "trapint_blocking" INT QUIT
-    trap "trapexit_blocking" EXIT TERM HUP
+    trap "trapint_blocking" INT
+    trap "trapexit_blocking" EXIT TERM HUP QUIT
     trap "trapusr1_both" USR1
     trap "trapstop_blocking" TSTP
     trap "trapcont_blocking" CONT
