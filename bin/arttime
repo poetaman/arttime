@@ -322,6 +322,38 @@ else
     debugopt=""
 fi
 
+
+if [[ -z $artname && ! -z $flipartname ]]; then
+    printf "E: if b-art is passed, a-art should also be passed"
+    exit 1
+fi
+
+function checkartfile {
+    local artfile=""
+    if [[ ! -z "$1" ]]; then
+        if [[ -f "${1/#\~/$HOME}" ]]; then
+            artfile="${1/#\~/$HOME}"
+        else
+            artfile="$artdir/${1}"
+        fi
+        if [[ ! -f "$artfile" ]]; then
+            return 1
+        fi
+    fi
+    return 0
+}
+checkartfile $artname
+if [[ "$?" != "0" ]]; then
+    printf "E: artfile not found for a-art: $artname"
+    exit 1
+fi
+checkartfile $flipartname
+if [[ "$?" != "0" ]]; then
+    printf "E: artfile not found for b-art: $flipartname"
+    exit 1
+fi
+
+
 if [[ ! -z "$nolearn" ]]; then
     if [[ -z "$artname" ]]; then
         artname="butterfly"
