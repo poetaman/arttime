@@ -275,7 +275,7 @@ tzshortcurrent="$tzshort"
 function notifydesktop {
     local notifytitle="ARTTIME"
     local notifysubtitle="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
-    local notifymessage="Goal $goal reached!\ra-art: $(getaart)"
+    local notifymessage="Goal $goalstr reached!\ra-art: $(getaart)"
     if bart=$(getbart); then
         notifymessage+=", b-art: $(getbart)"
     else
@@ -407,7 +407,6 @@ tput -S <<HERE
 HERE
 }
 
-
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
 regex1='^'$regexpart'$'
 regex2='^'$regexpart$regexpart'$'
@@ -429,8 +428,11 @@ function getseconds {
 }
 
 function setgoaltime {
-    local currenttime=$(strftime '%s')
-    goaltime=""
+    local currenttime="$2"
+    local goal="$1"
+    local goaltime=""
+    local goaltimestr=""
+    local goalstatus="0"
     if [[ $goal =~ $regex1 ]]; then
         goaltime=$(getseconds $match[1] $match[2])
         goaltime=$(( currenttime+goaltime ))
@@ -453,19 +455,22 @@ function setgoaltime {
         if [[ $goaltime -gt $currenttime ]]; then
         elif goaltime=$($datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
             if [[ $goaltime -gt $currenttime ]]; then
-                tput cup 0 0
-                tput el
-                printf "Today's $goal has passed, setting goal time to tomorrow's $goal"
-                sleep 2
+                goalstatus="1"
+                #tput cup 0 0
+                #tput el
+                #printf "Today's $goal has passed, setting goal time to tomorrow's $goal"
+                #sleep 2
             else
-                goaltime=""
+                goaltime='-'
+                goalstatus="2"
             fi
         fi
     else
-        goaltime=""
+        goaltime='-'
+        goalstatus="2"
     fi
     #echo "$ goal:$goal, goaltime:$goaltime"
-    if [[ ! -z $goaltime ]]; then
+    if [[ $goaltime != '-' ]]; then
         local tmpgoaltime=$(strftime $timeformat $goaltime)
         local tmpgoaltimearray=(${(s/|/)tmpgoaltime})
         goaltimestr=$tmpgoaltimearray[2]
@@ -477,19 +482,79 @@ function setgoaltime {
     else
         goaltimestr=""
     fi
+    returngoaltime="$goaltime"
+    returngoaltimestr="$goaltimestr"
+    returngoalstatus="$goalstatus"
+    #return $returnval
     #echo "$ goal:$goal, goaltime:$goaltime, goaltimestr:$goaltimestr"
 }
 
+#goaltimes=()
+#goaltimesstrs=()
+#goalvalids=()
+goalarray=()
+goalarraysorted=()
+goalmaxptr="0"
+goalptr="0"
+goalentry=""
+
+function setnextgoal {
+    if [[ $goalptr != $goalmaxptr ]] then;
+        goalptr=$((goalptr+1))
+        goalentry="$goalarraysorted[$goalptr]"
+        #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
+        local goalentryarray=(${(s/;/)goalentry})
+        goaltime="$goalentryarray[1]"
+        goalnum="$goalentryarray[2]"
+        goalstatus="$goalentryarray[3]"
+        goaltimestr="$goalentryarray[4]"
+        goalstr="$goalentryarray[5]"
+        goaldone="0"
+    fi
+}
+
+function setgoals {
+    local tmpgoals=(${(s/;/)goal})
+    local goal=""
+    local numgoals="0"
+    local errdetected="0"
+    local tmpgoalarray=()
+    for goal in "$tmpgoals[@]"; do
+        numgoals=$((numgoals+1))
+        setgoaltime $goal $(strftime '%s')
+        if [[ $returngoalstatus = "2" ]]; then
+            errdetected="1"
+        fi
+        tmpgoalarray+=("$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal")
+    done
+    if [[ $numgoals -gt 0 ]]; then
+        if [[ $errdetected = "0" ]]; then
+            goalarray=("${tmpgoalarray[@]}")
+            goalarraysorted=("${(o)goalarray[@]}")
+            errgoalarray=()
+            goalptr="0"
+            goalmaxptr="$numgoals"
+            setnextgoal
+        else
+            errgoalarray=("${tmpgoalarray[@]}")
+            goalptr="0"
+            goalmaxptr="0"
+            goalentry=""
+            setnextgoal
+        fi
+    fi
+    return $errdetected
+}
+
 if [[ ! -z $goal ]]; then
-    setgoaltime
-    if [[ -z $goaltime ]]; then
+    setgoals
+    if [[ "$?" != "0" ]]; then
         echo "Err: Goal time must be a valid time format representing future time"
         exit 0
     fi
 else
     goaltime=""
 fi
-
 
 if [[ ! -z $updateonminute ]]; then
     sleeptime="60"
@@ -686,9 +751,10 @@ function printtime {
             difftime=$(( -difftime ))
             slackstring1=" | goal passed! "
             slackstring4style="$passedgoalstyle"
-            if [[ ! -z $goal ]]; then
+            if [[ $goaldone = "0" ]]; then
                 notifydesktop
-                goal=""
+                goaldone="1"
+                setnextgoal
             fi
         else
             slackstring1=" | time pending "
@@ -1010,7 +1076,7 @@ function usr1input_handler {
             tput civis
             if [[ ! -z $tempgoal ]]; then
                 goal="$tempgoal"
-                setgoaltime
+                setgoals
                 if [[ -z $goaltime ]]; then
                     if [[ -z $datehelpstr ]]; then
                         if [[ $dateisgnu = "1" ]]; then
@@ -1158,9 +1224,7 @@ EOF
             $sttycmd $sttyorig
             tput cnorm
             if askforconfirmation "clear goal"; then
-                goal=""
                 goaltime=""
-                goaltimestr=""
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -1196,9 +1260,7 @@ EOF
             tput cnorm
             if askforconfirmation "reset start time, and goal"; then
                 resetstarttime="1"
-                goal=""
                 goaltime=""
-                goaltimestr=""
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
