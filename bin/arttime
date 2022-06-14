@@ -510,7 +510,9 @@ function setnextgoal {
         goaltimestr="$goalentryarray[4]"
         goalstr="$goalentryarray[5]"
         goaldone="0"
+        return 0
     fi
+    return 1
 }
 
 function setgoals {
@@ -749,15 +751,23 @@ function printtime {
         slackstring4="$goaltimestr"
         if [[ ! $difftime -gt 0 ]]; then
             difftime=$(( -difftime ))
-            slackstring1=" | goal passed! "
-            slackstring4style="$passedgoalstyle"
             if [[ $goaldone = "0" ]]; then
-                notifydesktop
-                goaldone="1"
-                setnextgoal
+                local lastgoaltime="$goaltime"
+                while ((goaltime == lastgoaltime && goaldone == 0)); do
+                    notifydesktop &
+                    goaldone="1"
+                    setnextgoal
+                done
+            fi
+            if [[ $goaldone = "0" ]]; then
+                slackstring1=" | goal $goalptr/$goalmaxptr pending "
+                slackstring4style=""
+            else
+                slackstring1=" | goal $goalmaxptr/$goalmaxptr passed! "
+                slackstring4style="$passedgoalstyle"
             fi
         else
-            slackstring1=" | time pending "
+            slackstring1=" | goal $goalptr/$goalmaxptr pending "
             slackstring4style=""
         fi
     else
