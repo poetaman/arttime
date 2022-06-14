@@ -275,7 +275,7 @@ tzshortcurrent="$tzshort"
 function notifydesktop {
     local notifytitle="ARTTIME"
     local notifysubtitle="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
-    local notifymessage="Goal $goalstr reached!\ra-art: $(getaart)"
+    local notifymessage="goal ($goalptr/$goalmaxptr) $goalstr reached!\ra-art: $(getaart)"
     if bart=$(getbart); then
         notifymessage+=", b-art: $(getbart)"
     else
