@@ -820,6 +820,8 @@ function printtime {
                     goaldone="1"
                     setnextgoal
                 done
+                difftime=$((goaltime-currenttimearray[1]))
+                slackstring4="$goaltimestr"
             fi
             if [[ $goalmaxptreff -gt 1 ]]; then
                 local goalptrofmaxstr=" $goalptr/$goalmaxptreff"
