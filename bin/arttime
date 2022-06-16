@@ -811,11 +811,6 @@ function printtime {
         slackstring0="$currenttimearray[2]"
         slackstring0style="$currenttimestyle"
         slackstring4="$goaltimestr"
-        if [[ $printsprints = "1" ]]; then
-            slackstring1=" | sprint-${goalsprint} "
-        else
-            slackstring1=" | "
-        fi
         if [[ ! $difftime -gt 0 ]]; then
             difftime=$(( -difftime ))
             if [[ $goaldone = "0" ]]; then
@@ -831,6 +826,11 @@ function printtime {
             else
                 local goalptrofmaxstr=""
             fi
+            if [[ $printsprints = "1" ]]; then
+                slackstring1=" | sprint-${goalsprint} "
+            else
+                slackstring1=" | "
+            fi
             if [[ $goaldone = "0" ]]; then
                 slackstring1+="goal$goalptrofmaxstr pending "
                 slackstring4style=""
@@ -843,6 +843,11 @@ function printtime {
                 local goalptrofmaxstr=" $goalptr/$goalmaxptreff"
             else
                 local goalptrofmaxstr=""
+            fi
+            if [[ $printsprints = "1" ]]; then
+                slackstring1=" | sprint-${goalsprint} "
+            else
+                slackstring1=" | "
             fi
             slackstring1+="goal$goalptrofmaxstr pending "
             slackstring4style=""
