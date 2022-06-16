@@ -275,7 +275,12 @@ tzshortcurrent="$tzshort"
 function notifydesktop {
     local notifytitle="ARTTIME"
     local notifysubtitle="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
-    local notifymessage="goal ($goalptr/$goalmaxptr) $goalstr reached!\ra-art: $(getaart)"
+    if [[ $printsprints = "1" ]]; then
+        local notifymessage="sprint-$goalsprint"
+    else
+        local notifymessage=""
+    fi
+    notifymessage+=" goal-$goalptr/$goalmaxptreff: $goalstr\ra-art: $(getaart)"
     if bart=$(getbart); then
         notifymessage+=", b-art: $(getbart)"
     else
@@ -494,28 +499,52 @@ function setgoaltime {
 #goalvalids=()
 goalarray=()
 goalarraysorted=()
-goalmaxptr="0"
-goalptr="0"
 goalentry=""
+goalsprint="1"
 
 function setnextgoal {
     if [[ $goalptr != $goalmaxptr ]] then;
+        local lastgoaltime="$goaltime"
+        local lastgoaltimestr="$goaltimestr"
         goalptr=$((goalptr+1))
         goalentry="$goalarraysorted[$goalptr]"
         #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
         local goalentryarray=(${(s/;/)goalentry})
         goaltime="$goalentryarray[1]"
         goalnum="$goalentryarray[2]"
+        local localgoalnum="$goalnum"
         goalstatus="$goalentryarray[3]"
         goaltimestr="$goalentryarray[4]"
+        local localgoaltimestr="$goaltimestr"
         goalstr="$goalentryarray[5]"
-        goaldone="0"
-        return 0
+        if [[ $goalstr = "loop" ]]; then
+            if [[ $localgoaltimestr = "-" ]]; then
+                local lastgoalptr="$goalptr"
+                goalsprint=$((goalsprint+1))
+                setgoals
+                goaldone="0"
+                #goalarraysorted[-1]=("loop;$localgoalnum;0;-;loop")
+            elif [[ $localgoaltimestr -gt 1 ]]; then
+                local lastgoalptr="$goalptr"
+                goalsprint=$((goalsprint+1))
+                setgoals
+                goaldone="0"
+                goalarraysorted[-1]=("loop;$localgoalnum;0;$((localgoaltimestr-1));loop")
+            else
+                goaltime="$lastgoaltime"
+                goaltimestr="$lastgoaltimestr"
+                goalptr="$((goalmaxptr-1))"
+                goaldone="1"
+            fi
+        else
+            goaldone="0"
+        fi
     fi
-    return 1
 }
 
 function setgoals {
+    goalmaxptr="0"
+    goalptr="0"
     local tmpgoals=(${(s/;/)goal})
     local goal=""
     local numgoals="0"
@@ -523,11 +552,30 @@ function setgoals {
     local tmpgoalarray=()
     for goal in "$tmpgoals[@]"; do
         numgoals=$((numgoals+1))
-        setgoaltime $goal $(strftime '%s')
-        if [[ $returngoalstatus = "2" ]]; then
-            errdetected="1"
+        if [[ $goal =~ ^.*(loop|sprint|x)(.*)$ ]]; then
+            goal="loop"
+            local match2="$match[2]"
+            if [[ $match2 =~ ^([0-9]+)[[:space:]]*$ ]]; then
+                returngoaltimestr="$match[1]"
+            elif [[ $match2 =~ ^[[:space:]]*$ ]]; then
+                returngoaltimestr="-"
+            else
+                returngoaltimestr=" "
+                errdetected="1"
+            fi
+            if [[ $numgoals = "1" ]]; then
+                errdetected="1"
+            fi
+            returngoaltime="loop"
+            tmpgoalarray+=("$returngoaltime;$numgoals;0;$returngoaltimestr;$goal")
+            break
+        else
+            setgoaltime $goal $(strftime '%s')
+            if [[ $returngoalstatus = "2" ]]; then
+                errdetected="1"
+            fi
+            tmpgoalarray+=("$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal")
         fi
-        tmpgoalarray+=("$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal")
     done
     if [[ $numgoals -gt 0 ]]; then
         if [[ $errdetected = "0" ]]; then
@@ -542,7 +590,7 @@ function setgoals {
             goalptr="0"
             goalmaxptr="0"
             goalentry=""
-            setnextgoal
+            goaltime=""
         fi
     fi
     return $errdetected
@@ -551,8 +599,17 @@ function setgoals {
 if [[ ! -z $goal ]]; then
     setgoals
     if [[ "$?" != "0" ]]; then
-        echo "Err: Goal time must be a valid time format representing future time"
+        echo "E: Goal time must be a valid time format representing future time.\n   Start application, press 'g', enter 'help' to learn more."
         exit 0
+    else
+        if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
+            printsprints="1"
+            goalmaxptreff="$((goalmaxptr-1))"
+            #goalmaxsprint="$returngoaltimestr"
+        else
+            printsprints="0"
+            goalmaxptreff="$goalmaxptr"
+        fi
     fi
 else
     goaltime=""
@@ -749,6 +806,11 @@ function printtime {
         slackstring0="$currenttimearray[2]"
         slackstring0style="$currenttimestyle"
         slackstring4="$goaltimestr"
+        if [[ $printsprints = "1" ]]; then
+            slackstring1=" | sprint-${goalsprint} "
+        else
+            slackstring1=" | "
+        fi
         if [[ ! $difftime -gt 0 ]]; then
             difftime=$(( -difftime ))
             if [[ $goaldone = "0" ]]; then
@@ -760,14 +822,14 @@ function printtime {
                 done
             fi
             if [[ $goaldone = "0" ]]; then
-                slackstring1=" | goal $goalptr/$goalmaxptr pending "
+                slackstring1+="goal $goalptr/$goalmaxptreff pending "
                 slackstring4style=""
             else
-                slackstring1=" | goal $goalmaxptr/$goalmaxptr passed! "
+                slackstring1+="goal $goalmaxptreff/$goalmaxptreff passed! "
                 slackstring4style="$passedgoalstyle"
             fi
         else
-            slackstring1=" | goal $goalptr/$goalmaxptr pending "
+            slackstring1+="goal $goalptr/$goalmaxptreff pending "
             slackstring4style=""
         fi
     else
@@ -1086,6 +1148,7 @@ function usr1input_handler {
             tput civis
             if [[ ! -z $tempgoal ]]; then
                 goal="$tempgoal"
+                goalsprint="1"
                 setgoals
                 if [[ -z $goaltime ]]; then
                     if [[ -z $datehelpstr ]]; then
@@ -1176,6 +1239,15 @@ EOF
                     clear
                     less -R <<<"$datehelpstr" 2>/dev/null
                     tput smcup
+                else
+                    if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
+                        printsprints="1"
+                        goalmaxptreff="$((goalmaxptr-1))"
+                        #goalmaxsprint="$returngoaltimestr"
+                    else
+                        printsprints="0"
+                        goalmaxptreff="$goalmaxptr"
+                    fi
                 fi
             fi
             ;;
