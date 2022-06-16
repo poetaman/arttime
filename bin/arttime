@@ -280,7 +280,12 @@ function notifydesktop {
     else
         local notifymessage=""
     fi
-    notifymessage+=" goal-$goalptr/$goalmaxptreff: $goalstr\ra-art: $(getaart)"
+    if [[ $goalmaxptreff -gt 1 ]]; then
+        local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
+    else
+        local goalptrofmaxstr=""
+    fi
+    notifymessage+=" goal$goalptrofmaxstr: $goalstr\ra-art: $(getaart)"
     if bart=$(getbart); then
         notifymessage+=", b-art: $(getbart)"
     else
@@ -821,15 +826,25 @@ function printtime {
                     setnextgoal
                 done
             fi
+            if [[ $goalmaxptreff -gt 1 ]]; then
+                local goalptrofmaxstr=" $goalptr/$goalmaxptreff"
+            else
+                local goalptrofmaxstr=""
+            fi
             if [[ $goaldone = "0" ]]; then
-                slackstring1+="goal $goalptr/$goalmaxptreff pending "
+                slackstring1+="goal$goalptrofmaxstr pending "
                 slackstring4style=""
             else
-                slackstring1+="goal $goalmaxptreff/$goalmaxptreff passed! "
+                slackstring1+="goal$goalptrofmaxstr passed! "
                 slackstring4style="$passedgoalstyle"
             fi
         else
-            slackstring1+="goal $goalptr/$goalmaxptreff pending "
+            if [[ $goalmaxptreff -gt 1 ]]; then
+                local goalptrofmaxstr=" $goalptr/$goalmaxptreff"
+            else
+                local goalptrofmaxstr=""
+            fi
+            slackstring1+="goal$goalptrofmaxstr pending "
             slackstring4style=""
         fi
     else
