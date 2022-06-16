@@ -552,7 +552,7 @@ function setgoals {
     local tmpgoalarray=()
     for goal in "$tmpgoals[@]"; do
         numgoals=$((numgoals+1))
-        if [[ $goal =~ ^.*(loop|sprint|x)(.*)$ ]]; then
+        if [[ $goal =~ ^[[:space:]]*(loop|sprint|x)(.*)$ ]]; then
             goal="loop"
             local match2="$match[2]"
             if [[ $match2 =~ ^([0-9]+)[[:space:]]*$ ]]; then
