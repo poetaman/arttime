@@ -274,7 +274,7 @@ tzshortcurrent="$tzshort"
 # Function to push desktop notifications
 function notifydesktop {
     local notifytitle="ARTTIME"
-    local notifysubtitle="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
+    local notifysubtitle="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
     if [[ $printsprints = "1" ]]; then
         local notifymessage="sprint-$goalsprint"
     else
@@ -1277,7 +1277,7 @@ EOF
             ;;
         "i")
             local tmpcurtime=$(strftime '%s')
-            local timestring="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
+            local timestring="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
             timestring+=" ($tzlongcurrent)"
             timestring+="$(strftime ' | week %W')"
             timestring+=" | ID: $$"
