@@ -289,11 +289,11 @@ function notifydesktop {
     else
         local goalptrofmaxstr=""
     fi
-    notifymessage+=" goal$goalptrofmaxstr: $goalstr\ra-art: $(getaart)"
+    notifymessage+=" goal$goalptrofmaxstr: $goalstr"
     if bart=$(getbart); then
-        notifymessage+=", b-art: $(getbart)"
+        notifymessage+="\rarts: $(getaart), $(getbart)"
     else
-        notifymessage+=", b-art: none"
+        notifymessage+="\rart: $(getaart)"
     fi
     notifymessage+="\rID: $$"
     if [[ $machine = "Darwin" ]]; then
