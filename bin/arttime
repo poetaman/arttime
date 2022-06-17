@@ -276,7 +276,11 @@ function notifydesktop {
     local notifytitle="ARTTIME"
     local notifysubtitle="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
     if [[ $printsprints = "1" ]]; then
-        local notifymessage="sprint-$goalsprint"
+        if [[ $goalmaxsprint != "-" ]]; then
+            local notifymessage="sprint-$goalsprint/$goalmaxsprint"
+        else
+            local notifymessage="sprint-$goalsprint"
+        fi
     else
         local notifymessage=""
     fi
@@ -610,7 +614,7 @@ if [[ ! -z $goal ]]; then
         if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
             printsprints="1"
             goalmaxptreff="$((goalmaxptr-1))"
-            #goalmaxsprint="$returngoaltimestr"
+            goalmaxsprint="$returngoaltimestr"
         else
             printsprints="0"
             goalmaxptreff="$goalmaxptr"
@@ -824,12 +828,16 @@ function printtime {
                 slackstring4="$goaltimestr"
             fi
             if [[ $goalmaxptreff -gt 1 ]]; then
-                local goalptrofmaxstr=" $goalptr/$goalmaxptreff"
+                local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
             else
                 local goalptrofmaxstr=""
             fi
             if [[ $printsprints = "1" ]]; then
-                slackstring1=" | sprint-${goalsprint} "
+                if [[ $goalmaxsprint != "-" ]]; then
+                    slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                else
+                    slackstring1=" | sprint-${goalsprint} "
+                fi
             else
                 slackstring1=" | "
             fi
@@ -842,12 +850,16 @@ function printtime {
             fi
         else
             if [[ $goalmaxptreff -gt 1 ]]; then
-                local goalptrofmaxstr=" $goalptr/$goalmaxptreff"
+                local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
             else
                 local goalptrofmaxstr=""
             fi
             if [[ $printsprints = "1" ]]; then
-                slackstring1=" | sprint-${goalsprint} "
+                if [[ $goalmaxsprint != "-" ]]; then
+                    slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                else
+                    slackstring1=" | sprint-${goalsprint} "
+                fi
             else
                 slackstring1=" | "
             fi
@@ -1265,7 +1277,7 @@ EOF
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
                         printsprints="1"
                         goalmaxptreff="$((goalmaxptr-1))"
-                        #goalmaxsprint="$returngoaltimestr"
+                        goalmaxsprint="$returngoaltimestr"
                     else
                         printsprints="0"
                         goalmaxptreff="$goalmaxptr"
