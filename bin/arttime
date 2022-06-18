@@ -579,8 +579,8 @@ function setgoals {
             tmpgoalarray+=("$returngoaltime;$numgoals;0;$returngoaltimestr;$goal")
             break
         else
-            [[ $goal =~ ^[[:space:]]*(.*)$ ]] && goal="$match[1]"
-            [[ $goal =~ ^(.*)[[:space:]]*$ ]] && goal="$match[1]"
+            #[[ $goal =~ ^[[:space:]]*(.*)$ ]] && goal="$match[1]"
+            goal=${${goal%${goal##*[^[:blank:]]}}#${${goal%${goal##*[^[:blank:]]}}%%[^[:blank:]]*}};
             setgoaltime $goal $(strftime '%s')
             if [[ $returngoalstatus = "2" ]]; then
                 errdetected="1"
@@ -1316,22 +1316,22 @@ EOF
             local timestring="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
             timestring+=" ($tzlongcurrent)"
             timestring+="$(strftime ' | week %W')"
-            timestring+=" | ID: $$"
+            timestring+=" | ID: $$ "
             if [[ $helpactive = "1" ]]; then
                 if [[ $restoreflipartname != "" ]]; then
-                    printf "$timestring \narts: a) $restoreartname, b) $restoreflipartname"
+                    printf "$timestring \narts: a) $restoreartname, b) $restoreflipartname "
                 else
-                    printf "$timestring \narts: a) $restoreartname, b) none"
+                    printf "$timestring \narts: a) $restoreartname, b) none "
                 fi
             else
                 if [[ $flipartname != "" ]]; then
-                    printf "$timestring \narts: a) $artname, b) $flipartname"
+                    printf "$timestring \narts: a) $artname, b) $flipartname "
                 else
-                    printf "$timestring \narts: a) $artname, b) none"
+                    printf "$timestring \narts: a) $artname, b) none "
                 fi
             fi
             if [[ ! -z $goaltime ]]; then
-                printf "\nGoals:"
+                printf "\nGoals: "
                 for ((i=1;i<=goalmaxptr;i=i+1)) do
                     #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
                     local goalentryarray=(${(s/;/)goalarraysorted[$i]})
@@ -1342,20 +1342,20 @@ EOF
                         local goaltimeunix="$goalentryarray[1]"
                         local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
                         if [[ $i = $goalptr ]]; then
-                            printf "\n  > $i. [31mtime: $goaltimestr, goal: $goalstr[0m"
+                            printf "\n  > $i. [31mtime: $goaltimestr, goal: $goalstr [0m"
                         else
-                            printf "\n    $i. time: $goaltimestr, goal: $goalstr"
+                            printf "\n    $i. time: $goaltimestr, goal: $goalstr "
                         fi
                     else
                         if [[ $goalmaxsprint != "-" ]]; then
-                            printf "\n       sprint $goalsprint/$goalmaxsprint"
+                            printf "\n       sprint $goalsprint/$goalmaxsprint "
                         else
-                            printf "\n       sprint $goalsprint/infinity"
+                            printf "\n       sprint $goalsprint/infinity "
                         fi
                     fi
                 done
             fi
-            printf "\nPress any key to continue"
+            printf "\nPress any key to continue "
             read -t5 -k1
 #tput -S <<HERE
 #            cup 1 0
