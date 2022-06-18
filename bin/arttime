@@ -1171,6 +1171,23 @@ function usr1input_handler {
         #"d")
         #    echo "cliwallpaper[$$]: flipartname=$flipartname, lasttime=$lasttime, toggleflipart:$toggleflipart, artname:$artname, flipartht:$flipartht, artht:$artht, artstringht:$artstringht, flipartstringht:$flipartstringht" >> ~/arttime_debug.log
         #    ;;
+        "e")
+            if [[ ! -z $goal ]]; then
+                $sttycmd $sttyorig
+                tput cnorm
+                if askforconfirmation "restart previous goal '$goal'"; then
+                    goalsprint="1"
+                    setgoals
+                fi
+                $sttycmd -echo
+                $sttycmd -icanon min 0 time 0
+                tput civis
+            else
+                echo "No goals set, so nothing to restart"
+                zselect -t 200
+                while read dummy ; do : ; done 
+            fi
+            ;;
         "g")
             tput cup 0 0
             tput el
@@ -1371,14 +1388,20 @@ EOF
             while read dummy ; do : ; done
             ;;
         "l")
-            $sttycmd $sttyorig
-            tput cnorm
-            if askforconfirmation "clear goal"; then
-                goaltime=""
+            if [[ ! -z $goaltime ]]; then
+                $sttycmd $sttyorig
+                tput cnorm
+                if askforconfirmation "clear goals"; then
+                    goaltime=""
+                fi
+                $sttycmd -echo
+                $sttycmd -icanon min 0 time 0
+                tput civis
+            else
+                echo "No active goal to clear"
+                zselect -t 200
+                while read dummy ; do : ; done 
             fi
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
-            tput civis
             ;;
         "m")
             tput cup 0 0
