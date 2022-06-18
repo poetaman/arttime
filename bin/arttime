@@ -1311,27 +1311,27 @@ EOF
                 read -t3 -k1
             fi
             ;;
-        "i")
+        "i"|"I")
             local tmpcurtime=$(strftime '%s')
-            local timestring="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
-            timestring+=" ($tzlongcurrent)"
-            timestring+="$(strftime ' | week %W')"
-            timestring+=" | ID: $$ "
+            local infostring="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
+            infostring+=" ($tzlongcurrent)"
+            infostring+="$(strftime ' | week %W')"
+            infostring+=" | ID: $$ "
             if [[ $helpactive = "1" ]]; then
                 if [[ $restoreflipartname != "" ]]; then
-                    printf "$timestring \narts: a) $restoreartname, b) $restoreflipartname "
+                    infostring+=" \narts: a) $restoreartname, b) $restoreflipartname "
                 else
-                    printf "$timestring \narts: a) $restoreartname, b) none "
+                    infostring+=" \narts: a) $restoreartname, b) none "
                 fi
             else
                 if [[ $flipartname != "" ]]; then
-                    printf "$timestring \narts: a) $artname, b) $flipartname "
+                    infostring+=" \narts: a) $artname, b) $flipartname "
                 else
-                    printf "$timestring \narts: a) $artname, b) none "
+                    infostring+=" \narts: a) $artname, b) none "
                 fi
             fi
-            if [[ ! -z $goaltime ]]; then
-                printf "\nGoals: "
+            if [[ ! -z $goaltime && $goaldone = "0" ]]; then
+                infostring+="\nGoals: "
                 for ((i=1;i<=goalmaxptr;i=i+1)) do
                     #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
                     local goalentryarray=(${(s/;/)goalarraysorted[$i]})
@@ -1342,21 +1342,28 @@ EOF
                         local goaltimeunix="$goalentryarray[1]"
                         local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
                         if [[ $i = $goalptr ]]; then
-                            printf "\n  > $i. [31mtime: $goaltimestr, goal: $goalstr [0m"
+                            infostring+="\n  > $i. [31mtime: $goaltimestr, goal: $goalstr [0m"
                         else
-                            printf "\n    $i. time: $goaltimestr, goal: $goalstr "
+                            infostring+="\n    $i. time: $goaltimestr, goal: $goalstr "
                         fi
                     else
                         if [[ $goalmaxsprint != "-" ]]; then
-                            printf "\n       sprint $goalsprint/$goalmaxsprint "
+                            infostring+="\n       sprint $goalsprint/$goalmaxsprint "
                         else
-                            printf "\n       sprint $goalsprint/infinity "
+                            infostring+="\n       sprint $goalsprint/infinity "
                         fi
                     fi
                 done
             fi
-            printf "\nPress any key to continue "
-            read -t5 -k1
+            if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
+                clear
+                printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
+                tput smcup
+            else
+                infostring+="\nPress any key to continue "
+                printf "$infostring"
+                read -t5 -k1
+            fi
 #tput -S <<HERE
 #            cup 1 0
 #            el
