@@ -1317,16 +1317,41 @@ EOF
             timestring+=" | ID: $$"
             if [[ $helpactive = "1" ]]; then
                 if [[ $restoreflipartname != "" ]]; then
-                    printf "$timestring \na-art: $restoreartname, b-art: $restoreflipartname"
+                    printf "$timestring \narts: a) $restoreartname, b) $restoreflipartname"
                 else
-                    printf "$timestring \na-art: $restoreartname, b-art: none"
+                    printf "$timestring \narts: a) $restoreartname, b) none"
                 fi
             else
                 if [[ $flipartname != "" ]]; then
-                    printf "$timestring \na-art: $artname, b-art: $flipartname"
+                    printf "$timestring \narts: a) $artname, b) $flipartname"
                 else
-                    printf "$timestring \na-art: $artname, b-art: none"
+                    printf "$timestring \narts: a) $artname, b) none"
                 fi
+            fi
+            if [[ ! -z $goaltime ]]; then
+                printf "\nGoals:"
+                for ((i=1;i<=goalmaxptr;i=i+1)) do
+                    #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
+                    local goalentryarray=(${(s/;/)goalarraysorted[$i]})
+                    local goalnum="$goalentryarray[2]"
+                    local goalstatus="$goalentryarray[3]"
+                    local goalstr="$goalentryarray[5]"
+                    if [[ $goalstr != "loop" ]]; then
+                        local goaltimeunix="$goalentryarray[1]"
+                        local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                        if [[ $i = $goalptr ]]; then
+                            printf "\n  > $i. [31mtime: $goaltimestr, goal: $goalstr[0m"
+                        else
+                            printf "\n    $i. time: $goaltimestr, goal: $goalstr"
+                        fi
+                    else
+                        if [[ $goalmaxsprint != "-" ]]; then
+                            printf "\n       sprint $goalsprint/$goalmaxsprint"
+                        else
+                            printf "\n       sprint $goalsprint/infinity"
+                        fi
+                    fi
+                done
             fi
             printf "\nPress any key to continue"
             read -t5 -k1
