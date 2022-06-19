@@ -1224,8 +1224,7 @@ function usr1input_handler {
             tempgoal=""
             $sttycmd $sttyorig
             tput cnorm
-            printf "Enter goal ('help' to learn): "
-            read tempgoal
+            vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter goal ('help' to learn): " -c tempgoal;
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
             tput civis
@@ -1484,7 +1483,7 @@ EOF
             tput cnorm
             #printf "Enter message (Ctrl-d to cancel): "
             #read temptitle
-            vared -ep "Enter title message: " -c temptitle
+            vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter title message ('orig' to reset): " -c temptitle;
             readstatus="$?"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
