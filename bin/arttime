@@ -751,12 +751,12 @@ tput_rc=$(tput rc)
 tput_civis=$(tput civis)
 tput_smcup=$(tput smcup)
 
-toggleflipart=""
+toggleflipart="0"
 function printart {
     usr1detected=""
     trap 'trapusr1detected' USR1
-    if [[ ! -z $flipartname && ! -z $toggleflipart ]]; then
-        toggleflipart=""
+    if [[ ! -z $flipartname && $toggleflipart = "1" ]]; then
+        toggleflipart="0"
         if [[ -z $1 ]]; then
             printf '%s\n' "${tput_cup00}${flipartstring}"
         else
@@ -1225,6 +1225,7 @@ function usr1input_handler {
             tempgoal=""
             $sttycmd $sttyorig
             tput cnorm
+            toggleflipart=$(((toggleflipart+1)%2))
             vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter goal ('help' to learn): " -c tempgoal;
             printf "$tput_civis"
             $sttycmd -echo
@@ -1484,6 +1485,7 @@ EOF
             tput cnorm
             #printf "Enter message (Ctrl-d to cancel): "
             #read temptitle
+            toggleflipart=$(((toggleflipart+1)%2))
             vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter title message ('orig' to reset): " -c temptitle;
             readstatus="$?"
             printf "$tput_civis"
