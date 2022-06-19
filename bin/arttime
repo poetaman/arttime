@@ -748,6 +748,8 @@ function setartstring {
 tput_cup00=$(tput cup 0 0)
 tput_sc=$(tput sc)
 tput_rc=$(tput rc)
+tput_civis=$(tput civis)
+tput_smcup=$(tput smcup)
 
 toggleflipart=""
 function printart {
@@ -1074,14 +1076,13 @@ function usr1input_handler {
     case "$1" in
         "a"|"b")
             $sttycmd $sttyorig
-            tput smcup
+            printf "$tput_smcup"
             tput cup 0 0
             tput cnorm
             clear
             artselector
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput rmcup
             tputset
             if [[ $tmpartname = "" ]]; then
                 if [[ $1 = "b" ]]; then
@@ -1225,9 +1226,9 @@ function usr1input_handler {
             $sttycmd $sttyorig
             tput cnorm
             vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter goal ('help' to learn): " -c tempgoal;
+            printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput civis
             if [[ ! -z $tempgoal ]]; then
                 goal="$tempgoal"
                 goalsprint="1"
@@ -1485,9 +1486,9 @@ EOF
             #read temptitle
             vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter title message ('orig' to reset): " -c temptitle;
             readstatus="$?"
+            printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput civis
             if [[ $temptitle = "" || $readstatus != "0" ]]; then
             elif [[ $temptitle = "-" ]]; then
                 title=' - '
@@ -1568,14 +1569,13 @@ EOF
             ;;
         "z")
             $sttycmd $sttyorig
-            tput smcup
+            printf "$tput_smcup"
             tput cup 0 0
             tput cnorm
             clear
             zoneselector
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput rmcup
             tputset
             if [[ ! -z $tmpzonename ]]; then
                 TZ=$tmpzonename
