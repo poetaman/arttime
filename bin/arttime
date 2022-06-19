@@ -1040,6 +1040,36 @@ zstyle ':completion:zoneselector:*:' completer _zoneselector
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 autoload -Uz compinit && compinit
 
+function formattimedelta {
+    if [[ ! $1 -gt 0 ]]; then
+        local timedelta="$1"
+        local timedelta=$(( -timedelta ))
+        local timestate=" passed: "
+    else
+        local timedelta="$1"
+        local timestate="pending: "
+    fi
+    local days=$(($timedelta/86400))
+    local hours=$(($timedelta%86400/3600))
+    local minutes=$(($timedelta%3600/60))
+    local seconds=$(($timedelta%60))
+    if [[ $days != "0" || $2 != "0" ]]; then
+        if [[ $2 != "0" ]]; then
+            local formattedtime="${(l:$2::0:)days}d "
+        else
+            local formattedtime="${days}d "
+        fi
+    else
+        local formattedtime=""
+    fi
+    formattedtime="$formattedtime${(l:2::0:)hours}h "
+    formattedtime="$formattedtime${(l:2::0:)minutes}m "
+    if [[ -z $updateonminute ]]; then
+        formattedtime="$formattedtime${(l:2::0:)seconds}s"
+    fi
+    echo "$timestate$formattedtime"
+}
+
 function usr1input_handler {
     case "$1" in
         "a"|"b")
@@ -1349,19 +1379,30 @@ EOF
             fi
             if [[ ! -z $goaltime && $goaldone = "0" ]]; then
                 infostring+="\nGoals: "
+                # NOTE: first query the last entry to find width of days 
+                local goalentryarray=(${(s/;/)goalarraysorted[$goalmaxptreff]})
+                local goaltimeunix="$goalentryarray[1]"
+                local timepending=$((goaltimeunix-currenttimearray[1]))
+                timepending=$((timepending/86400))
+                if [[ $timepending != "0" ]]; then
+                    local datewidth="${#timepending}"
+                else
+                    local datewidth="0"
+                fi
                 for ((i=1;i<=goalmaxptr;i=i+1)) do
                     #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
-                    local goalentryarray=(${(s/;/)goalarraysorted[$i]})
+                    goalentryarray=(${(s/;/)goalarraysorted[$i]})
                     local goalnum="$goalentryarray[2]"
                     local goalstatus="$goalentryarray[3]"
                     local goalstr="$goalentryarray[5]"
                     if [[ $goalstr != "loop" ]]; then
-                        local goaltimeunix="$goalentryarray[1]"
+                        goaltimeunix="$goalentryarray[1]"
                         local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                        timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth)
                         if [[ $i = $goalptr ]]; then
-                            infostring+="\n  > $i. [31mtime: $goaltimestr, goal: $goalstr [0m"
+                            infostring+="\n  > $i. [31mtime: $goaltimestr ($timepending), goal: $goalstr [0m"
                         else
-                            infostring+="\n    $i. time: $goaltimestr, goal: $goalstr "
+                            infostring+="\n    $i. time: $goaltimestr ($timepending), goal: $goalstr "
                         fi
                     else
                         if [[ $goalmaxsprint != "-" ]]; then
