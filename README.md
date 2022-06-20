@@ -14,11 +14,17 @@ Contents
 
 
 # arttime
-🧜🏼‍♀️ Beauty of text art meets functionality of clock/timer ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
+🧜🏼‍♀️ Beauty of text art meets functionality of a feature-rich clock/timer/pattern-based time manager ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
-- Provide a simple yet smart alarm/timer for commandline. Always shows some delta in time, which is hard to track by looking outside the window or looking at your phone/computer clock. Provides easy/interative timezone switching.
+- Provide a feature-rich alarm timer/time manager for commandline.
+  - Set multiple timers, supports specifying delta in time (like ``1h 30m`` from now) or absoulte time ``March 22, 2:45PM EST``.
+  - Configurable pattern-based time management: Set a repeating pattern of times to get notifications at. This makes [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) just one of billions of patterns possible for time management, and makes you set a pattern that works for you.
+  - Or just loop forever or N number of times over a set of timers. Example: get a notification every day at 8AM; 12PM; 5PM.
+  - Shows time passed since a timer expired or times pending to for every timer (press ``i`` after setting multiple goals)
+  - Always shows one of delta in time, which is hard to track: 1) time since arttime started, 2) time pending to next goal, 3) time passed since last goal.
+  - Interactively switch time zones.
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
