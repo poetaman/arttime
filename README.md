@@ -14,11 +14,17 @@ Contents
 
 
 # arttime
-🧜🏼‍♀️ Beauty of text art meets functionality of clock/timer ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
+🧜🏼‍♀️ Beauty of text art meets functionality of a feature-rich clock/timer/pattern-based time manager ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
-- Provide a simple yet smart alarm/timer for commandline. Always shows some delta in time, which is hard to track by looking outside the window or looking at your phone/computer clock. Provides easy/interative timezone switching.
+- Provide a feature-rich alarm timer/time manager for commandline.
+  - Set multiple timers, supports specifying delta in time (like ``1h 30m`` from now) or absoulte time (like ``Dec 22 2:45PM EST``).
+  - Configurable pattern-based time management: Set a repeating pattern of times to get notifications at. This makes [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) just one of billions of patterns possible for time management, and makes you set a pattern that works for you.
+  - Or just loop forever or N number of times over a set of timers. Example: get a notification every day at 8AM; 12PM; 5PM.
+  - Shows time passed since a timer expired or times pending to for every timer (press ``i`` after setting multiple goals)
+  - Always shows some delta in time which is hard to track: 1) time since arttime started, 2) time pending for next timer, 3) time passed since last timer expired.
+  - Interactively switch time zones.
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
@@ -49,7 +55,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 # Screenshots
 1. Default start page. ``$ arttime``
-<img width="1014" alt="Screen Shot 2022-06-02 at 2 58 07 PM" src="https://user-images.githubusercontent.com/71736629/171746645-8be032bc-6181-4e11-8eab-c76402437b18.png">
+<img width="1016" alt="help_learn_page" src="https://user-images.githubusercontent.com/71736629/174508586-9b40f2cc-0f45-42d1-8519-a67024f2927c.png">
 
 2. Default art. ``$ arttime`` then press ``h``, or ``arttime --nolearn``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 59 PM" src="https://user-images.githubusercontent.com/71736629/169680963-0cd5027d-5e21-4d3e-8eda-c21939f5d89d.png">
@@ -63,17 +69,20 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 5. Timer and notification. ``arttime --nolearn -a colorowl2 -b colorowl3 -t "We don't sleep at night - Owls"`` then press ``g`` to enter a goal time like ``6s`` for 6 seconds, ``1h 6s`` for 1 hour 6 seconds. Check more formats supported by reading help documentation ``$ arttime -h``, or even better by passing 'help' as goal time while arttime is running (press ``g``, enter ``help``). This is an example of multi-colored art too.
 ![arttime_timer2](https://user-images.githubusercontent.com/71736629/169683033-b343526c-718a-4515-a1fa-52943a609e18.gif)
 
-6. Activism and 24-bit ANSI color example ``$ arttime --nolearn -a ukraine1_40 -t "Support peace, support Ukraine"``. Note: terminal emulator must support 24-bit RGB colors.
+6. Multiple timers, repeating time management program like [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique). a) From the commandline, run: ``arttime --nolearn -a magic -b magic2 -g "25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop"`` or b) From within application, run: ``arttime --nolearn -a magic -b magic2``, then press ``g`` and enter ``25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop``. Change ``loop`` to ``loop4`` or ``sprint4`` for approximately 10 hour work day.
+<img width="1025" alt="Screen Shot 2022-06-19 at 6 06 39 PM" src="https://user-images.githubusercontent.com/71736629/174509159-bd5d7a0b-4fa5-47b1-b330-3a0f9c97ca54.png">
+
+7. Activism and 24-bit ANSI color example ``$ arttime --nolearn -a ukraine1_40 -t "Support peace, support Ukraine"``. Note: terminal emulator must support 24-bit RGB colors.
 <img width="1019" alt="Screen Shot 2022-05-22 at 12 05 56 AM" src="https://user-images.githubusercontent.com/71736629/169683276-ec44c366-b570-4dd1-a334-ed5b052f03fd.png">
 
-7. Another 24-bit ANSI color (from image) example ``$ arttime --nolearn -a obama2 -t "Yes we can, yes we can drink better teas"``.  Note: terminal emulator must support 24-bit RGB colors.
+8. Another 24-bit ANSI color (from image) example ``$ arttime --nolearn -a obama2 -t "Yes we can, yes we can drink better teas"``.  Note: terminal emulator must support 24-bit RGB colors.
 <img width="1019" alt="Screen Shot 2022-05-22 at 12 14 22 AM" src="https://user-images.githubusercontent.com/71736629/169683524-a63a5a9c-aa66-4ecd-a036-97b8bfa0f243.png">
 
-8. Random art selection game, tarot-style. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (Note: following video playback works in Safari on macOS, but for some reason not in Safari on iPhone 8, perhaps because of a github.com bug?).
+9. Random art selection game, tarot-style. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (Note: following video playback works in Safari on macOS, but for some reason not in Safari on iPhone 8, perhaps because of a github.com bug?).
 
 https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-84b3-8e69affdf64f.mp4
 
-9. And much more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
+10. And much more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
 # Installation
 At the moment, only manual installation is possible, but it's very simple as the code is self-contained.

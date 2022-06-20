@@ -274,12 +274,26 @@ tzshortcurrent="$tzshort"
 # Function to push desktop notifications
 function notifydesktop {
     local notifytitle="ARTTIME"
-    local notifysubtitle="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
-    local notifymessage="Goal $goal reached!\ra-art: $(getaart)"
-    if bart=$(getbart); then
-        notifymessage+=", b-art: $(getbart)"
+    local notifysubtitle="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
+    if [[ $printsprints = "1" ]]; then
+        if [[ $goalmaxsprint != "-" ]]; then
+            local notifymessage="sprint-$goalsprint/$goalmaxsprint"
+        else
+            local notifymessage="sprint-$goalsprint"
+        fi
     else
-        notifymessage+=", b-art: none"
+        local notifymessage=""
+    fi
+    if [[ $goalmaxptreff -gt 1 ]]; then
+        local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
+    else
+        local goalptrofmaxstr=""
+    fi
+    notifymessage+=" goal$goalptrofmaxstr: $goalstr"
+    if bart=$(getbart); then
+        notifymessage+="\rarts: $(getaart), $(getbart)"
+    else
+        notifymessage+="\rart: $(getaart)"
     fi
     notifymessage+="\rID: $$"
     if [[ $machine = "Darwin" ]]; then
@@ -407,7 +421,6 @@ tput -S <<HERE
 HERE
 }
 
-
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
 regex1='^'$regexpart'$'
 regex2='^'$regexpart$regexpart'$'
@@ -429,8 +442,11 @@ function getseconds {
 }
 
 function setgoaltime {
-    local currenttime=$(strftime '%s')
-    goaltime=""
+    local currenttime="$2"
+    local goal="$1"
+    local goaltime=""
+    local goaltimestr=""
+    local goalstatus="0"
     if [[ $goal =~ $regex1 ]]; then
         goaltime=$(getseconds $match[1] $match[2])
         goaltime=$(( currenttime+goaltime ))
@@ -453,19 +469,22 @@ function setgoaltime {
         if [[ $goaltime -gt $currenttime ]]; then
         elif goaltime=$($datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
             if [[ $goaltime -gt $currenttime ]]; then
-                tput cup 0 0
-                tput el
-                printf "Today's $goal has passed, setting goal time to tomorrow's $goal"
-                sleep 2
+                goalstatus="1"
+                #tput cup 0 0
+                #tput el
+                #printf "Today's $goal has passed, setting goal time to tomorrow's $goal"
+                #sleep 2
             else
-                goaltime=""
+                goaltime='-'
+                goalstatus="2"
             fi
         fi
     else
-        goaltime=""
+        goaltime='-'
+        goalstatus="2"
     fi
     #echo "$ goal:$goal, goaltime:$goaltime"
-    if [[ ! -z $goaltime ]]; then
+    if [[ $goaltime != '-' ]]; then
         local tmpgoaltime=$(strftime $timeformat $goaltime)
         local tmpgoaltimearray=(${(s/|/)tmpgoaltime})
         goaltimestr=$tmpgoaltimearray[2]
@@ -477,19 +496,135 @@ function setgoaltime {
     else
         goaltimestr=""
     fi
+    returngoaltime="$goaltime"
+    returngoaltimestr="$goaltimestr"
+    returngoalstatus="$goalstatus"
+    #return $returnval
     #echo "$ goal:$goal, goaltime:$goaltime, goaltimestr:$goaltimestr"
 }
 
+#goaltimes=()
+#goaltimesstrs=()
+#goalvalids=()
+goalarray=()
+goalarraysorted=()
+goalentry=""
+goalsprint="1"
+
+function setnextgoal {
+    if [[ $goalptr != $goalmaxptr ]] then;
+        local lastgoaltime="$goaltime"
+        local lastgoaltimestr="$goaltimestr"
+        goalptr=$((goalptr+1))
+        goalentry="$goalarraysorted[$goalptr]"
+        #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
+        local goalentryarray=(${(s/;/)goalentry})
+        goaltime="$goalentryarray[1]"
+        goalnum="$goalentryarray[2]"
+        local localgoalnum="$goalnum"
+        goalstatus="$goalentryarray[3]"
+        goaltimestr="$goalentryarray[4]"
+        local localgoaltimestr="$goaltimestr"
+        goalstr="$goalentryarray[5]"
+        if [[ $goalstr = "loop" ]]; then
+            if [[ $localgoaltimestr = "-" ]]; then
+                local lastgoalptr="$goalptr"
+                goalsprint=$((goalsprint+1))
+                setgoals
+                goaldone="0"
+                #goalarraysorted[-1]=("loop;$localgoalnum;0;-;loop")
+            elif [[ $localgoaltimestr -gt 1 ]]; then
+                local lastgoalptr="$goalptr"
+                goalsprint=$((goalsprint+1))
+                setgoals
+                goaldone="0"
+                goalarraysorted[-1]=("loop;$localgoalnum;0;$((localgoaltimestr-1));loop")
+            else
+                goaltime="$lastgoaltime"
+                goaltimestr="$lastgoaltimestr"
+                goalptr="$((goalmaxptr-1))"
+                goaldone="1"
+            fi
+        else
+            goaldone="0"
+        fi
+    fi
+}
+
+function setgoals {
+    goalmaxptr="0"
+    goalptr="0"
+    local tmpgoals=(${(s/;/)goal})
+    local goal=""
+    local numgoals="0"
+    local errdetected="0"
+    local tmpgoalarray=()
+    for goal in "$tmpgoals[@]"; do
+        numgoals=$((numgoals+1))
+        if [[ $goal =~ ^[[:space:]]*(loop|sprint|x)(.*)$ ]]; then
+            goal="loop"
+            local match2="$match[2]"
+            if [[ $match2 =~ ^([0-9]+)[[:space:]]*$ ]]; then
+                returngoaltimestr="$match[1]"
+            elif [[ $match2 =~ ^[[:space:]]*$ ]]; then
+                returngoaltimestr="-"
+            else
+                returngoaltimestr=" "
+                errdetected="1"
+            fi
+            if [[ $numgoals = "1" ]]; then
+                errdetected="1"
+            fi
+            returngoaltime="loop"
+            tmpgoalarray+=("$returngoaltime;$numgoals;0;$returngoaltimestr;$goal")
+            break
+        else
+            #[[ $goal =~ ^[[:space:]]*(.*)$ ]] && goal="$match[1]"
+            goal=${${goal%${goal##*[^[:blank:]]}}#${${goal%${goal##*[^[:blank:]]}}%%[^[:blank:]]*}};
+            setgoaltime $goal $(strftime '%s')
+            if [[ $returngoalstatus = "2" ]]; then
+                errdetected="1"
+            fi
+            tmpgoalarray+=("$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal")
+        fi
+    done
+    if [[ $numgoals -gt 0 ]]; then
+        if [[ $errdetected = "0" ]]; then
+            goalarray=("${tmpgoalarray[@]}")
+            goalarraysorted=("${(o)goalarray[@]}")
+            errgoalarray=()
+            goalptr="0"
+            goalmaxptr="$numgoals"
+            setnextgoal
+        else
+            errgoalarray=("${tmpgoalarray[@]}")
+            goalptr="0"
+            goalmaxptr="0"
+            goalentry=""
+            goaltime=""
+        fi
+    fi
+    return $errdetected
+}
+
 if [[ ! -z $goal ]]; then
-    setgoaltime
-    if [[ -z $goaltime ]]; then
-        echo "Err: Goal time must be a valid time format representing future time"
+    setgoals
+    if [[ "$?" != "0" ]]; then
+        echo "E: Goal time must be a valid time format representing future time.\n   Start application, press 'g', enter 'help' to learn more."
         exit 0
+    else
+        if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
+            printsprints="1"
+            goalmaxptreff="$((goalmaxptr-1))"
+            goalmaxsprint="$returngoaltimestr"
+        else
+            printsprints="0"
+            goalmaxptreff="$goalmaxptr"
+        fi
     fi
 else
     goaltime=""
 fi
-
 
 if [[ ! -z $updateonminute ]]; then
     sleeptime="60"
@@ -613,13 +748,15 @@ function setartstring {
 tput_cup00=$(tput cup 0 0)
 tput_sc=$(tput sc)
 tput_rc=$(tput rc)
+tput_civis=$(tput civis)
+tput_smcup=$(tput smcup)
 
-toggleflipart=""
+toggleflipart="0"
 function printart {
     usr1detected=""
     trap 'trapusr1detected' USR1
-    if [[ ! -z $flipartname && ! -z $toggleflipart ]]; then
-        toggleflipart=""
+    if [[ ! -z $flipartname && $toggleflipart = "1" ]]; then
+        toggleflipart="0"
         if [[ -z $1 ]]; then
             printf '%s\n' "${tput_cup00}${flipartstring}"
         else
@@ -684,14 +821,53 @@ function printtime {
         slackstring4="$goaltimestr"
         if [[ ! $difftime -gt 0 ]]; then
             difftime=$(( -difftime ))
-            slackstring1=" | goal passed! "
-            slackstring4style="$passedgoalstyle"
-            if [[ ! -z $goal ]]; then
-                notifydesktop
-                goal=""
+            if [[ $goaldone = "0" ]]; then
+                local lastgoaltime="$goaltime"
+                while ((goaltime == lastgoaltime && goaldone == 0)); do
+                    notifydesktop &
+                    goaldone="1"
+                    setnextgoal
+                done
+                difftime=$((goaltime-currenttimearray[1]))
+                slackstring4="$goaltimestr"
+            fi
+            if [[ $goalmaxptreff -gt 1 ]]; then
+                local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
+            else
+                local goalptrofmaxstr=""
+            fi
+            if [[ $printsprints = "1" ]]; then
+                if [[ $goalmaxsprint != "-" ]]; then
+                    slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                else
+                    slackstring1=" | sprint-${goalsprint} "
+                fi
+            else
+                slackstring1=" | "
+            fi
+            if [[ $goaldone = "0" ]]; then
+                slackstring1+="goal$goalptrofmaxstr pending "
+                slackstring4style=""
+            else
+                slackstring1+="goal$goalptrofmaxstr passed! "
+                slackstring4style="$passedgoalstyle"
             fi
         else
-            slackstring1=" | time pending "
+            if [[ $goalmaxptreff -gt 1 ]]; then
+                local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
+            else
+                local goalptrofmaxstr=""
+            fi
+            if [[ $printsprints = "1" ]]; then
+                if [[ $goalmaxsprint != "-" ]]; then
+                    slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                else
+                    slackstring1=" | sprint-${goalsprint} "
+                fi
+            else
+                slackstring1=" | "
+            fi
+            slackstring1+="goal$goalptrofmaxstr pending "
             slackstring4style=""
         fi
     else
@@ -866,18 +1042,47 @@ zstyle ':completion:zoneselector:*:' completer _zoneselector
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 autoload -Uz compinit && compinit
 
+function formattimedelta {
+    if [[ ! $1 -gt 0 ]]; then
+        local timedelta="$1"
+        local timedelta=$(( -timedelta ))
+        local timestate=" passed: "
+    else
+        local timedelta="$1"
+        local timestate="pending: "
+    fi
+    local days=$(($timedelta/86400))
+    local hours=$(($timedelta%86400/3600))
+    local minutes=$(($timedelta%3600/60))
+    local seconds=$(($timedelta%60))
+    if [[ $days != "0" || $2 != "0" ]]; then
+        if [[ $2 != "0" ]]; then
+            local formattedtime="${(l:$2::0:)days}d "
+        else
+            local formattedtime="${days}d "
+        fi
+    else
+        local formattedtime=""
+    fi
+    formattedtime="$formattedtime${(l:2::0:)hours}h "
+    formattedtime="$formattedtime${(l:2::0:)minutes}m "
+    if [[ -z $updateonminute ]]; then
+        formattedtime="$formattedtime${(l:2::0:)seconds}s"
+    fi
+    echo "$timestate$formattedtime"
+}
+
 function usr1input_handler {
     case "$1" in
         "a"|"b")
             $sttycmd $sttyorig
-            tput smcup
+            printf "$tput_smcup"
             tput cup 0 0
             tput cnorm
             clear
             artselector
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput rmcup
             tputset
             if [[ $tmpartname = "" ]]; then
                 if [[ $1 = "b" ]]; then
@@ -997,20 +1202,38 @@ function usr1input_handler {
         #"d")
         #    echo "cliwallpaper[$$]: flipartname=$flipartname, lasttime=$lasttime, toggleflipart:$toggleflipart, artname:$artname, flipartht:$flipartht, artht:$artht, artstringht:$artstringht, flipartstringht:$flipartstringht" >> ~/arttime_debug.log
         #    ;;
+        "e")
+            if [[ ! -z $goal ]]; then
+                $sttycmd $sttyorig
+                tput cnorm
+                if askforconfirmation "restart previous goal '$goal'"; then
+                    goalsprint="1"
+                    setgoals
+                fi
+                $sttycmd -echo
+                $sttycmd -icanon min 0 time 0
+                tput civis
+            else
+                echo "No goals set, so nothing to restart"
+                zselect -t 200
+                while read dummy ; do : ; done 
+            fi
+            ;;
         "g")
             tput cup 0 0
             tput el
             tempgoal=""
             $sttycmd $sttyorig
             tput cnorm
-            printf "Enter goal ('help' to learn): "
-            read tempgoal
+            toggleflipart=$(((toggleflipart+1)%2))
+            vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter goal ('help' to learn): " -c tempgoal;
+            printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput civis
             if [[ ! -z $tempgoal ]]; then
                 goal="$tempgoal"
-                setgoaltime
+                goalsprint="1"
+                setgoals
                 if [[ -z $goaltime ]]; then
                     if [[ -z $datehelpstr ]]; then
                         if [[ $dateisgnu = "1" ]]; then
@@ -1023,7 +1246,14 @@ arttime supports two types of time formats: 1) Native, 2) External.
 External formats are enabled by GNU date, which is [32mINSTALLED[0m on your
 system, and should be preferred (as they can be very expressive).
 
-1) Native (simple, relative):
+One can set multiple goals, and even sprint (loop) over a pattern of goals
+multiple times. Multiple goals or a pattern of goals can be specified by
+separating them with a semi-colon (;). Goals can be repeated by specifying
+the last goal as 'loop'/'sprint' (to sprint forever) or 'loopN'/'sprintN'
+(to sprint N number of times). See section 3) below to learn how to set
+multiple goals, and/or a pattern of goals to repeat.
+
+1) Native (simple, relative) formats:
     1m (1 minute from now)
     30s (30 seconds from now)
     48h (48 hours from now)
@@ -1035,7 +1265,7 @@ system, and should be preferred (as they can be very expressive).
 
 Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
 
-2) External (simple/complex, absolute/relative, very expressive):
+2) External (simple/complex, absolute/relative, very expressive) formats:
     10AM (upcoming 10AM, local timezone unless specified)
     10:30AM IST (upcoming 10:30AM Indian Standard Time)
     May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
@@ -1052,6 +1282,15 @@ For detailed documentation on External date/time formats please refer:
     Web:      https://www.gnu.org/software/coreutils/date 
     Locally:  $ info '(coreutils) date invocation'
 and jump directly to the section on "Date input formats".
+
+3) Multiple and/or pattern of repeating goals:
+    10s;20s (10 seconds and 20 seconds from now)
+    10s;20s;1PM (10 seconds and 20 seconds from now, at 1PM in local time zone)
+    10s;loop, 10s;sprint (every 10 seconds, repeat forever)
+    10s;loop4, 10s;sprint4 (after 10 seconds, sprint 4 times)
+    10s;1m;loop2 (after 10 seconds and 1m from now, sprint 2 times)
+    5m;1PM;2PM;3PM;4PM;loop (after 5m from now and at 1-4 PM, repeat forever)
+    25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop (pattern of Pomodoro Technique)
 EOF
                     else
 read -r -d '' datehelpstr <<-'EOF'
@@ -1065,7 +1304,14 @@ please search the web to find if/how to install GNU date on your system.
 If installed, it will open up the possibility of being very expressive in
 specifying goal date/time. After installing GNU date, restart arttime.
 
-1) Native (simple, relative, should work on your system):
+One can set multiple goals, and even sprint (loop) over a pattern of goals
+multiple times. Multiple goals or a pattern of goals can be specified by
+separating them with a semi-colon (;). Goals can be repeated by specifying
+the last goal as 'loop'/'sprint' (to sprint forever) or 'loopN'/'sprintN'
+(to sprint N number of times). See section 3) below to learn how to set
+multiple goals, and/or a pattern of goals to repeat.
+
+1) Native (simple, relative, should work on your system) formats:
     1m (1 minute from now)
     30s (30 seconds from now)
     48h (48 hours from now)
@@ -1077,7 +1323,7 @@ specifying goal date/time. After installing GNU date, restart arttime.
 
 Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
 
-2) External (very expressive, though won't work on your system):
+2) External (very expressive, though won't work on your system) formats:
     10AM (upcoming 10AM, local timezone unless specified)
     10:30AM IST (upcoming 10:30AM Indian Standard Time)
     May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
@@ -1094,12 +1340,30 @@ For detailed documentation on External date/time formats please refer:
     Web:      https://www.gnu.org/software/coreutils/date 
     Locally:  $ info '(coreutils) date invocation'
 and jump directly to the section on "Date input formats".
+
+3) Multiple and/or pattern of repeating goals:
+    10s;20s (10 seconds and 20 seconds from now)
+    10s;20s;1PM (10 seconds and 20 seconds from now, at 1PM in local time zone)
+    10s;loop, 10s;sprint (every 10 seconds, repeat forever)
+    10s;loop4, 10s;sprint4 (after 10 seconds, sprint 4 times)
+    10s;1m;loop2 (after 10 seconds and 1m from now, sprint 2 times)
+    5m;1PM;2PM;3PM;4PM;loop (after 5m from now and at 1-4 PM, repeat forever)
+    25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop (pattern of Pomodoro Technique)
 EOF
                         fi
                     fi
                     clear
                     less -R <<<"$datehelpstr" 2>/dev/null
                     tput smcup
+                else
+                    if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
+                        printsprints="1"
+                        goalmaxptreff="$((goalmaxptr-1))"
+                        goalmaxsprint="$returngoaltimestr"
+                    else
+                        printsprints="0"
+                        goalmaxptreff="$goalmaxptr"
+                    fi
                 fi
             fi
             ;;
@@ -1127,27 +1391,70 @@ EOF
                 read -t3 -k1
             fi
             ;;
-        "i")
+        "i"|"I")
             local tmpcurtime=$(strftime '%s')
-            local timestring="$(strftime '%b %d, %Y %I:%M:%S%p %Z')"
-            timestring+=" ($tzlongcurrent)"
-            timestring+="$(strftime ' | week %W')"
-            timestring+=" | ID: $$"
+            local infostring="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
+            infostring+=" ($tzlongcurrent)"
+            infostring+="$(strftime ' | week %W')"
+            infostring+=" | ID: $$ "
             if [[ $helpactive = "1" ]]; then
                 if [[ $restoreflipartname != "" ]]; then
-                    printf "$timestring \na-art: $restoreartname, b-art: $restoreflipartname"
+                    infostring+=" \narts: a) $restoreartname, b) $restoreflipartname "
                 else
-                    printf "$timestring \na-art: $restoreartname, b-art: none"
+                    infostring+=" \narts: a) $restoreartname, b) none "
                 fi
             else
                 if [[ $flipartname != "" ]]; then
-                    printf "$timestring \na-art: $artname, b-art: $flipartname"
+                    infostring+=" \narts: a) $artname, b) $flipartname "
                 else
-                    printf "$timestring \na-art: $artname, b-art: none"
+                    infostring+=" \narts: a) $artname, b) none "
                 fi
             fi
-            printf "\nPress any key to continue"
-            read -t5 -k1
+            if [[ ! -z $goaltime && $goaldone = "0" ]]; then
+                infostring+="\nGoals: "
+                # NOTE: first query the last entry to find width of days 
+                local goalentryarray=(${(s/;/)goalarraysorted[$goalmaxptreff]})
+                local goaltimeunix="$goalentryarray[1]"
+                local timepending=$((goaltimeunix-currenttimearray[1]))
+                timepending=$((timepending/86400))
+                if [[ $timepending != "0" ]]; then
+                    local datewidth="${#timepending}"
+                else
+                    local datewidth="0"
+                fi
+                for ((i=1;i<=goalmaxptr;i=i+1)) do
+                    #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
+                    goalentryarray=(${(s/;/)goalarraysorted[$i]})
+                    local goalnum="$goalentryarray[2]"
+                    local goalstatus="$goalentryarray[3]"
+                    local goalstr="$goalentryarray[5]"
+                    if [[ $goalstr != "loop" ]]; then
+                        goaltimeunix="$goalentryarray[1]"
+                        local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                        timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth)
+                        if [[ $i = $goalptr ]]; then
+                            infostring+="\n  > $i. [31mtime: $goaltimestr ($timepending), goal: $goalstr [0m"
+                        else
+                            infostring+="\n    $i. time: $goaltimestr ($timepending), goal: $goalstr "
+                        fi
+                    else
+                        if [[ $goalmaxsprint != "-" ]]; then
+                            infostring+="\n       sprint $goalsprint/$goalmaxsprint "
+                        else
+                            infostring+="\n       sprint $goalsprint/infinity "
+                        fi
+                    fi
+                done
+            fi
+            if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
+                clear
+                printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
+                tput smcup
+            else
+                infostring+="\nPress any key to continue "
+                printf "$infostring"
+                read -t5 -k1
+            fi
 #tput -S <<HERE
 #            cup 1 0
 #            el
@@ -1155,16 +1462,20 @@ EOF
             while read dummy ; do : ; done
             ;;
         "l")
-            $sttycmd $sttyorig
-            tput cnorm
-            if askforconfirmation "clear goal"; then
-                goal=""
-                goaltime=""
-                goaltimestr=""
+            if [[ ! -z $goaltime ]]; then
+                $sttycmd $sttyorig
+                tput cnorm
+                if askforconfirmation "clear goals"; then
+                    goaltime=""
+                fi
+                $sttycmd -echo
+                $sttycmd -icanon min 0 time 0
+                tput civis
+            else
+                echo "No active goal to clear"
+                zselect -t 200
+                while read dummy ; do : ; done 
             fi
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
-            tput civis
             ;;
         "m")
             tput cup 0 0
@@ -1174,11 +1485,12 @@ EOF
             tput cnorm
             #printf "Enter message (Ctrl-d to cancel): "
             #read temptitle
-            vared -ep "Enter title message: " -c temptitle
+            toggleflipart=$(((toggleflipart+1)%2))
+            vared -p "$(printart;lasttime="";printtime '1')${tput_cup00}Enter title message ('orig' to reset): " -c temptitle;
             readstatus="$?"
+            printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput civis
             if [[ $temptitle = "" || $readstatus != "0" ]]; then
             elif [[ $temptitle = "-" ]]; then
                 title=' - '
@@ -1196,9 +1508,7 @@ EOF
             tput cnorm
             if askforconfirmation "reset start time, and goal"; then
                 resetstarttime="1"
-                goal=""
                 goaltime=""
-                goaltimestr=""
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -1261,14 +1571,13 @@ EOF
             ;;
         "z")
             $sttycmd $sttyorig
-            tput smcup
+            printf "$tput_smcup"
             tput cup 0 0
             tput cnorm
             clear
             zoneselector
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput rmcup
             tputset
             if [[ ! -z $tmpzonename ]]; then
                 TZ=$tmpzonename
