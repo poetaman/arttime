@@ -749,6 +749,7 @@ tput_cup00=$(tput cup 0 0)
 tput_sc=$(tput sc)
 tput_rc=$(tput rc)
 tput_civis=$(tput civis)
+tput_cnorm=$(tput cnorm)
 tput_smcup=$(tput smcup)
 
 toggleflipart="0"
@@ -1224,10 +1225,9 @@ function usr1input_handler {
             tput el
             tempgoal=""
             $sttycmd $sttyorig
-            tput cnorm
             toggleflipart=$(((toggleflipart+1)%2))
             local tempscreen=$(printart;lasttime="";printtime '1')
-            vared -p "$tempscreen${tput_cup00}Enter goal ('help' to learn): " -c tempgoal;
+            vared -p "$tempscreen${tput_cup00}Enter goal ('help' to learn):${tput_cnorm} " -c tempgoal;
             printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -1483,12 +1483,11 @@ EOF
             tput el
             temptitle=""
             $sttycmd $sttyorig
-            tput cnorm
             #printf "Enter message (Ctrl-d to cancel): "
             #read temptitle
             toggleflipart=$(((toggleflipart+1)%2))
             local tempscreen=$(printart;lasttime="";printtime '1')
-            vared -p "$tempscreen${tput_cup00}Enter title message ('orig' to reset): " -c temptitle;
+            vared -p "$tempscreen${tput_cup00}Enter title message ('orig' to reset):${tput_cnorm} " -c temptitle;
             readstatus="$?"
             printf "$tput_civis"
             $sttycmd -echo
