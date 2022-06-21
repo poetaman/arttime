@@ -221,6 +221,12 @@ else
     fi
 fi
 
+if command -v bash &>/dev/null; then
+    bashavailable="1"
+else
+    bashavailable="0"
+fi
+
 function getaart {
     if [[ $helpactive = "1" ]]; then
         echo $restoreartname
@@ -1225,9 +1231,15 @@ function usr1input_handler {
             tput el
             tempgoal=""
             $sttycmd $sttyorig
-            toggleflipart=$(((toggleflipart+1)%2))
-            local tempscreen=$(printart;lasttime="";printtime '1')
-            vared -p "$tempscreen${tput_cup00}Enter goal ('help' to learn):${tput_cnorm} " -c tempgoal;
+            if [[ $bashavailable = "1" ]]; then
+                printf "${tput_cup00}${tput_cnorm}"
+                tempgoal=$(bash -c 'read -e -p "Enter goal (\"help\" to learn): " retvar; echo $retvar');
+                readstatus="0"
+            else
+                toggleflipart=$(((toggleflipart+1)%2))
+                local tempscreen=$(printart;lasttime="";printtime '1')
+                vared -p "$tempscreen${tput_cup00}Enter goal ('help' to learn):${tput_cnorm} " -c tempgoal;
+            fi
             printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -1485,10 +1497,16 @@ EOF
             $sttycmd $sttyorig
             #printf "Enter message (Ctrl-d to cancel): "
             #read temptitle
-            toggleflipart=$(((toggleflipart+1)%2))
-            local tempscreen=$(printart;lasttime="";printtime '1')
-            vared -p "$tempscreen${tput_cup00}Enter title message ('orig' to reset):${tput_cnorm} " -c temptitle;
-            readstatus="$?"
+            if [[ $bashavailable = "1" ]]; then
+                printf "${tput_cup00}${tput_cnorm}"
+                temptitle=$(bash -c 'read -e -p "Enter title message (\"orig\" to reset): " retvar; echo $retvar');
+                readstatus="0"
+            else
+                toggleflipart=$(((toggleflipart+1)%2))
+                local tempscreen=$(printart;lasttime="";printtime '1')
+                vared -p "$tempscreen${tput_cup00}Enter title message ('orig' to reset):${tput_cnorm} " -c temptitle;
+                readstatus="$?"
+            fi
             printf "$tput_civis"
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
