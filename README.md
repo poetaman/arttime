@@ -113,8 +113,8 @@ In future an installation script will be added to the project.
   - Currently only macOS and Linux have been tested. They use the native technique so should work across versions. Pull requests for other OSes (BSD, windows, etc) will be considered if the technique is native enough
 - No notification sound on Linux?
   - Sounds on Linux are played using [PulseAudio](https://en.wikipedia.org/wiki/PulseAudio)'s [paplay](https://linux.die.net/man/1/paplay) as that seems to be the most standard way. Other suggestions are welcome, and will be considered.
-- arttime notifications do not stay for long time on macOS?
-  - This setting cannot be controlled by arttime. You will have to do this 1 time change in your computer: Open System Preferences > Select Notifications & Focus > Scroll to Script Editor > Change "Script editor alert style" to "Alets". Make sure "Allow Notifications" is selected. Additionally check the combination of boxes based on your preferences. 
+- Notifications for arttime do not stay for long time on macOS?
+  - This setting cannot be controlled by arttime. You will have to do this 1 time change in your computer: Open System Preferences > Select Notifications & Focus > Scroll to Script Editor > Change "Script editor alert style" to "Alerts". Make sure "Allow Notifications" is selected. Additionally check the combination of boxes based on your preferences.
 - Launchtime is slower?
   - This could be mostly because file ``/etc/localtime`` on your system is not a symbolic (soft) link, and hence arttime needs to spend some time finding the long form of your current timezone. Workaround: ``sudo rm /etc/localtime && ln -s /usr/share/<Area>/<Location> /etc/localtime``. Here ``<Area>/<Location>`` should be the appropriate timezone. Check [Names_of_time_zones](https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones). arttime prints a warning upon launch if this ``/etc/localtime`` is not a symbolic link.
 
