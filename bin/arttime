@@ -1294,6 +1294,7 @@ function usr1input_handler {
                 tput cnorm
                 if askforconfirmation "restart previous goal '$goal'"; then
                     goalsprint="1"
+                    pausegoals="0"
                     setgoals
                 fi
                 $sttycmd -echo
@@ -1325,6 +1326,7 @@ function usr1input_handler {
             if [[ ! -z $tempgoal ]]; then
                 goal="$tempgoal"
                 goalsprint="1"
+                pausegoals="0"
                 setgoals
                 if [[ -z $goaltime ]]; then
                     if [[ -z $datehelpstr ]]; then
@@ -1559,6 +1561,7 @@ EOF
                 tput cnorm
                 if askforconfirmation "clear goals"; then
                     goaltime=""
+                    pausegoals="0"
                 fi
                 $sttycmd -echo
                 $sttycmd -icanon min 0 time 0
@@ -1607,6 +1610,7 @@ EOF
             if askforconfirmation "reset start time, and goal"; then
                 resetstarttime="1"
                 goaltime=""
+                pausegoals="0"
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
