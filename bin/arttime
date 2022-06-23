@@ -632,6 +632,36 @@ else
     goaltime=""
 fi
 
+function exitpause {
+    local goalentry
+    local goalentryarray
+    local goaltimeloc
+    local goalnum
+    local goalstatus
+    local goalstr
+    local tmpgoaltime
+    local tmpgoaltimearray
+    local goaltimestrloc
+    local i
+    for (( i=$goalptr; i<=$goalmaxptreff; i++ )) do
+        goalentry=$goalarraysorted[$i]
+        goalentryarray=(${(s/;/)goalentry})
+        goaltimeloc=$((goalentryarray[1]+pausedelta))
+        goalnum="$goalentryarray[2]"
+        goalstatus="$goalentryarray[3]"
+        goalstr="$goalentryarray[5]"
+        tmpgoaltime=$(strftime $timeformat $goaltimeloc)
+        tmpgoaltimearray=(${(s/|/)tmpgoaltime})
+        goaltimestrloc=$tmpgoaltimearray[2]
+        goalarraysorted[$i]=("$goaltimeloc;$goalnum;$goalstatus;$goaltimestrloc;$goalstr")
+        if [[ $i = $goalptr ]]; then
+            goaltime="$goaltimeloc"
+            goaltimestr="$goaltimestrloc"
+        fi
+    done
+}
+
+
 if [[ ! -z $updateonminute ]]; then
     sleeptime="60"
     nonblocking="1"
@@ -877,6 +907,27 @@ function printtime {
             slackstring1+="goal$goalptrofmaxstr pending "
             slackstring4style=""
         fi
+    elif [[ $pausegoals = "1" ]]; then
+        difftime=$((currenttimearray[1]-pausestart))
+        slackstring0="$pausestartstr"
+        slackstring4="$currenttimearray[2]"
+        slackstring4style="$currenttimestyle"
+        slackstring0style=""
+        if [[ $goalmaxptreff -gt 1 ]]; then
+            local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
+        else
+            local goalptrofmaxstr=""
+        fi
+        if [[ $printsprints = "1" ]]; then
+            if [[ $goalmaxsprint != "-" ]]; then
+                slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+            else
+                slackstring1=" | sprint-${goalsprint} "
+            fi
+        else
+            slackstring1=" | "
+        fi
+        slackstring1+="goal$goalptrofmaxstr PAUSED! "
     else
         difftime=$((currenttimearray[1]-starttimearray[1]))
         slackstring0="$starttimearray[2]"
@@ -1209,6 +1260,34 @@ function usr1input_handler {
         #"d")
         #    echo "cliwallpaper[$$]: flipartname=$flipartname, lasttime=$lasttime, toggleflipart:$toggleflipart, artname:$artname, flipartht:$flipartht, artht:$artht, artstringht:$artstringht, flipartstringht:$flipartstringht" >> ~/arttime_debug.log
         #    ;;
+        "p")
+            if [[ $goaltime != "" && $goaldone = "0" || $goaltime = "" && $pausegoals = "1" ]]; then
+                $sttycmd $sttyorig
+                tput cnorm
+                if [[ $pausegoals = "" || $pausegoals = "0" ]]; then
+                    if askforconfirmation "pause goals"; then
+                        pausegoals="1"
+                        pausestart="$currenttimearray[1]"
+                        pausestartstr="$currenttimearray[2]"
+                        goaltime=""
+                    fi
+                else
+                    if askforconfirmation "un-pause goals"; then
+                        pauseend=$(strftime '%s')
+                        pausedelta=$((pauseend-pausestart))
+                        exitpause
+                        pausegoals="0"
+                    fi
+                fi
+                $sttycmd -echo
+                $sttycmd -icanon min 0 time 0
+                tput civis
+            else
+                echo "No goals set, so nothing to pause"
+                zselect -t 200
+                while read dummy ; do : ; done 
+            fi
+            ;;
         "e")
             if [[ ! -z $goal ]]; then
                 $sttycmd $sttyorig
