@@ -55,7 +55,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 # Screenshots
 1. Default start page. ``$ arttime``
-<img width="1016" alt="help_learn_page" src="https://user-images.githubusercontent.com/71736629/174508586-9b40f2cc-0f45-42d1-8519-a67024f2927c.png">
+<img width="1015" alt="Screen Shot 2022-06-22 at 6 34 49 PM" src="https://user-images.githubusercontent.com/71736629/175188667-4008dbb4-fe96-4dd9-bb30-b969e988f733.png">
 
 2. Default art. ``$ arttime`` then press ``h``, or ``arttime --nolearn``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 59 PM" src="https://user-images.githubusercontent.com/71736629/169680963-0cd5027d-5e21-4d3e-8eda-c21939f5d89d.png">
