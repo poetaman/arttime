@@ -1154,9 +1154,8 @@ function usr1input_handler {
                     flipartname=""
                 fi
             elif [[ ! -f "$artdir/$tmpartname" ]]; then
-                tput cup 0 0
-                echo "$(tput el)No file found for art: $tmpartname"
-                zselect -t 200
+                printf "E: No file found for art: $tmpartname.\nPress any key to continue..."
+                read -t3 -k1
                 while read dummy ; do : ; done 
             else
                 if [[ $1 = "a" ]]; then
@@ -1168,9 +1167,8 @@ function usr1input_handler {
             fi
             prevartname=""
             if ! setartstring; then
-                tput cup 0 0
-                printf "W: height of b art does not match that of a art. Try setting b art again."
-                zselect -t 300
+                printf "E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                read -t5 -k1
                 while read dummy ; do : ; done
             fi
             #printart
@@ -1192,9 +1190,8 @@ function usr1input_handler {
             tputset
             if [[ $artnametemp = "" ]]; then
             elif [[ ! -f "$artdir/$artnametemp" ]]; then
-                tput cup 0 0
-                echo "$(tput el)No file found for art: $artnametemp"
-                zselect -t 200
+                printf "E: No file found for art: $artnametemp.\nPress any key to continue..."
+                read -t3 -k1
                 while read dummy ; do : ; done 
             else
                 if [[ $1 = "x" ]]; then
@@ -1206,9 +1203,8 @@ function usr1input_handler {
             fi
             prevartname=""
             if ! setartstring; then
-                tput cup 0 0
-                printf "W: height of b art does not match that of a art. Try setting b art again."
-                zselect -t 300
+                printf "E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                read -t5 -k1
                 while read dummy ; do : ; done
             fi
             #printart
