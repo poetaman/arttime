@@ -1105,6 +1105,9 @@ function formattimedelta {
         local timedelta="$1"
         local timedelta=$(( -timedelta ))
         local timestate=" passed: "
+    elif [[ $3 = "1" ]]; then
+        local timedelta="$1"
+        local timestate=" PAUSED: "
     else
         local timedelta="$1"
         local timestate="pending: "
@@ -1504,7 +1507,7 @@ EOF
                     infostring+=" \narts: a) $artname, b) none "
                 fi
             fi
-            if [[ ! -z $goaltime && $goaldone = "0" ]]; then
+            if [[ $goaltime != "" && $goaldone = "0" || $goaltime = "" && $pausegoals = "1" ]]; then
                 infostring+="\nGoals: "
                 # NOTE: first query the last entry to find width of days 
                 local goalentryarray=(${(s/;/)goalarraysorted[$goalmaxptreff]})
@@ -1523,10 +1526,20 @@ EOF
                     local goalstatus="$goalentryarray[3]"
                     local goalstr="$goalentryarray[5]"
                     if [[ $goalstr != "loop" ]]; then
-                        goaltimeunix="$goalentryarray[1]"
-                        local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
-                        timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth)
-                        if [[ $i = $goalptr ]]; then
+                        if ((i>=goalptr && pausegoals==1)); then
+                            goaltimeunix=$((currenttimearray[1]+goalentryarray[1]-pausestart))
+                            local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                            timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth "1")
+                        else
+                            goaltimeunix="$goalentryarray[1]"
+                            local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                            timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth "0")
+                        fi
+                        if ((i>goalptr && pausegoals==1)); then
+                            infostring+="\n    $i. est.: $goaltimestr ($timepending), goal: $goalstr "
+                        elif ((i==goalptr && pausegoals==1)); then
+                            infostring+="\n  > $i. [31mest.: $goaltimestr ($timepending), goal: $goalstr [0m"
+                        elif [[ $i = $goalptr ]]; then
                             infostring+="\n  > $i. [31mtime: $goaltimestr ($timepending), goal: $goalstr [0m"
                         else
                             infostring+="\n    $i. time: $goaltimestr ($timepending), goal: $goalstr "
