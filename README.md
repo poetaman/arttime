@@ -14,7 +14,7 @@ Contents
 
 
 # arttime
-🧜🏼‍♀️ Beauty of text art meets functionality of a feature-rich clock/timer/pattern-based time manager ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
+🧜🏼‍♀️ Beauty of text art meets functionality of a feature-rich clock / timer / pattern-based time manager ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
