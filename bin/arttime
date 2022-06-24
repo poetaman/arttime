@@ -85,19 +85,23 @@ Layout:
     centered on the terminal, even when terminal size is changed.
 
     Current time is always shown underlined, another time is either
-    start time (when arttime was started), or goal time. Layout/meaning
-    of times shown in the application:
+    start time (when arttime was started), goal time, goals up time
+    or paused time (when goals were paused). Layout of times shown
+    in the application:
         - When the application starts, it displays:
           <start_time> | time elapsed <elapsed_time> | <current_time>
-        - When goal time is set, it shows:
-          <current_time> | time pending <pending_time> | <goal_time>
-        - When goal time passes, it shows:
-          <current_time> | goal passed! <goal_up_time> | <goal_time>
+        - When one or more goals are set and pending, it shows:
+          <current_time> | [goal_id] time pending <pending_time> | <goal_time>
+        - When all goals have passed, it shows:
+          <current_time> | [goal_id] goal passed! <goals_up_time> | <goal_time>
+        - When goal/s are paused, it shows:
+          <paused_time> | [goal_id] goal PAUSED! <elapsed_time> | <current_time>
         - When goal time is cleared, it shows:
           <start_time> | time elapsed <elapsed_time> | <current_time>
 
     Colors, underlines, and invert-coloring helps distinguish the
-    between times.
+    between times. [goal_id] is displayed optionally when there are
+    more than one goals and/or multiple sprints.
 
 Notifications:
     Aside from inverting the colors of goal time to show that goal has been
