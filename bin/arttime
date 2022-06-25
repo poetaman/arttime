@@ -1140,6 +1140,12 @@ function formattimedelta {
 function usr1input_handler {
     case "$1" in
         "a"|"b")
+            local initialartname="$artname"
+            local initialflipartname="$flipartname"
+            if [[ $helpactive = "1" ]]; then
+                artname="$restoreartname"
+                flipartname="$restoreflipartname"
+            fi
             $sttycmd $sttyorig
             printf "$tput_smcup"
             tput cup 0 0
@@ -1163,13 +1169,25 @@ function usr1input_handler {
                 else
                     flipartname="$tmpartname"
                 fi
-                helpactive="0"
             fi
             prevartname=""
             if ! setartstring; then
                 printf "E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                artname="$initialartname"
+                flipartname="$initialflipartname"
+                setartstring
                 read -t5 -k1
                 while read dummy ; do : ; done
+            else
+                if [[ $tmpartname = "" || ! -f "$artdir/$tmpartname" ]]; then
+                    if [[ $helpactive = "1" ]]; then
+                        artname="$initialartname"
+                        flipartname="$initialflipartname"
+                        setartstring
+                    fi
+                else
+                    helpactive="0"
+                fi
             fi
             #printart
             #tput sc
@@ -1182,6 +1200,12 @@ function usr1input_handler {
                 while read dummy ; do : ; done 
                 return
             fi
+            local initialartname="$artname"
+            local initialflipartname="$flipartname"
+            if [[ $helpactive = "1" ]]; then
+                artname="$restoreartname"
+                flipartname="$restoreflipartname"
+            fi
             tputreset
             $sttycmd $sttyorig
             artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
@@ -1190,7 +1214,7 @@ function usr1input_handler {
             tputset
             if [[ $artnametemp = "" ]]; then
             elif [[ ! -f "$artdir/$artnametemp" ]]; then
-                printf "E: No file found for art: $artnametemp.\nPress any key to continue..."
+                printf "${tput_cup00}E: No file found for art: $artnametemp.\nPress any key to continue..."
                 read -t3 -k1
                 while read dummy ; do : ; done 
             else
@@ -1199,13 +1223,25 @@ function usr1input_handler {
                 else
                     flipartname="$artnametemp"
                 fi
-                helpactive="0"
             fi
             prevartname=""
             if ! setartstring; then
-                printf "E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+            printf "${tput_cup00}E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                artname="$initialartname"
+                flipartname="$initialflipartname"
+                setartstring
                 read -t5 -k1
                 while read dummy ; do : ; done
+            else
+                if [[ $artnametemp = "" || ! -f "$artdir/$artnametemp" ]]; then
+                    if [[ $helpactive = "1" ]]; then
+                        artname="$initialartname"
+                        flipartname="$initialflipartname"
+                        setartstring
+                    fi
+                else
+                    helpactive="0"
+                fi
             fi
             #printart
             #tput sc
