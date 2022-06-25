@@ -105,6 +105,8 @@ alias arttime="<path_to_arttime_directory>/bin/arttime"
 In future an installation script will be added to the project.
 
 # Troubleshooting
+- Error launching without any arguments, or art with unicode characters is not centered in terminal?
+  - This is mostly because zsh on your system is old. Try upgrading zsh to version 5.8 or above. Latest macOS already comes with version 5.9 preinstalled on the computer. If you use a Linux distribution that has very old zsh in its package repositories, you might have to build zsh with a higher version with some more effort.
 - Some art does not render correctly?
   - This is mostly because your terminal application does not support 24-bit true color (like macOS's builtin [Terminal.app](https://en.wikipedia.org/wiki/Terminal_(macOS))). Some suggestions: 1. easiest for macOS: [iTerm2](https://iterm2.com), 2. for multiple  OSes: [Alacritty](https://alacritty.org), [WezTerm](https://wezfurlong.org/wezterm/), [Kitty](https://sw.kovidgoyal.net/kitty/) etc. Check the list maintained [here](https://gist.github.com/sindresorhus/bed863fb8bedf023b833c88c322e44f9#now-supporting-truecolour) to know more terminals that support true colors.
   - Another possibility is your system does not have fonts for braille characters. Some of the above terminal emulators come with builtin fonts for missing characters, or on-the-fly find missing characters from fonts installed on your system. For that to work, make sure to install at least one font on your system that has braille characters. 
