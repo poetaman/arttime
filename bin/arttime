@@ -310,7 +310,7 @@ function notifydesktop {
         local notifystr="display notification \"$notifymessage\" with title \"$notifytitle\" subtitle \"$notifysubtitle\" sound name \"Blow\""
         osascript -e $notifystr 2>/dev/null
     elif [[ $machine = "Linux" || $machine = "BSD" ]]; then
-	    paplay /usr/share/sounds/freedesktop/stereo/message-new-instant.oga 2>/dev/null &
+        paplay /usr/share/sounds/freedesktop/stereo/message-new-instant.oga 2>/dev/null &
         notify-send -u critical $notifytitle "$notifysubtitle\r$notifymessage" 2>/dev/null
     fi
 }
