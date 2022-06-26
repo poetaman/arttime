@@ -1202,9 +1202,11 @@ function usr1input_handler {
             prevartname=""
             if ! setartstring; then
                 printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
-                artname="$initialartname"
-                flipartname="$initialflipartname"
-                setartstring
+                if [[ $1 = "b" ]]; then
+                    artname="$initialartname"
+                    flipartname="$initialflipartname"
+                    setartstring
+                fi
                 read -t5 -k1
                 while read dummy ; do : ; done
             else
@@ -1265,9 +1267,11 @@ function usr1input_handler {
             prevartname=""
             if ! setartstring; then
             printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
-                artname="$initialartname"
-                flipartname="$initialflipartname"
-                setartstring
+                if [[ $1 = "y" ]]; then
+                    artname="$initialartname"
+                    flipartname="$initialflipartname"
+                    setartstring
+                fi
                 read -t5 -k1
                 while read dummy ; do : ; done
             else
