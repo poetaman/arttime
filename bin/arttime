@@ -1062,7 +1062,7 @@ function artselector {
     local curcontext=artselector:::
     tmpartname="";
     printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
-    vared -p "Enter artname: " -c tmpartname;
+    vared -p "Enter artname:${tput_cnorm} " -c tmpartname;
 }
 function _artselector {
     _files -W $artdir
@@ -1079,7 +1079,7 @@ function artselector2 {
     cd $restoredir
     local curcontext=artselector2:::
     tmpartname="";
-    printf "Select b-art. Press 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAll arts that matches height of a-art ($artname) are:\n";
+    printf "\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
     if command -v column &>/dev/null; then
         echo $artnametemp  | tr ' ' '\n' | column -c$(tput cols)
         printf '\n'
@@ -1088,7 +1088,7 @@ function artselector2 {
         printf '%s  ' $artnametemp
         printf '\n\n'
     fi
-    vared -p "Enter artname: " -c tmpartname;
+    vared -p "Enter artname:${tput_cnorm} " -c tmpartname;
 }
 function _artselector2 {
     _describe 'possible b-art' artnametemp
@@ -1173,12 +1173,12 @@ function usr1input_handler {
             fi
             $sttycmd $sttyorig
             printf "$tput_smcup"
-            tput cup 0 0
-            tput cnorm
             clear
+            tput cup 0 0
             if [[ $1 = "a" ]]; then
                 artselector
             else
+                printf "Set b-art, finding art that matches height of a-art ($artname)..."
                 artselector2
             fi
             $sttycmd -echo
