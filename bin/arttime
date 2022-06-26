@@ -1061,7 +1061,7 @@ tmpartname=""
 function artselector {
     local curcontext=artselector:::
     tmpartname="";
-    printf "Press a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
+    printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     vared -p "Enter artname: " -c tmpartname;
 }
 function _artselector {
@@ -1069,6 +1069,31 @@ function _artselector {
 }
 zstyle ':completion:artselector:*:' completer _artselector
 #zstyle ':completion:::*:default' completer _artselector menu no select
+
+function artselector2 {
+    local restoredir=$PWD
+    cd $artdir
+    local tmpaart=$(getaart)
+    local aartheight=$(wc -l "${tmpaart}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]][[:space:]]*.*$/\1/p')
+    artnametemp=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
+    cd $restoredir
+    local curcontext=artselector2:::
+    tmpartname="";
+    printf "Select b-art. Press 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAll arts that matches height of a-art ($artname) are:\n";
+    if command -v column &>/dev/null; then
+        echo $artnametemp  | tr ' ' '\n' | column -c$(tput cols)
+        printf '\n'
+    else
+        tput smam
+        printf '%s  ' $artnametemp
+        printf '\n\n'
+    fi
+    vared -p "Enter artname: " -c tmpartname;
+}
+function _artselector2 {
+    _describe 'possible b-art' artnametemp
+}
+zstyle ':completion:artselector2:*:' completer _artselector2
 
 function zoneselector {
     local restorepwd=$PWD
@@ -1151,7 +1176,11 @@ function usr1input_handler {
             tput cup 0 0
             tput cnorm
             clear
-            artselector
+            if [[ $1 = "a" ]]; then
+                artselector
+            else
+                artselector2
+            fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
             tputset
@@ -1172,7 +1201,7 @@ function usr1input_handler {
             fi
             prevartname=""
             if ! setartstring; then
-                printf "E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                 artname="$initialartname"
                 flipartname="$initialflipartname"
                 setartstring
@@ -1208,7 +1237,16 @@ function usr1input_handler {
             fi
             tputreset
             $sttycmd $sttyorig
-            artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
+            if [[ $1 = "x" ]]; then
+                artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
+            else
+                local restoredir=$PWD
+                cd $artdir
+                local tmpaart=$(getaart)
+                local aartheight=$(wc -l "${tmpaart}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]]*.*$/\1/p')
+                artnametemp=$(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p' | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
+                cd $restoredir
+            fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
             tputset
@@ -1226,7 +1264,7 @@ function usr1input_handler {
             fi
             prevartname=""
             if ! setartstring; then
-            printf "${tput_cup00}E: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+            printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                 artname="$initialartname"
                 flipartname="$initialflipartname"
                 setartstring
@@ -1519,9 +1557,9 @@ EOF
             lasttime="";
             printtime "1"
             if [[ $setartstringerr = "1" ]]; then
-                tput cup 0 0
-                printf "W: height of b art does not match that of a art. Try setting b art again."
-                read -t3 -k1
+                printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                read -t5 -k1
+                while read dummy ; do : ; done
             fi
             ;;
         "i"|"I")
