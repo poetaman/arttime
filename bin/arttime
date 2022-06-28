@@ -826,13 +826,58 @@ function setstyle {
         currenttimestyle="\e[4m" # regular underline
         passedgoalstyle="\e[7m" # reversed
         style="0"
+        pbpendingchar='-'
+        pbcompletechar='>'
     else
         currenttimestyle="\e[4:3m" # curly underline
         passedgoalstyle="\e[9m" # strike-through
+        pbpendingchar='□'
+        pbcompletechar='■'
     fi
 }
 setstyle
 
+function printprogressbar {
+    # $1: percentagedone 
+    #local probar='**********'
+    #local probar='■■■■□□□□□□'
+    #local probar='..........'
+    #local probar='>>>>>.....'
+    #local percentdone=$((1-(goaltime-currenttime[1])/(goaltime-goalsettime)))
+    if (($1>100)); then
+        local percentdone="100"
+    elif (($1<0)); then
+        local percentdone="0"
+    else
+        local percentdone="$1"
+    fi
+    if [[ $2 =~ ^[0-9]+$ && $2 -gt "5" ]]; then
+        local barlen="${2%.*}"
+    else
+        local barlen="10"
+    fi
+    local numdone=$(((percentdone/100.0)*barlen))
+    numdone="${numdone%.*}"
+    local numnotdone=$((barlen-numdone))
+    local probar=''
+    if [[ $numdone -gt 0 ]]; then
+        probar+=$(printf "%.s$pbcompletechar" {1..$numdone})
+    fi
+    if [[ $numnotdone -gt 0 ]]; then
+        probar+=$(printf "%.s$pbpendingchar" {1..$numnotdone})
+    fi
+    local shiftwidth=$(((termwidth-${#probar})/2))
+    local padwidth=$((termwidth-${#probar}-shiftwidth-1))
+    #printf "$tput_sc\n%${shiftwidth}s\e[38;5;${artcolor}m%s[0m%${padwidth}s$tput_rc" " " "$probar" " "
+    printf "\n%${shiftwidth}s\e[38;5;${artcolor}m%s[0m%${padwidth}s$tchar" " " "$probar" " "
+}
+#printprogressbar 10.2
+#printprogressbar 100
+#printprogressbar 200
+#printprogressbar 50 20
+#printprogressbar 42.99999
+#printprogressbar 35
+#exit
 
 ignorewinch="0"
 resetstarttime="0"
