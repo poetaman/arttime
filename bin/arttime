@@ -1021,17 +1021,15 @@ function printtime {
     if [[ $goaltime != "" && $goalmaxsprint != "-" ]]; then
         progressbar=$(printprogressbar $((((goalsprint-1)*100.0/goalmaxsprint)+ (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime))) 10)
         shiftwidth=$(((termwidth-${#progressbar})/2))
-        if [[ ! $shiftwidth -gt 0 ]]; then
-            shiftwidth=0
-        fi
+        [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
         padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
-        if [[ ! $padwidth -gt 0 ]]; then
-            padwidth=0
-        fi
+        [[ ! $padwidth -gt 0 ]] && padwidth=0
         printprogressbarflag="1"
     elif [[ $pausegoals = "1" && $goalmaxsprint != "-" ]]; then
         shiftwidth=$(((termwidth-${#progressbar})/2))
+        [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
         padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+        [[ ! $padwidth -gt 0 ]] && padwidth=0
         printprogressbarflag="1"
     else
         printprogressbarflag="0"
