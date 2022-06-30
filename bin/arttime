@@ -25,6 +25,9 @@ zparseopts -D -E -F - \
     -tc:=titlecolor_arg \
     -ac:=artcolor_arg \
     -style:=style_arg \
+    -pa:=pbpendingchar_arg \
+    -pb:=pbcompletechar_arg \
+    -pl:=pblength_arg \
     -debug=debug_arg \
     -nolearn=nolearn_arg \
     -help=help_arg \
@@ -157,6 +160,12 @@ Options:
                 value of 1 (--style 1) uses curly underlines, among other
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
+
+    --pa        a-character to denote pending part of progress bar
+    --pa        b-character to denote complete part of progress bar
+    --pl        progress bar length
+                Note: progressbar a/b "character" can be a multi-character
+                string, though both a/b "characters" should be same length.
 
     --nolearn   By default arttime displays a keybinding help/learn art
                 page upon launch instead of showing some beautiful art.
@@ -335,6 +344,9 @@ timeformat=$timeformatnz
 artcolorarg="${artcolor_arg[-1]}"
 titlecolorarg="${titlecolor_arg[-1]}"
 style="${style_arg[-1]}"
+pbcompletechar="${pbcompletechar_arg[-1]}"
+pbpendingchar="${pbpendingchar_arg[-1]}"
+pblength="${pblength_arg[-1]}"
 debug="${debug_arg[-1]}"
 nolearn="${nolearn_arg[-1]}"
 
@@ -540,13 +552,17 @@ function setnextgoal {
             if [[ $localgoaltimestr = "-" ]]; then
                 local lastgoalptr="$goalptr"
                 goalsprint=$((goalsprint+1))
-                setgoals
+                accumulatedsprinttime="0"
+                sprintstarttime=$(strftime '%s')
+                setgoals $sprintstarttime
                 goaldone="0"
                 #goalarraysorted[-1]=("loop;$localgoalnum;0;-;loop")
             elif [[ $localgoaltimestr -gt 1 ]]; then
                 local lastgoalptr="$goalptr"
                 goalsprint=$((goalsprint+1))
-                setgoals
+                accumulatedsprinttime="0"
+                sprintstarttime=$(strftime '%s')
+                setgoals $sprintstarttime
                 goaldone="0"
                 goalarraysorted[-1]=("loop;$localgoalnum;0;$((localgoaltimestr-1));loop")
             else
@@ -591,7 +607,7 @@ function setgoals {
         else
             #[[ $goal =~ ^[[:space:]]*(.*)$ ]] && goal="$match[1]"
             goal=${${goal%${goal##*[^[:blank:]]}}#${${goal%${goal##*[^[:blank:]]}}%%[^[:blank:]]*}};
-            setgoaltime $goal $(strftime '%s')
+            setgoaltime $goal $1
             if [[ $returngoalstatus = "2" ]]; then
                 errdetected="1"
             fi
@@ -606,6 +622,18 @@ function setgoals {
             goalptr="0"
             goalmaxptr="$numgoals"
             setnextgoal
+            if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
+                printsprints="1"
+                goalmaxptreff="$((goalmaxptr-1))"
+                goalmaxsprint="$returngoaltimestr"
+            else
+                printsprints="0"
+                goalmaxsprint="1"
+                goalmaxptreff="$goalmaxptr"
+            fi
+            goalentry=$goalarraysorted[$goalmaxptreff]
+            goalentryarray=(${(s/;/)goalentry})
+            sprintendtime=$goalentryarray[1]
         else
             errgoalarray=("${tmpgoalarray[@]}")
             goalptr="0"
@@ -618,19 +646,13 @@ function setgoals {
 }
 
 if [[ ! -z $goal ]]; then
-    setgoals
+    accumulatedsprinttime="0"
+    sprintstarttime=$(strftime '%s')
+    setgoals $sprintstarttime
     if [[ "$?" != "0" ]]; then
         echo "E: Goal time must be a valid time format representing future time.\n   Start application, press 'g', enter 'help' to learn more."
         exit 0
     else
-        if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
-            printsprints="1"
-            goalmaxptreff="$((goalmaxptr-1))"
-            goalmaxsprint="$returngoaltimestr"
-        else
-            printsprints="0"
-            goalmaxptreff="$goalmaxptr"
-        fi
     fi
 else
     goaltime=""
@@ -743,7 +765,7 @@ function setartstring {
         fi
         artht=$(tail -n +2 $artfile | wc -l)
         artstringht=$(wc -l <<<$artstring)
-        belowcurpos=$(($artstringht+1))
+        belowcurpos=$(($artstringht+2))
         lastlinepos=$(($termheight-1))
         belowstr=""
         if [[ $belowcurpos = $lastlinepos ]]; then
@@ -791,11 +813,12 @@ tput_rc=$(tput rc)
 tput_civis=$(tput civis)
 tput_cnorm=$(tput cnorm)
 tput_smcup=$(tput smcup)
+tput_cuu1=$(tput cuu1)
 
 toggleflipart="0"
 function printart {
-    usr1detected=""
-    trap 'trapusr1detected' USR1
+    #usr1detected=""
+    #trap 'trapusr1detected' USR1
     if [[ ! -z $flipartname && $toggleflipart = "1" ]]; then
         toggleflipart="0"
         if [[ -z $1 ]]; then
@@ -812,10 +835,10 @@ function printart {
             printf '%s\n' "${tput_cup00}$1${artstring/#*\\n/}"
         fi
     fi
-    if [[ "$usr1detected" = "1" ]]; then
-        trapusr1_both
-    fi
-    trap 'trapusr1_both' USR1
+    #if [[ "$usr1detected" = "1" ]]; then
+    #    trapusr1_both
+    #fi
+    #trap 'trapusr1_both' USR1
 }
 if ! setartstring && [[ $helpactive != "1" ]]; then
     printf "W: height of b art does not match that of a art. Try setting b art again."
@@ -826,13 +849,49 @@ function setstyle {
         currenttimestyle="\e[4m" # regular underline
         passedgoalstyle="\e[7m" # reversed
         style="0"
+        [[ -z $pbpendingchar ]] && pbpendingchar='-'
+        [[ -z $pbcompletechar ]] && pbcompletechar='>'
+        [[ -z $pblength ]] && pblength="10"
     else
         currenttimestyle="\e[4:3m" # curly underline
         passedgoalstyle="\e[9m" # strike-through
+        [[ -z $pbpendingchar ]] && pbpendingchar='□'
+        [[ -z $pbcompletechar ]] && pbcompletechar='■'
+        [[ -z $pblength ]] && pblength="10"
     fi
 }
 setstyle
 
+function printprogressbar {
+    #local probar='**********'
+    #local probar='■■■■□□□□□□'
+    #local probar='..........'
+    #local probar='>>>>>.....'
+    if (($1>100)); then
+        local percentdone="100"
+    elif (($1<0)); then
+        local percentdone="0"
+    else
+        local percentdone="$1"
+    fi
+    if [[ $2 =~ ^[0-9]+$ && $2 -gt "1" ]]; then
+        local barlen="${2%.*}"
+    else
+        local barlen="1"
+    fi
+    local numdone=$(((percentdone/100.0)*barlen))
+    numdone="${numdone%.*}"
+    local numnotdone=$((barlen-numdone))
+    local probar=''
+    if [[ $numdone -gt 0 ]]; then
+        probar+=$(printf "%.s$pbcompletechar" {1..$numdone})
+    fi
+    if [[ $numnotdone -gt 0 ]]; then
+        probar+=$(printf "%.s$pbpendingchar" {1..$numnotdone})
+    fi
+    printf "$probar"
+}
+cacheprogressbar100=$(printprogressbar 100.0 $pblength)
 
 ignorewinch="0"
 resetstarttime="0"
@@ -843,8 +902,8 @@ function printtime {
     if [[ "$currenttime" = "$lasttime" ]]; then
         return
     else
-        usr1detected=""
-        trap 'trapusr1detected' USR1
+        #usr1detected=""
+        #trap 'trapusr1detected' USR1
         if [[ ! -z $flipartname && ! -z $lasttime ]]; then
             printart
         fi
@@ -975,14 +1034,53 @@ function printtime {
         padwidth=0
     fi
     printf "\r%${shiftwidth}s\e[0m\e[38;5;${starttimecolor}m${slackstring0style}$slackstring0\e[0m\e[38;5;${subtitlecolor}m$slackstring1\e[0m\e[38;5;${deltatimecolor}m$slackstring2\e[0m\e[38;5;${subtitlecolor}m$slackstring3\e[0m\e[38;5;${currenttimecolor}m${slackstring4style}$slackstring4\e[0m%${padwidth}s$tchar" " " " "
-    #if [[ $1 = "1" && $belowstr != "" ]]; then
-    if [[ $1 = "1" ]]; then
-        printf '%s' "$tput_sc$belowstr$tput_rc"
+    if [[  $goaltime != "" && $goaldone = "1" && $goalmaxsprint != "-" ]]; then
+        progressbar="$cacheprogressbar100"
+        printprogressbarflag="1"
+    elif [[ $goaltime != "" && $goalmaxsprint != "-" ]]; then
+        progressbar=$(printprogressbar $((((goalsprint-1)*100.0/goalmaxsprint)+ (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime))) $pblength)
+        printprogressbarflag="1"
+    elif [[ $pausegoals = "1" && $goalmaxsprint != "-" ]]; then
+        printprogressbarflag="1"
+    elif [[ $pausegoals = "1" || $goaltime != "" ]] && [[ $goalmaxsprint = "-" ]]; then
+        printprogressbarflag="1"
+        progressbar=">--------|"
+    else
+        printprogressbarflag="0"
     fi
-    if [[ "$usr1detected" = "1" ]]; then
-        trapusr1_both
+    if [[ $belowstr = "" || $1 != "1"  ]]; then
+        if [[ $printprogressbarflag = "1" ]]; then
+            #printprogressbar
+            shiftwidth=$(((termwidth-${#progressbar})/2))
+            [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
+            padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+            [[ ! $padwidth -gt 0 ]] && padwidth=0
+            printf "\n%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar$tput_cuu1" " " "$progressbar" " "
+        else
+            #printemptyline
+            shiftwidth=$((termwidth-1))
+            printf "\n%${shiftwidth}s$tchar$tput_cuu1" " "
+        fi
+    else
+        #printprogressbar
+        #printbelowstr
+        if [[ $printprogressbarflag = "1" ]]; then
+            #printprogressbar
+            shiftwidth=$(((termwidth-${#progressbar})/2))
+            [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
+            padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+            [[ ! $padwidth -gt 0 ]] && padwidth=0
+            printf "$tput_sc\n%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar$belowstr$tput_rc" " " "$progressbar" " "
+        else
+            #printemptyline
+            shiftwidth=$((termwidth-1))
+            printf "$tput_sc\n%${shiftwidth}s$tchar$belowstr$tput_rc" " "
+        fi
     fi
-    trap 'trapusr1_both' USR1
+    #if [[ "$usr1detected" = "1" ]]; then
+    #    trapusr1_both
+    #fi
+    #trap 'trapusr1_both' USR1
 }
 
 killdone="0"
@@ -1350,6 +1448,7 @@ function usr1input_handler {
                         pausegoals="1"
                         pausestart="$currenttimearray[1]"
                         pausestartstr="$currenttimearray[2]"
+                        accumulatedsprinttime=$((currenttimearray[1]-sprintstarttime))
                         goaltime=""
                     fi
                 else
@@ -1357,7 +1456,11 @@ function usr1input_handler {
                         pauseend=$(strftime '%s')
                         pausedelta=$((pauseend-pausestart))
                         exitpause
+                        sprintstarttime="$pauseend"
                         pausegoals="0"
+                        goalentry=$goalarraysorted[$goalmaxptreff]
+                        goalentryarray=(${(s/;/)goalentry})
+                        sprintendtime=$goalentryarray[1]
                     fi
                 fi
                 $sttycmd -echo
@@ -1376,7 +1479,9 @@ function usr1input_handler {
                 if askforconfirmation "restart previous goal '$goal'"; then
                     goalsprint="1"
                     pausegoals="0"
-                    setgoals
+                    accumulatedsprinttime="0"
+                    sprintstarttime=$(strftime '%s')
+                    setgoals $sprintstarttime
                 fi
                 $sttycmd -echo
                 $sttycmd -icanon min 0 time 0
@@ -1408,7 +1513,9 @@ function usr1input_handler {
                 goal="$tempgoal"
                 goalsprint="1"
                 pausegoals="0"
-                setgoals
+                accumulatedsprinttime="0"
+                sprintstarttime=$(strftime '%s')
+                setgoals $sprintstarttime
                 if [[ -z $goaltime ]]; then
                     if [[ -z $datehelpstr ]]; then
                         if [[ $dateisgnu = "1" ]]; then
@@ -1537,8 +1644,12 @@ EOF
                         goalmaxsprint="$returngoaltimestr"
                     else
                         printsprints="0"
+                        goalmaxsprint="1"
                         goalmaxptreff="$goalmaxptr"
                     fi
+                    goalentry=$goalarraysorted[$goalmaxptreff]
+                    goalentryarray=(${(s/;/)goalentry})
+                    sprintendtime=$goalentryarray[1]
                 fi
             fi
             ;;
@@ -1799,10 +1910,10 @@ EOF
     esac
 }
 
-usr1detected=""
-function trapusr1detected {
-    usr1detected="1"
-}
+#usr1detected=""
+#function trapusr1detected {
+#    usr1detected="1"
+#}
 
 function trapusr1_both {
     # NOTE: disable C-z when executing this trap
@@ -1852,7 +1963,7 @@ function arttime_blocking {
     #trap "trapint_blocking" INT
     trap "" INT
     trap "trapexit_blocking" EXIT TERM HUP QUIT
-    trap "trapusr1_both" USR1
+    #trap "trapusr1_both" USR1
     trap "trapstop_blocking" TSTP
     trap "trapcont_blocking" CONT
     while true; do
@@ -1893,7 +2004,7 @@ function arttime_nonblocking {
     starttime=$(strftime $timeformat)
     starttimearray=(${(s/|/)starttime})
     printtime
-    trap "trapusr1_both" USR1
+    #trap "trapusr1_both" USR1
     trap "trapcont_nonblocking" CONT
     trap "trapstop_nonblocking" TSTP
     while true; do
