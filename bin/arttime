@@ -801,11 +801,12 @@ tput_rc=$(tput rc)
 tput_civis=$(tput civis)
 tput_cnorm=$(tput cnorm)
 tput_smcup=$(tput smcup)
+tput_cuu1=$(tput cuu1)
 
 toggleflipart="0"
 function printart {
-    usr1detected=""
-    trap 'trapusr1detected' USR1
+    #usr1detected=""
+    #trap 'trapusr1detected' USR1
     if [[ ! -z $flipartname && $toggleflipart = "1" ]]; then
         toggleflipart="0"
         if [[ -z $1 ]]; then
@@ -822,10 +823,10 @@ function printart {
             printf '%s\n' "${tput_cup00}$1${artstring/#*\\n/}"
         fi
     fi
-    if [[ "$usr1detected" = "1" ]]; then
-        trapusr1_both
-    fi
-    trap 'trapusr1_both' USR1
+    #if [[ "$usr1detected" = "1" ]]; then
+    #    trapusr1_both
+    #fi
+    #trap 'trapusr1_both' USR1
 }
 if ! setartstring && [[ $helpactive != "1" ]]; then
     printf "W: height of b art does not match that of a art. Try setting b art again."
@@ -876,6 +877,7 @@ function printprogressbar {
     fi
     printf "$probar"
 }
+cacheprogressbar100=$(printprogressbar 100.0 10)
 
 ignorewinch="0"
 resetstarttime="0"
@@ -886,8 +888,8 @@ function printtime {
     if [[ "$currenttime" = "$lasttime" ]]; then
         return
     else
-        usr1detected=""
-        trap 'trapusr1detected' USR1
+        #usr1detected=""
+        #trap 'trapusr1detected' USR1
         if [[ ! -z $flipartname && ! -z $lasttime ]]; then
             printart
         fi
@@ -1018,26 +1020,27 @@ function printtime {
         padwidth=0
     fi
     printf "\r%${shiftwidth}s\e[0m\e[38;5;${starttimecolor}m${slackstring0style}$slackstring0\e[0m\e[38;5;${subtitlecolor}m$slackstring1\e[0m\e[38;5;${deltatimecolor}m$slackstring2\e[0m\e[38;5;${subtitlecolor}m$slackstring3\e[0m\e[38;5;${currenttimecolor}m${slackstring4style}$slackstring4\e[0m%${padwidth}s$tchar" " " " "
-    if [[ $goaltime != "" && $goalmaxsprint != "-" ]]; then
+    if [[  $goaltime != "" && $goaldone = "1" && $goalmaxsprint != "-" ]]; then
+        progressbar="$cacheprogressbar100"
+        printprogressbarflag="1"
+    elif [[ $goaltime != "" && $goalmaxsprint != "-" ]]; then
         progressbar=$(printprogressbar $((((goalsprint-1)*100.0/goalmaxsprint)+ (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime))) 10)
-        shiftwidth=$(((termwidth-${#progressbar})/2))
-        [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
-        padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
-        [[ ! $padwidth -gt 0 ]] && padwidth=0
         printprogressbarflag="1"
     elif [[ $pausegoals = "1" && $goalmaxsprint != "-" ]]; then
-        shiftwidth=$(((termwidth-${#progressbar})/2))
-        [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
-        padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
-        [[ ! $padwidth -gt 0 ]] && padwidth=0
         printprogressbarflag="1"
+    elif [[ $pausegoals = "1" || $goaltime != "" ]] && [[ $goalmaxsprint = "-" ]]; then
+        printprogressbarflag="1"
+        progressbar=">--------|"
     else
         printprogressbarflag="0"
     fi
     if [[ $belowstr = "" || $1 != "1"  ]]; then
-        tput_cuu1=$(tput cuu1)
         if [[ $printprogressbarflag = "1" ]]; then
             #printprogressbar
+            shiftwidth=$(((termwidth-${#progressbar})/2))
+            [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
+            padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+            [[ ! $padwidth -gt 0 ]] && padwidth=0
             printf "\n%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar$tput_cuu1" " " "$progressbar" " "
         else
             #printemptyline
@@ -1049,7 +1052,10 @@ function printtime {
         #printbelowstr
         if [[ $printprogressbarflag = "1" ]]; then
             #printprogressbar
-            tput_cuu1=$(tput cuu1)
+            shiftwidth=$(((termwidth-${#progressbar})/2))
+            [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
+            padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+            [[ ! $padwidth -gt 0 ]] && padwidth=0
             printf "$tput_sc\n%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar$belowstr$tput_rc" " " "$progressbar" " "
         else
             #printemptyline
@@ -1057,10 +1063,10 @@ function printtime {
             printf "$tput_sc\n%${shiftwidth}s$tchar$belowstr$tput_rc" " "
         fi
     fi
-    if [[ "$usr1detected" = "1" ]]; then
-        trapusr1_both
-    fi
-    trap 'trapusr1_both' USR1
+    #if [[ "$usr1detected" = "1" ]]; then
+    #    trapusr1_both
+    #fi
+    #trap 'trapusr1_both' USR1
 }
 
 killdone="0"
@@ -1890,10 +1896,10 @@ EOF
     esac
 }
 
-usr1detected=""
-function trapusr1detected {
-    usr1detected="1"
-}
+#usr1detected=""
+#function trapusr1detected {
+#    usr1detected="1"
+#}
 
 function trapusr1_both {
     # NOTE: disable C-z when executing this trap
@@ -1943,7 +1949,7 @@ function arttime_blocking {
     #trap "trapint_blocking" INT
     trap "" INT
     trap "trapexit_blocking" EXIT TERM HUP QUIT
-    trap "trapusr1_both" USR1
+    #trap "trapusr1_both" USR1
     trap "trapstop_blocking" TSTP
     trap "trapcont_blocking" CONT
     while true; do
@@ -1984,7 +1990,7 @@ function arttime_nonblocking {
     starttime=$(strftime $timeformat)
     starttimearray=(${(s/|/)starttime})
     printtime
-    trap "trapusr1_both" USR1
+    #trap "trapusr1_both" USR1
     trap "trapcont_nonblocking" CONT
     trap "trapstop_nonblocking" TSTP
     while true; do
