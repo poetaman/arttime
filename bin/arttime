@@ -25,6 +25,9 @@ zparseopts -D -E -F - \
     -tc:=titlecolor_arg \
     -ac:=artcolor_arg \
     -style:=style_arg \
+    -pa:=pbpendingchar_arg \
+    -pb:=pbcompletechar_arg \
+    -pl:=pblength_arg \
     -debug=debug_arg \
     -nolearn=nolearn_arg \
     -help=help_arg \
@@ -157,6 +160,12 @@ Options:
                 value of 1 (--style 1) uses curly underlines, among other
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
+
+    --pa        a-character to denote pending part of progress bar
+    --pa        b-character to denote complete part of progress bar
+    --pl        progress bar length
+                Note: progressbar a/b "character" can be a multi-character
+                string, though both a/b "characters" should be same length.
 
     --nolearn   By default arttime displays a keybinding help/learn art
                 page upon launch instead of showing some beautiful art.
@@ -335,6 +344,9 @@ timeformat=$timeformatnz
 artcolorarg="${artcolor_arg[-1]}"
 titlecolorarg="${titlecolor_arg[-1]}"
 style="${style_arg[-1]}"
+pbcompletechar="${pbcompletechar_arg[-1]}"
+pbpendingchar="${pbpendingchar_arg[-1]}"
+pblength="${pblength_arg[-1]}"
 debug="${debug_arg[-1]}"
 nolearn="${nolearn_arg[-1]}"
 
@@ -837,13 +849,15 @@ function setstyle {
         currenttimestyle="\e[4m" # regular underline
         passedgoalstyle="\e[7m" # reversed
         style="0"
-        pbpendingchar='-'
-        pbcompletechar='>'
+        [[ -z $pbpendingchar ]] && pbpendingchar='-'
+        [[ -z $pbcompletechar ]] && pbcompletechar='>'
+        [[ -z $pblength ]] && pblength="10"
     else
         currenttimestyle="\e[4:3m" # curly underline
         passedgoalstyle="\e[9m" # strike-through
-        pbpendingchar='□'
-        pbcompletechar='■'
+        [[ -z $pbpendingchar ]] && pbpendingchar='□'
+        [[ -z $pbcompletechar ]] && pbcompletechar='■'
+        [[ -z $pblength ]] && pblength="10"
     fi
 }
 setstyle
@@ -877,7 +891,7 @@ function printprogressbar {
     fi
     printf "$probar"
 }
-cacheprogressbar100=$(printprogressbar 100.0 10)
+cacheprogressbar100=$(printprogressbar 100.0 $pblength)
 
 ignorewinch="0"
 resetstarttime="0"
@@ -1024,7 +1038,7 @@ function printtime {
         progressbar="$cacheprogressbar100"
         printprogressbarflag="1"
     elif [[ $goaltime != "" && $goalmaxsprint != "-" ]]; then
-        progressbar=$(printprogressbar $((((goalsprint-1)*100.0/goalmaxsprint)+ (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime))) 10)
+        progressbar=$(printprogressbar $((((goalsprint-1)*100.0/goalmaxsprint)+ (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime))) $pblength)
         printprogressbarflag="1"
     elif [[ $pausegoals = "1" && $goalmaxsprint != "-" ]]; then
         printprogressbarflag="1"
