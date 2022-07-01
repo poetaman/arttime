@@ -868,9 +868,9 @@ function printprogressbar {
     #local probar='..........'
     #local probar='>>>>>.....'
     if (($1>100)); then
-        local percentdone="100"
+        local percentdone="100.0"
     elif (($1<0)); then
-        local percentdone="0"
+        local percentdone="0.0"
     else
         local percentdone="$1"
     fi
@@ -880,7 +880,11 @@ function printprogressbar {
         local barlen="1"
     fi
     local numdone=$(((percentdone/100.0)*barlen))
-    numdone="${numdone%.*}"
+    if ((numdone<1.0)); then
+        numdone="0"
+    else
+        numdone="${numdone%.*}"
+    fi
     local numnotdone=$((barlen-numdone))
     local probar=''
     if [[ $numdone -gt 0 ]]; then
@@ -889,7 +893,7 @@ function printprogressbar {
     if [[ $numnotdone -gt 0 ]]; then
         probar+=$(printf "%.s$pbpendingchar" {1..$numnotdone})
     fi
-    printf "$probar"
+    printf "$probar\n"
 }
 cacheprogressbar100=$(printprogressbar 100.0 $pblength)
 
@@ -1035,10 +1039,12 @@ function printtime {
     fi
     printf "\r%${shiftwidth}s\e[0m\e[38;5;${starttimecolor}m${slackstring0style}$slackstring0\e[0m\e[38;5;${subtitlecolor}m$slackstring1\e[0m\e[38;5;${deltatimecolor}m$slackstring2\e[0m\e[38;5;${subtitlecolor}m$slackstring3\e[0m\e[38;5;${currenttimecolor}m${slackstring4style}$slackstring4\e[0m%${padwidth}s$tchar" " " " "
     if [[  $goaltime != "" && $goaldone = "1" && $goalmaxsprint != "-" ]]; then
+        percentdone="100.0"
         progressbar="$cacheprogressbar100"
         printprogressbarflag="1"
     elif [[ $goaltime != "" && $goalmaxsprint != "-" ]]; then
-        progressbar=$(printprogressbar $((((goalsprint-1)*100.0/goalmaxsprint)+ (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime))) $pblength)
+        percentdone=$((((goalsprint-1)*100.0/goalmaxsprint) + (1.0/goalmaxsprint)*(accumulatedsprinttime+currenttimearray[1]-sprintstarttime)*100.0/(accumulatedsprinttime+sprintendtime-sprintstarttime)))
+        progressbar=$(printprogressbar $percentdone $pblength)
         printprogressbarflag="1"
     elif [[ $pausegoals = "1" && $goalmaxsprint != "-" ]]; then
         printprogressbarflag="1"
