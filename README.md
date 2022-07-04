@@ -92,7 +92,7 @@ There are two installation methods: 1) Simple, 2) Advanced. As the name suggests
 
 1) Simple install method:
 - Open some "Terminal" application on your computer
-- Copy following line from start to end. Note: hovering your computer mouse on the right end of the following line will show a button, clicking it will copy the line for you (or else you will have to press and hold to the mouse to scroll and select the entire line from beginning to end).
+- Copy following line from start to end. *Note: hovering your computer mouse on the right end of the following line will show a button, clicking it will copy the line for you (or else you will have to press and hold to the mouse to scroll and select the entire line from beginning to end).*
 ```
 zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9767fe33da50e993c650/raw/ad7e47a12782a904a9f62f4d17736afe0fd89279/arttime_online_installer.sh)"
 ```
