@@ -100,7 +100,7 @@ cd arttime
 curl -L -O https://github.com/reportaman/arttime/archive/main.zip && unzip main.zip
 cd arttime-main
 ```
-4. ``./install.sh``.
+3. ``./install.sh``.
 
 Note: More advanced users can pass a ``-h | --help`` option to ``./install.sh`` to learn how to tweak installation options.
 
