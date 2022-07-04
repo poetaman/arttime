@@ -86,23 +86,24 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 # Installation
 
+There are two installation methods: 1) Simple, 2) Advanced. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Advanced method is for users who want to 
 
-Please follow these steps:
-1. Open a "Terminal" application on your computer.
-2. Clone or download arttime git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``. For macOS users who get a notification to install developer tools when they run git clone and don't know what that means, prefer download instead. Choose a preferred location wisely for future references, updates (clones only), and re-installations.
-- Clone: 
+1) Simple install method:
+- Open some "Terminal" application on your computer
+- Copy and paste the following complete line in terminal window, and press ``Enter``:
 ```
-cd <preferred_location>
-git clone https://github.com/reportaman/arttime.git
-cd arttime
+zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9767fe33da50e993c650/raw/ad7e47a12782a904a9f62f4d17736afe0fd89279/arttime_online_installer.sh)"
 ```
-- Download:
-```
-cd <preferred_location>
-curl -L -O https://github.com/reportaman/arttime/archive/main.zip && unzip main.zip
-cd arttime-main
-```
-3. ``./install.sh``.
+- Restart "Terminal" application or open a new tab
+- Type ``arttime`` and press ``Enter``, arttime will launch!
+
+2) Advanced install method (steps are self explanatory for advanced users):
+- Clone the github repository somewhere on your machine
+- ``cd`` to that directory
+- Run ``./install.sh -h`` to see the options for installation
+- Run ``./install.sh`` with your options of choice
+- You already know what else to do...
+
 
 Note: More advanced users can pass a ``-h | --help`` option to ``./install.sh`` to learn how to tweak installation options.
 
