@@ -2,6 +2,7 @@
 # Copyrights 2022 Aman Mehra.
 # Check ../LICENSE_CODE, ../LICENSE_ART, and ../LICENSE_ADDENDUM_CFLA
 # files to know the terms of license
+# License files are also on github: https://github.com/reportaman/arttime
 
 zmodload zsh/zutil
 zparseopts -D -E -F - \
