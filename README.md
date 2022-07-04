@@ -88,15 +88,17 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 
 Please follow these steps:
-1. Open a "Terminal" application on your computer. 
-2. Clone or download arttime git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``. For macOS users who get a notification to install developer tools when they run git clone, prefer download instead.
+1. Open a "Terminal" application on your computer.
+2. Clone or download arttime git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``. For macOS users who get a notification to install developer tools when they run git clone, prefer download instead. Choose a preffered location wisely for future references, updates (clones only), and re-installations.
 - Clone: 
 ```
+cd <preferred_location>
 git clone https://github.com/reportaman/arttime.git
 cd arttime
 ```
 - Download:
 ```
+cd <preferred_location>
 curl -L -O https://github.com/reportaman/arttime/archive/main.zip && unzip main.zip
 cd arttime-main
 ```
@@ -104,6 +106,7 @@ cd arttime-main
 
 Note: More advanced users can pass a ``-h | --help`` option to ``./install.sh`` to learn how to tweak installation options.
 
+Once step 3 is complete, and you restart terminal to run ``arttime``. It is recommended to maintain the clone repository instead of deleteting it as the same install script also acts as an update script after you do ``git pull`` in the clone.
 
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
