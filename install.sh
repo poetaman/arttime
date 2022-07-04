@@ -38,6 +38,8 @@ Description:
 Options:
     -l --local          Install arttime executables locally in ~/.local/bin
                         and art files in ~/.local/share/arttime/textart
+                        Note: This is the default method used when none
+                        of -l/-g/-p is provided
                         
     -g --global         Install arttime executables globally in /usr/local/bin
                         and art files in /usr/local/share/arttime/textart
