@@ -88,6 +88,8 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 There are two installation methods: 1) Simple, 2) Advanced. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Advanced method is for users who want to tweak installation options, etc.
 
+---
+
 1) Simple install method:
 - Open some "Terminal" application on your computer
 - Copy following line from start to end. Note: hovering your computer mouse on the right end of the following line will show a button, clicking it will copy the line for you (or else you will have to press and hold to the mouse to scroll and select the entire line from beginning to end).
@@ -97,6 +99,8 @@ zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9
 - Paste the above copied line in "Terminal" application, and press ``Enter``
 - Restart "Terminal" application OR open a new tab OR for more terminal aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
 - Type ``arttime`` and press ``Enter``, arttime will launch!
+
+---
 
 2) Advanced install method (steps are self explanatory for advanced users):
 - Clone the github repository somewhere on your machine
