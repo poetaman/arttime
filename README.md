@@ -85,24 +85,25 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 10. And much more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
 # Installation
-At the moment, only manual installation is possible, but it's very simple as the code is self-contained.
+
 
 Please follow these steps:
-1. Clone or download the git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``.
-2. Add one of the following block of lines to your ``.zshrc`` or ``.bashrc`` file, depending on your login shell. For macOS it is ``.zshrc`` unless you have changed that.
+1. Open a "Terminal" application on your computer. 
+2. Clone or download arttime git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``. For macOS users who get a notification to install developer tools when they run git clone, prefer download instead.
+- Clone: 
 ```
-export PATH="<path_to_arttime_directory>/bin:$PATH"
+git clone https://github.com/reportaman/arttime.git
+cd arttime
 ```
-OR
+- Download:
 ```
-alias artprint="<path_to_arttime_directory>/bin/artprint"
-alias arttime="<path_to_arttime_directory>/bin/arttime"
+curl -L -O https://github.com/reportaman/arttime/archive/main.zip && unzip main.zip
+cd arttime-main
 ```
+4. ``./install.sh``.
 
-3. Open new terminal or source your respective ``.zshrc`` or ``.bashrc`` again.
-4. Run command ``arttime``
+Note: More advanced users can pass a ``-h | --help`` option to ``./install.sh`` to learn how to tweak installation options.
 
-In future an installation script will be added to the project.
 
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
