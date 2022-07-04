@@ -86,7 +86,7 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 # Installation
 
-There are two installation methods: 1) Simple, 2) Advanced. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Advanced method is for users who want to 
+There are two installation methods: 1) Simple, 2) Advanced. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Advanced method is for users who want to tweak installation options, etc.
 
 1) Simple install method:
 - Open some "Terminal" application on your computer
