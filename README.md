@@ -96,7 +96,7 @@ There are two installation methods: 1) Simple, 2) Advanced. As the name suggests
 ```
 zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9767fe33da50e993c650/raw/ad7e47a12782a904a9f62f4d17736afe0fd89279/arttime_online_installer.sh)"
 ```
-- Paste the above copied line in "Terminal" application, and press ``Enter``
+- Paste the above copied line in some "Terminal" application, and press ``Enter``
 - Restart "Terminal" application OR open a new tab OR for more terminal aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
 - Type ``arttime`` and press ``Enter``, arttime will launch!
 
