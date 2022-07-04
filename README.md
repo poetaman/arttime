@@ -89,7 +89,7 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 Please follow these steps:
 1. Open a "Terminal" application on your computer.
-2. Clone or download arttime git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``. For macOS users who get a notification to install developer tools when they run git clone, prefer download instead. Choose a preffered location wisely for future references, updates (clones only), and re-installations.
+2. Clone or download arttime git repository to a preferred location. Cloning is the preferred method to get future updates via ``git pull``. For macOS users who get a notification to install developer tools when they run git clone and don't know what that means, prefer download instead. Choose a preffered location wisely for future references, updates (clones only), and re-installations.
 - Clone: 
 ```
 cd <preferred_location>
