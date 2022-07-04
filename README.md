@@ -95,7 +95,7 @@ There are two installation methods: 1) Simple, 2) Advanced. As the name suggests
 zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9767fe33da50e993c650/raw/ad7e47a12782a904a9f62f4d17736afe0fd89279/arttime_online_installer.sh)"
 ```
 - Paste the above copied line in "Terminal" application, and press ``Enter``
-- Restart "Terminal" application or open a new tab
+- Restart "Terminal" application OR open a new tab OR for more terminal aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
 - Type ``arttime`` and press ``Enter``, arttime will launch!
 
 2) Advanced install method (steps are self explanatory for advanced users):
@@ -104,11 +104,6 @@ zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9
 - Run ``./install.sh -h`` to see the options for installation
 - Run ``./install.sh`` with your options of choice
 - You already know what else to do...
-
-
-Note: More advanced users can pass a ``-h | --help`` option to ``./install.sh`` to learn how to tweak installation options.
-
-Once step 3 is complete, and you restart terminal to run ``arttime``. It is recommended to maintain the clone repository instead of deleteting it as the same install script also acts as an update script after you do ``git pull`` in the clone.
 
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
