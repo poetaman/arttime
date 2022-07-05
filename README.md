@@ -86,7 +86,7 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 # Installation
 
-There are two installation methods: 1) Simple, 2) Advanced. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Advanced method is for users who want to tweak installation options, etc.
+There are two installation methods: 1) Simple, 2) Manual. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Manual method is for users who are fluent in using terminal and want to customize installation.
 
 ---
 
@@ -100,14 +100,16 @@ zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9
 - When installation completes, do one of the following (easiest choice first): 1) restart "Terminal" application, or 2) open a new tab in "Terminal" application, or 3) for more terminal-aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
 - Type ``arttime`` and press ``Enter``, arttime will launch!
 
+Note: The simple install method installs arttime executables in ``~/.local/bin`` and art files in ``~/.local/share/arttime/textart``.
+
 ---
 
-2) Advanced install method (steps are self explanatory for advanced users):
+2) Manual install method:
 - Clone the github repository somewhere on your machine
 - ``cd`` to that directory
 - Run ``./install.sh -h`` to see the options for installation
 - Run ``./install.sh`` with your options of choice
-- You already know what else to do...
+- Rest is similar to the last 2 steps of simple installer
 
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
