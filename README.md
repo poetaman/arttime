@@ -100,7 +100,7 @@ zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9
 - When installation completes, do one of the following (easiest choice first): 1) restart "Terminal" application, or 2) open a new tab in "Terminal" application, or 3) for more terminal-aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
 - Type ``arttime`` and press ``Enter``, arttime will launch!
 
-Note: The simple install method installs arttime executables in ``~/.local/bin`` and art files in ``~/.local/share/arttime/textart``.
+Note: The simple install method installs arttime under ``~/.local``, which is a standard install directory for local installation.
 
 ---
 
