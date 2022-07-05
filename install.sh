@@ -154,10 +154,10 @@ for ((i = 1; i <= $artfilearraysize; i++)); do
     file="$artfilearray[i]"
     if [[ -f "$artdir/$file" ]]; then
         oldmessage='"Custom message for art goes here"'
-        oldmessage=$(head -n1 "$artdir/$file")
-        newart=$(tail -n +2 "$file")
-        echo $oldmessage >$artdir/$file
-        echo $newart >>$artdir/$file
+        oldmessage="$(head -n1 $artdir/$file)"
+        newart="$(tail -n +2 $file)"
+        printf '%s\n' "$oldmessage" >$artdir/$file
+        printf '%s\n' "$newart" >>$artdir/$file
     else
         cp $file $artdir/$file
     fi
