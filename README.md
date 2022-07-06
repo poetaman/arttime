@@ -25,6 +25,7 @@ Contents
   - Shows time passed since a timer expired or times pending to for every timer (press ``i`` after setting multiple goals)
   - Always shows some delta in time which is hard to track: 1) time since arttime started, 2) time pending for next timer, 3) time passed since last timer expired.
   - Interactively switch time zones.
+  - A configurable text-based progress bar shows what percentage of the timer is complete/pending. Example: >>>>------ (--style 0) ■■■■□□□□□□ (--style 1)
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
