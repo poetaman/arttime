@@ -297,9 +297,9 @@ function notifydesktop {
     local notifysubtitle="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
     if [[ $printsprints = "1" ]]; then
         if [[ $goalmaxsprint != "-" ]]; then
-            local notifymessage="sprint-$goalsprint/$goalmaxsprint"
+            local notifymessage="sprint-$goalsprint/$goalmaxsprint "
         else
-            local notifymessage="sprint-$goalsprint"
+            local notifymessage="sprint-$goalsprint "
         fi
     else
         local notifymessage=""
@@ -309,7 +309,7 @@ function notifydesktop {
     else
         local goalptrofmaxstr=""
     fi
-    notifymessage+=" goal$goalptrofmaxstr: $goalstr"
+    notifymessage+="goal$goalptrofmaxstr: $goalstr"
     if bart=$(getbart); then
         notifymessage+="\rarts: $(getaart), $(getbart)"
     else
