@@ -1184,7 +1184,6 @@ function artselector2 {
     cd $restoredir
     local curcontext=artselector2:::
     tmpartname="";
-    printf "\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
     if command -v column &>/dev/null; then
         echo $artnametemp  | tr ' ' '\n' | column -c$(tput cols)
         printf '\n'
@@ -1283,7 +1282,7 @@ function usr1input_handler {
             if [[ $1 = "a" ]]; then
                 artselector
             else
-                printf "Set b-art, finding art that matches height of a-art ($artname)..."
+                printf "Set b-art, finding art that matches height of a-art ($artname)...\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
                 artselector2
             fi
             $sttycmd -echo
