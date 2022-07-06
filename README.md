@@ -67,8 +67,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 ![kissingcats1](https://user-images.githubusercontent.com/71736629/169914495-a99f7633-d77e-4e7a-84d0-be64e281de92.gif)
 
 5. Timer and notification. ``arttime --nolearn -a colorowl2 -b colorowl3 -t "We don't sleep at night - Owls"`` then press ``g`` to enter a goal time like ``10s`` for 10 seconds, ``1h 6s`` for 1 hour 6 seconds. Check more formats supported by reading help documentation ``$ arttime -h``, or even better by passing 'help' as goal time while arttime is running (press ``g``, enter ``help``). This is an example of multi-colored art too.
-![ColorOwlTimer](https://user-images.githubusercontent.com/71736629/177450544-64e821f0-5432-49c4-b21a-45cebae54ca4.gif)
-
+![ColorOwl3](https://user-images.githubusercontent.com/71736629/177451474-4d868e17-d577-4500-adaa-f00c49bc78b7.gif)
 
 6. Multiple timers, repeating time management program like [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique). a) From the commandline, run: ``arttime --nolearn -a magic -b magic2 -g "25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop"`` or b) From within application, run: ``arttime --nolearn -a magic -b magic2``, then press ``g`` and enter ``25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop``. Change ``loop`` to ``loop4`` or ``sprint4`` for approximately 10 hour work day.
 <img width="1025" alt="Screen Shot 2022-06-19 at 6 06 39 PM" src="https://user-images.githubusercontent.com/71736629/174509159-bd5d7a0b-4fa5-47b1-b330-3a0f9c97ca54.png">
