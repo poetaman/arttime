@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/71736629/177634156-00c79cc2-89ec-4eed-9a88-2b35e76bedc9.png">
-  <img alt="Representative screenshot of arttime" src="https://user-images.githubusercontent.com/71736629/177634156-00c79cc2-89ec-4eed-9a88-2b35e76bedc9.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/71736629/177691716-f53d9f68-3f24-4860-b9a9-d5101d952544.png">
+  <img alt="Representative screenshot of arttime" src="https://user-images.githubusercontent.com/71736629/177691691-9fda6539-e2e7-4afd-9c97-14385fdcbb59.png">
 </picture>
 
 
