@@ -1,5 +1,5 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/71736629/177692988-9647d882-9171-4880-9d9e-c191aab91057.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/71736629/177693531-49f9e7c7-55ca-4a43-a45f-eb3db2540ae6.png">
   <img alt="Representative screenshot of arttime" src="https://user-images.githubusercontent.com/71736629/177691691-9fda6539-e2e7-4afd-9c97-14385fdcbb59.png">
 </picture>
 
