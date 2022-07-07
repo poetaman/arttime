@@ -1,5 +1,7 @@
-<img width="1008" alt="Screen Shot 2022-07-06 at 1 02 34 PM" src="https://user-images.githubusercontent.com/71736629/177634156-00c79cc2-89ec-4eed-9a88-2b35e76bedc9.png">
-
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/71736629/177634156-00c79cc2-89ec-4eed-9a88-2b35e76bedc9.png">
+  <img alt="Representative screenshot of arttime" src="https://user-images.githubusercontent.com/71736629/177634156-00c79cc2-89ec-4eed-9a88-2b35e76bedc9.png">
+</picture>
 
 
 Contents
