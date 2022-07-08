@@ -182,9 +182,9 @@ else
         echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/.zshrc'
         echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
     elif [[ $loginshell == *bash* ]]; then
-        echo "\n# Following line was automatically added by arttime installer" >>~/.bashrc
-        echo 'export PATH='"$bindir"':$PATH' >>~/.bashrc
-        echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/.bashrc'
+        echo "\n# Following line was automatically added by arttime installer" >>~/.profile
+        echo 'export PATH='"$bindir"':$PATH' >>~/.profile
+        echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/.profile'
         echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
     else
         echo "\nInstallation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable,\n    2) Restart your terminal application, type 'arttime' and press Enter."
