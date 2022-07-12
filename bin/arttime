@@ -1835,7 +1835,7 @@ EOF
                     set -e
                     (exit 130)
                 else
-                    exit
+                    exit 0
                 fi
             fi
             $sttycmd -echo
