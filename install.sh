@@ -30,7 +30,7 @@ Invocation:
 
 Description:
     arttime is an application that runs in your terminal emulator. It blends
-    beauty of text art with functionality of of a feature-rich clock/timer
+    beauty of text art with functionality of a feature-rich clock/timer
     /pattern-based time manager. For more information on arttime, run
     ./bin/arttime -h and visit it's github page:
     https://github.com/reportaman/arttime
