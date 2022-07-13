@@ -921,9 +921,9 @@ function printtime {
     fi
     if [[ ! -z $goaltime ]]; then
         difftime=$((goaltime-currenttimearray[1]))
-        slackstring0="$currenttimearray[2]"
-        slackstring0style="$currenttimestyle"
-        slackstring4="$goaltimestr"
+        timestring0="$currenttimearray[2]"
+        timestring0style="$currenttimestyle"
+        timestring4="$goaltimestr"
         if [[ ! $difftime -gt 0 ]]; then
             difftime=$(( -difftime ))
             if [[ $goaldone = "0" ]]; then
@@ -934,7 +934,7 @@ function printtime {
                     setnextgoal
                 done
                 difftime=$((goaltime-currenttimearray[1]))
-                slackstring4="$goaltimestr"
+                timestring4="$goaltimestr"
             fi
             if [[ $goalmaxptreff -gt 1 ]]; then
                 local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
@@ -943,19 +943,19 @@ function printtime {
             fi
             if [[ $printsprints = "1" ]]; then
                 if [[ $goalmaxsprint != "-" ]]; then
-                    slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                    timestring1=" | sprint-${goalsprint}/$goalmaxsprint "
                 else
-                    slackstring1=" | sprint-${goalsprint} "
+                    timestring1=" | sprint-${goalsprint} "
                 fi
             else
-                slackstring1=" | "
+                timestring1=" | "
             fi
             if [[ $goaldone = "0" ]]; then
-                slackstring1+="goal$goalptrofmaxstr pending "
-                slackstring4style=""
+                timestring1+="goal$goalptrofmaxstr pending "
+                timestring4style=""
             else
-                slackstring1+="goal$goalptrofmaxstr passed! "
-                slackstring4style="$passedgoalstyle"
+                timestring1+="goal$goalptrofmaxstr passed! "
+                timestring4style="$passedgoalstyle"
             fi
         else
             if [[ $goalmaxptreff -gt 1 ]]; then
@@ -965,22 +965,22 @@ function printtime {
             fi
             if [[ $printsprints = "1" ]]; then
                 if [[ $goalmaxsprint != "-" ]]; then
-                    slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                    timestring1=" | sprint-${goalsprint}/$goalmaxsprint "
                 else
-                    slackstring1=" | sprint-${goalsprint} "
+                    timestring1=" | sprint-${goalsprint} "
                 fi
             else
-                slackstring1=" | "
+                timestring1=" | "
             fi
-            slackstring1+="goal$goalptrofmaxstr pending "
-            slackstring4style=""
+            timestring1+="goal$goalptrofmaxstr pending "
+            timestring4style=""
         fi
     elif [[ $pausegoals = "1" ]]; then
         difftime=$((currenttimearray[1]-pausestart))
-        slackstring0="$pausestartstr"
-        slackstring4="$currenttimearray[2]"
-        slackstring4style="$currenttimestyle"
-        slackstring0style=""
+        timestring0="$pausestartstr"
+        timestring4="$currenttimearray[2]"
+        timestring4style="$currenttimestyle"
+        timestring0style=""
         if [[ $goalmaxptreff -gt 1 ]]; then
             local goalptrofmaxstr="-$goalptr/$goalmaxptreff"
         else
@@ -988,38 +988,38 @@ function printtime {
         fi
         if [[ $printsprints = "1" ]]; then
             if [[ $goalmaxsprint != "-" ]]; then
-                slackstring1=" | sprint-${goalsprint}/$goalmaxsprint "
+                timestring1=" | sprint-${goalsprint}/$goalmaxsprint "
             else
-                slackstring1=" | sprint-${goalsprint} "
+                timestring1=" | sprint-${goalsprint} "
             fi
         else
-            slackstring1=" | "
+            timestring1=" | "
         fi
-        slackstring1+="goal$goalptrofmaxstr PAUSED! "
+        timestring1+="goal$goalptrofmaxstr PAUSED! "
     else
         difftime=$((currenttimearray[1]-starttimearray[1]))
-        slackstring0="$starttimearray[2]"
-        slackstring4="$currenttimearray[2]"
-        slackstring4style="$currenttimestyle"
-        slackstring0style=""
-        slackstring1=" | time elapsed "
+        timestring0="$starttimearray[2]"
+        timestring4="$currenttimearray[2]"
+        timestring4style="$currenttimestyle"
+        timestring0style=""
+        timestring1=" | time elapsed "
     fi
     days=$((difftime/86400))
     hours=$((difftime%86400/3600))
     minutes=$((difftime%3600/60))
     seconds=$((difftime%60))
     if [[ $days != "0" ]]; then
-        #slackstring2="${(l:3::0:)days}d "
-        slackstring2="${days}d "
+        #timestring2="${(l:3::0:)days}d "
+        timestring2="${days}d "
     else
-        slackstring2=""
+        timestring2=""
     fi
-    slackstring2="$slackstring2${(l:2::0:)hours}h "
-    slackstring2="$slackstring2${(l:2::0:)minutes}m "
+    timestring2="$timestring2${(l:2::0:)hours}h "
+    timestring2="$timestring2${(l:2::0:)minutes}m "
     if [[ -z $updateonminute ]]; then
-        slackstring2="$slackstring2${(l:2::0:)seconds}s"
+        timestring2="$timestring2${(l:2::0:)seconds}s"
     fi
-    slackstring3=" | "
+    timestring3=" | "
     #if [[ ! -z $TMUX ]]; then
     #    #ignorewinch=$(tmux show-options -vp -t $TMUX_PANE @arttimeterm-ignorewinch 2>/dev/null)
     #    if [ "$ignorewinch" != "1" ]; then
@@ -1028,17 +1028,17 @@ function printtime {
     #else
     #    termwidth="$COLUMNS"
     #fi
-    shiftwidth=$((($termwidth-${#slackstring0}-${#slackstring1}-${#slackstring2}-${#slackstring3}-${#slackstring4})/2))
+    shiftwidth=$((($termwidth-${#timestring0}-${#timestring1}-${#timestring2}-${#timestring3}-${#timestring4})/2))
     # NOTE: following checks are needed so following math expressions do not fail during runtime
     # when the term-width is changed to be too narrow for instance...
     if [[ ! $shiftwidth -gt 0 ]]; then
         shiftwidth=0
     fi
-    padwidth=$(($termwidth-${#slackstring0}-${#slackstring1}-${#slackstring2}-${#slackstring3}-${#slackstring4}-${shiftwidth}-1))
+    padwidth=$(($termwidth-${#timestring0}-${#timestring1}-${#timestring2}-${#timestring3}-${#timestring4}-${shiftwidth}-1))
     if [[ ! $padwidth -gt 0 ]]; then
         padwidth=0
     fi
-    printf "\r%${shiftwidth}s\e[0m\e[38;5;${starttimecolor}m${slackstring0style}$slackstring0\e[0m\e[38;5;${subtitlecolor}m$slackstring1\e[0m\e[38;5;${deltatimecolor}m$slackstring2\e[0m\e[38;5;${subtitlecolor}m$slackstring3\e[0m\e[38;5;${currenttimecolor}m${slackstring4style}$slackstring4\e[0m%${padwidth}s$tchar" " " " "
+    printf "\r%${shiftwidth}s\e[0m\e[38;5;${starttimecolor}m${timestring0style}$timestring0\e[0m\e[38;5;${subtitlecolor}m$timestring1\e[0m\e[38;5;${deltatimecolor}m$timestring2\e[0m\e[38;5;${subtitlecolor}m$timestring3\e[0m\e[38;5;${currenttimecolor}m${timestring4style}$timestring4\e[0m%${padwidth}s$tchar" " " " "
     if [[  $goaltime != "" && $goaldone = "1" && $goalmaxsprint != "-" ]]; then
         percentdone="100.0"
         progressbar="$cacheprogressbar100"
