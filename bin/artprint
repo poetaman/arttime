@@ -225,9 +225,9 @@ fi
 
 if [[ ! $shiftheight -gt 0 ]]; then
     shiftheight=0
+else
+    printf "%$((termwidth-1)).s$tchar\n" " " {0..$shiftheight}
 fi
-
-printf "%$((termwidth-1)).s$tchar\n" " " {0..$shiftheight}
 
 if [[ -z $artcolor ]]; then
     if [[ -z "$theme" || "$theme" = "dark" ]]; then
@@ -240,7 +240,11 @@ else
 fi
 pr -t $prshiftopt <<<"$art" | while IFS= read -r line; do
     artlinewidth=$(findtextwidth $line)
-    printf "%s%$((termwidth-${artlinewidth}-1))s$tchar\n" "$line" " "
+    padwidth=$((termwidth-${artlinewidth}-1))
+    if [[ ! $padwidth -gt 0 ]]; then
+        padwidth=0
+    fi
+    printf "%s%${padwidth}s$tchar\n" "$line" " "
 done
 
 #echo "$textwidth, $shiftwidth"
