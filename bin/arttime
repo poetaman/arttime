@@ -1397,7 +1397,13 @@ function usr1input_handler {
             jrestoreflipartname="$flipartname"
             flipartname=""
             local jresponse=""
-            for pathname in $artdir/*(.DNnoe['REPLY=$RANDOM']); do
+            local shuffledart=($artdir/*(.DNnoe['REPLY=$RANDOM']))
+            for pathname in "$shuffledart[@]"; do
+                if [[ $winchdetected = "1" ]]; then
+                    termwidth="$COLUMNS"
+                    termheight="$LINES"
+                    winchdetected="0"
+                fi
                 artname=$(basename $pathname)
                 prevartname=""
                 setartstring
