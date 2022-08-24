@@ -1407,7 +1407,7 @@ function usr1input_handler {
                 artname=$(basename $pathname)
                 prevartname=""
                 setartstring
-                local questionstr="Select this? (y:select, n:next, c:cancel), name: $artname "
+                local questionstr="Select this? (q:cancel, j:next, y:select), name: $artname "
                 printart $questionstr
                 lasttime=""
                 printtime "1"
@@ -1416,7 +1416,7 @@ function usr1input_handler {
                 printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
                 jresponse=""
                 read -k1 jresponse
-                if [[ $jresponse = "y" || $jresponse = "c" ]]; then
+                if [[ $jresponse = "y" || $jresponse = "q" ]]; then
                     break
                 fi
             done
