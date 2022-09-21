@@ -16,6 +16,10 @@ zmodload zsh/datetime
 #   s:=samples_arg \
 # This means all functions ending in _nonblocking, etc are unreachable for now 
 
+# Note: To allow user to specify fully custom time format in future add
+#     -tf-local:=tflocal_arg \
+#     -tf-other:=tfother_arg \
+
 zparseopts -D -E -F - \
     a:=artname_arg \
     b:=flipartname_arg \
@@ -29,6 +33,7 @@ zparseopts -D -E -F - \
     -pa:=pbpendingchar_arg \
     -pb:=pbcompletechar_arg \
     -pl:=pblength_arg \
+    -hours:=hours_arg \
     -debug=debug_arg \
     -nolearn=nolearn_arg \
     -help=help_arg \
@@ -151,6 +156,8 @@ Options:
                 command does not interpret arbitrary date time format
                 strings. In future some standard formats that work out of
                 the box with macOS/BSD default date command will be added.
+    --hours     start with 12 or 24 hour format. Value passed must be
+                either 24 or 12 (default: 12)
 
     --ac        art color*, value between [1,15]
     --tc        title color*, value between [1,15]
@@ -294,7 +301,7 @@ tzshortcurrent="$tzshort"
 # Function to push desktop notifications
 function notifydesktop {
     local notifytitle="ARTTIME"
-    local notifysubtitle="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
+    local notifysubtitle=$(strftime "%a %b %d, %Y $hms %Z")
     if [[ $printsprints = "1" ]]; then
         if [[ $goalmaxsprint != "-" ]]; then
             local notifymessage="sprint-$goalsprint/$goalmaxsprint "
@@ -339,9 +346,6 @@ theme="${theme_arg[-1]}"
 goal="${goal_arg[-1]}"
 termwidth="$COLUMNS"
 termheight="$LINES"
-timeformatnz="%s|%b %d, %I:%M%p"
-timeformatz="%s|%b %d, %I:%M%p %Z"
-timeformat=$timeformatnz
 artcolorarg="${artcolor_arg[-1]}"
 titlecolorarg="${titlecolor_arg[-1]}"
 style="${style_arg[-1]}"
@@ -350,6 +354,34 @@ pbpendingchar="${pbpendingchar_arg[-1]}"
 pblength="${pblength_arg[-1]}"
 debug="${debug_arg[-1]}"
 nolearn="${nolearn_arg[-1]}"
+#tflocal="${tflocal_arg[-1]}"
+#tfother="${tfother_arg[-1]}"
+hoursfmt="$hours_arg[-1]"
+
+hm12="%I:%M%p"
+hms12="%I:%M:%S%p"
+hm24="%H:%M"
+hms24="%H:%M:%S"
+
+# This function sets hm, hms, tflocal, tfother used in rest of the program
+function settimeformats {
+    if [[ $hoursfmt = "12" || $hoursfmt = "" ]]; then
+        hoursfmt="12"
+        hm="$hm12"
+        hms="$hms12"
+    elif [[ $hoursfmt = "24"  ]]; then
+        hm="$hm24"
+        hms="$hms24"
+    else
+        printf "E: --hours can only be passed a value of 24 or 12 (default)"
+        exit 1
+    fi
+    tflocal="%s|%b %d, $hm"
+    tfother="%s|%b %d, $hm %Z"
+}
+settimeformats
+
+timeformat=$tflocal
 
 if [[ ! -z $debug ]]; then
     tchar="|"
@@ -1665,6 +1697,35 @@ EOF
                 fi
             fi
             ;;
+        "f")
+            if [[ $hoursfmt = "12" ]]; then
+                hoursfmt="24"
+            else
+                hoursfmt="12"
+            fi
+            settimeformats
+            if [[ $tzshortcurrent != $tzshortinit || $tzlongcurrent != $tzlonginit ]]; then
+                timeformat=$tfother
+            else
+                timeformat=$tflocal
+            fi
+            starttime=$(strftime $timeformat $starttimearray[1])
+            starttimearray=(${(s/|/)starttime})
+            if [[ ! -z $goaltime ]]; then
+                local tmpgoaltime=$(strftime $timeformat $goaltime)
+                local tmpgoaltimearray=(${(s/|/)tmpgoaltime})
+                goaltimestr=$tmpgoaltimearray[2]
+                local goalentryarray
+                local goaltimestrupdated
+                for ((i=1;i<=goalmaxptreff;i=i+1)) do
+                    #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
+                    goalentryarray=(${(s/;/)goalarraysorted[$i]})
+                    goaltimestrupdated=$(strftime $timeformat $goalentryarray[1])
+                    goaltimestrupdated="${goaltimestrupdated#*|}"
+                    goalarraysorted[$i]=("$goalentryarray[1];$goalentryarray[2];$goalentryarray[3];$goaltimestrupdated;$goalentryarray[5]")
+                done
+            fi
+            ;;
         "h")
             if [[ $helpactive = "0" ]]; then
                 helpactive="1"
@@ -1691,7 +1752,7 @@ EOF
             ;;
         "i"|"I")
             local tmpcurtime=$(strftime '%s')
-            local infostring="$(strftime '%a %b %d, %Y %I:%M:%S%p %Z')"
+            local infostring=$(strftime "%a %b %d, %Y $hms %Z")
             infostring+=" ($tzlongcurrent)"
             infostring+="$(strftime ' | week %W')"
             infostring+=" | ID: $$ "
@@ -1729,11 +1790,11 @@ EOF
                     if [[ $goalstr != "loop" ]]; then
                         if ((i>=goalptr && pausegoals==1)); then
                             goaltimeunix=$((currenttimearray[1]+goalentryarray[1]-pausestart))
-                            local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                            local goaltimestr=$(strftime "%b %d, $hms" $goaltimeunix)
                             timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth "1")
                         else
                             goaltimeunix="$goalentryarray[1]"
-                            local goaltimestr=$(strftime '%b %d, %I:%M:%S%p' $goaltimeunix)
+                            local goaltimestr=$(strftime "%b %d, $hms" $goaltimeunix)
                             timepending=$(formattimedelta $((goaltimeunix-currenttimearray[1])) $datewidth "0")
                         fi
                         if ((i>goalptr && pausegoals==1)); then
@@ -1901,9 +1962,9 @@ EOF
                 tzlongcurrent="$tzlong"
                 tzshortcurrent="$tzshort"
                 if [[ $tzshortcurrent != $tzshortinit || $tzlongcurrent != $tzlonginit ]]; then
-                    timeformat=$timeformatz
+                    timeformat=$tfother
                 else
-                    timeformat=$timeformatnz
+                    timeformat=$tflocal
                 fi
                 starttime=$(strftime $timeformat $starttimearray[1])
                 starttimearray=(${(s/|/)starttime})
@@ -1911,6 +1972,15 @@ EOF
                     local tmpgoaltime=$(strftime $timeformat $goaltime)
                     local tmpgoaltimearray=(${(s/|/)tmpgoaltime})
                     goaltimestr=$tmpgoaltimearray[2]
+                    local goalentryarray
+                    local goaltimestrupdated
+                    for ((i=1;i<=goalmaxptreff;i=i+1)) do
+                        #$returngoaltime;$numgoals;$returngoalstatus;$returngoaltimestr;$goal
+                        goalentryarray=(${(s/;/)goalarraysorted[$i]})
+                        goaltimestrupdated=$(strftime $timeformat $goalentryarray[1])
+                        goaltimestrupdated="${goaltimestrupdated#*|}"
+                        goalarraysorted[$i]=("$goalentryarray[1];$goalentryarray[2];$goalentryarray[3];$goaltimestrupdated;$goalentryarray[5]")
+                    done
                 fi
             fi
             ;;
