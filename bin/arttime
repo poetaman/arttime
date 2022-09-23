@@ -424,10 +424,10 @@ fi
 
 
 if [[ ! -z "$nolearn" ]]; then
+    helpactive="0"
     if [[ -z "$artname" ]]; then
         artname="butterfly"
     fi
-    helpactive="0"
     restoreartname="help"
     if [[ ! -z "$flipartname" ]]; then
         restoreflipartname="$flipartname"
@@ -443,6 +443,7 @@ else
         restoreflipartname="$flipartname"
     fi
     artname="help"
+    flipartname=""
 fi
 
 
@@ -782,9 +783,11 @@ belowstr=""
 artht=""
 flipartht=""
 function setartstring {
-    artstring=$($bindir/artprint -a "$artname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style")
+    local maxartstringht=$((termheight-2))
+    ((maxartstringht<0)) && maxartstringht="0"
+    artstring=$($bindir/artprint -a "$artname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style"| tail -n $maxartstringht)
     if [[ ! -z $flipartname ]]; then
-        flipartstring=$($bindir/artprint -a "$flipartname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style")
+        flipartstring=$($bindir/artprint -a "$flipartname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style" | tail -n $maxartstringht)
     fi
     if [[ $artname != $prevartname ]]; then
         #echo "here, $artname, $prevartname"
@@ -855,17 +858,17 @@ function printart {
     if [[ ! -z $flipartname && $toggleflipart = "1" ]]; then
         toggleflipart="0"
         if [[ -z $1 ]]; then
-            printf '%s\n' "${tput_cup00}${flipartstring}"
+            printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "${flipartstring}"
         else
             # NOTE: For now unreachable, might be needed in future
-            printf '%s\n' "${tput_cup00}$1${flipartstring/#*\\n/}"
+            printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "$1${flipartstring/#*\\n/}"
         fi
     else
         toggleflipart="1"
         if [[ -z $1 ]]; then
-            printf '%s\n' "${tput_cup00}${artstring}"
+            printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "${artstring}"
         else
-            printf '%s\n' "${tput_cup00}$1${artstring/#*\\n/}"
+            printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "$1${artstring/#*\\n/}"
         fi
     fi
     #if [[ "$usr1detected" = "1" ]]; then
