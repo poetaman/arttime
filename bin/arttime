@@ -861,14 +861,14 @@ function printart {
             printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "${flipartstring}"
         else
             # NOTE: For now unreachable, might be needed in future
-            printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "$1${flipartstring/#*\\n/}"
+            printf "${tput_cup00}%s%$((termwidth-${#1}-1))s$tchar\e[38;5;${artcolor}m%s\n" "$1" " " "${flipartstring/#*\\n/}"
         fi
     else
         toggleflipart="1"
         if [[ -z $1 ]]; then
             printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "${artstring}"
         else
-            printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "$1${artstring/#*\\n/}"
+            printf "${tput_cup00}%s%$((termwidth-${#1}-1))s$tchar\e[38;5;${artcolor}m%s\n" "$1" " " "${artstring/#*\\n/}"
         fi
     fi
     #if [[ "$usr1detected" = "1" ]]; then
@@ -1442,16 +1442,15 @@ function usr1input_handler {
                 artname=$(basename $pathname)
                 prevartname=""
                 setartstring
-                local questionstr="Select this? (q:cancel, j:next, y:select), name: $artname "
+                local questionstr="Select this? (c:cancel, j:next, y:select), name: $artname "
                 printart $questionstr
                 lasttime=""
                 printtime "1"
-                # NOTE: this pain to show same prompt twice is not explainable in a line's comment
-                # try removing one of the instances, and do exhaustive UI testing to know why its here
-                printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
+                # NOTE: now this pain of overlaying the same string twice is not necessary
+                #printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
                 jresponse=""
                 read -k1 jresponse
-                if [[ $jresponse = "y" || $jresponse = "q" ]]; then
+                if [[ $jresponse = "y" || $jresponse = "c" ]]; then
                     break
                 fi
             done
