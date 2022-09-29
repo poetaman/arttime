@@ -461,20 +461,40 @@ elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
     titlecolorarg="2"
 fi
 
+tputset_str=""
 function tputset {
-tput -S <<HERE
+    if [[ -z $tputset_str ]]; then
+tputset_str=$(2>/dev/null tput -S <<HERE
     smcup
     civis
     rmam
 HERE
+)
+    if [[ "$?" != "0" ]]; then
+        tputset_str=$(tput smcup;tput civis;tput rmam)
+    fi
+    printf "$tputset_str"
+else
+    printf "$tputset_str"
+fi
 }
 
+tputreset_str=""
 function tputreset {
-tput -S <<HERE
+    if [[ -z $tputreset_str ]]; then
+tputreset_str=$(2>/dev/null tput -S <<HERE
     rmcup
     smam
     cnorm
 HERE
+)
+    if [[ "$?" != "0" ]]; then
+        tputreset_str=$(tput rmcup;tput smam;tput cnorm)
+    fi
+    printf "$tputreset_str"
+else
+    printf "$tputreset_str"
+fi
 }
 
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
@@ -844,12 +864,23 @@ function setartstring {
 # NOTE: tput sequences of at least printart and printtime
 # are better cached, rest is a low priority
 tput_cup00=$(tput cup 0 0)
+if [[ "$?" != "0" ]]; then
+    echo "E: Either your terminfo/termcap database is too old (more likely), or your terminal emulator is arcane (less likely). In particular, it does not seem to have capabilities like \"[31mcup[0m\". Please update terminfo/termcap database before trying arttime, search the web on how to do that. Keeping it updated will enable you to flawlessly run more terminal-based applications, or else you will hit a similar problem with another terminal application in future."
+    exiterrtput="1"
+fi
 tput_sc=$(tput sc)
 tput_rc=$(tput rc)
 tput_civis=$(tput civis)
 tput_cnorm=$(tput cnorm)
 tput_smcup=$(tput smcup)
 tput_cuu1=$(tput cuu1)
+if [[ "$?" != "0" ]]; then
+    echo "E: Either your terminfo/termcap database is too old (more likely), or your terminal emulator is arcane (less likely). In particular, it does not seem to have capabilities like \"[31mcuu[0m\". Please update terminfo/termcap database before trying arttime, search the web on how to do that. Keeping it updated will enable you to flawlessly run more terminal-based applications."
+    exiterrtput="1"
+fi
+if [[ $exiterrtput == "1" ]]; then
+    exit 1
+fi
 
 toggleflipart="0"
 function printart {
@@ -2002,10 +2033,11 @@ EOF
 function trapusr1_both {
     # NOTE: disable C-z when executing this trap
     trap '' TSTP
-tput -S <<HERE
-    sc
-    cup 0 0
-HERE
+#tput -S <<HERE
+#    sc
+#    cup 0 0
+#HERE
+    printf "${tput_sc}${tput_cup00}"
     # slurp previous user input
     userinput="$1"
     if [[ -z $userinput ]]; then
