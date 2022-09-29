@@ -864,12 +864,23 @@ function setartstring {
 # NOTE: tput sequences of at least printart and printtime
 # are better cached, rest is a low priority
 tput_cup00=$(tput cup 0 0)
+if [[ "$?" != "0" ]]; then
+    echo "E: Either your terminfo/termcap database is too old (more likely), or your terminal emulator is arcane (less likely). In particular, it does not seem to have capabilities like \"[31mcup[0m\". Please update terminfo/termcap database before trying arttime, search the web on how to do that. Keeping it updated will enable you to flawlessly run more terminal-based applications, or else you will hit a similar problem with another terminal application in future."
+    exiterrtput="1"
+fi
 tput_sc=$(tput sc)
 tput_rc=$(tput rc)
 tput_civis=$(tput civis)
 tput_cnorm=$(tput cnorm)
 tput_smcup=$(tput smcup)
 tput_cuu1=$(tput cuu1)
+if [[ "$?" != "0" ]]; then
+    echo "E: Either your terminfo/termcap database is too old (more likely), or your terminal emulator is arcane (less likely). In particular, it does not seem to have capabilities like \"[31mcuu[0m\". Please update terminfo/termcap database before trying arttime, search the web on how to do that. Keeping it updated will enable you to flawlessly run more terminal-based applications."
+    exiterrtput="1"
+fi
+if [[ $exiterrtput == "1" ]]; then
+    exit 1
+fi
 
 toggleflipart="0"
 function printart {
