@@ -7,6 +7,7 @@
 zmodload zsh/zselect
 zmodload zsh/zutil
 zmodload zsh/datetime
+zmodload zsh/terminfo
 
 # NOTE: enable minute/nonblocking mode if/when its functional,
 # or remove it completely as sample rate is a waste now that
@@ -461,41 +462,10 @@ elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
     titlecolorarg="2"
 fi
 
-tputset_str=""
-function tputset {
-    if [[ -z $tputset_str ]]; then
-tputset_str=$(2>/dev/null tput -S <<HERE
-    smcup
-    civis
-    rmam
-HERE
-)
-    if [[ "$?" != "0" ]]; then
-        tputset_str=$(tput smcup;tput civis;tput rmam)
-    fi
-    printf "$tputset_str"
-else
-    printf "$tputset_str"
-fi
-}
-
-tputreset_str=""
-function tputreset {
-    if [[ -z $tputreset_str ]]; then
-tputreset_str=$(2>/dev/null tput -S <<HERE
-    rmcup
-    smam
-    cnorm
-HERE
-)
-    if [[ "$?" != "0" ]]; then
-        tputreset_str=$(tput rmcup;tput smam;tput cnorm)
-    fi
-    printf "$tputreset_str"
-else
-    printf "$tputreset_str"
-fi
-}
+tputset_str=$(echoti smcup; echoti civis; echoti rmam)
+function tputset { printf "$tputset_str"; }
+tputreset_str=$(echoti rmcup; echoti smam; echoti cnorm)
+function tputreset { printf "$tputreset_str"; }
 
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
 regex1='^'$regexpart'$'
@@ -546,8 +516,8 @@ function setgoaltime {
         elif goaltime=$($datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
             if [[ $goaltime -gt $currenttime ]]; then
                 goalstatus="1"
-                #tput cup 0 0
-                #tput el
+                #echoti cup 0 0
+                #echoti el
                 #printf "Today's $goal has passed, setting goal time to tomorrow's $goal"
                 #sleep 2
             else
@@ -863,24 +833,13 @@ function setartstring {
 
 # NOTE: tput sequences of at least printart and printtime
 # are better cached, rest is a low priority
-tput_cup00=$(tput cup 0 0)
-if [[ "$?" != "0" ]]; then
-    echo "E: terminfo capability \"[31mcup[0m\" not found. If your system uses terminfo (Linux, macOS, etc) then your terminfo database needs update. Else if your system uses termcap (FreeBSD, etc) then installing ncurses and making it's tput utility as default tput would be needed. In near future this dependence on ncurses for termcap-based systems will be removed."
-    exiterrtput="1"
-fi
-tput_sc=$(tput sc)
-tput_rc=$(tput rc)
-tput_civis=$(tput civis)
-tput_cnorm=$(tput cnorm)
-tput_smcup=$(tput smcup)
-tput_cuu1=$(tput cuu1)
-if [[ "$?" != "0" ]]; then
-    echo "E: terminfo capability \"[31mcuu[0m\" not found. If your system uses terminfo (Linux, macOS, etc) then your terminfo database needs update. Else if your system uses termcap (FreeBSD, etc) then installing ncurses and making it's tput utility as default tput would be needed. In near future this dependence on ncurses for termcap-based systems will be removed."
-    exiterrtput="1"
-fi
-if [[ $exiterrtput == "1" ]]; then
-    exit 1
-fi
+tput_cup00=$(echoti cup 0 0)
+tput_sc=$(echoti sc)
+tput_rc=$(echoti rc)
+tput_civis=$(echoti civis)
+tput_cnorm=$(echoti cnorm)
+tput_smcup=$(echoti smcup)
+tput_cuu1=$(echoti cuu1)
 
 toggleflipart="0"
 function printart {
@@ -1251,10 +1210,10 @@ function artselector2 {
     local curcontext=artselector2:::
     tmpartname="";
     if command -v column &>/dev/null; then
-        echo $artnametemp  | tr ' ' '\n' | column -c$(tput cols)
+        echo $artnametemp  | tr ' ' '\n' | column -c$(echoti cols)
         printf '\n'
     else
-        tput smam
+        echoti smam
         printf '%s  ' $artnametemp
         printf '\n\n'
     fi
@@ -1344,7 +1303,7 @@ function usr1input_handler {
             $sttycmd $sttyorig
             printf "$tput_smcup"
             clear
-            tput cup 0 0
+            echoti cup 0 0
             if [[ $1 = "a" ]]; then
                 artselector
             else
@@ -1391,12 +1350,12 @@ function usr1input_handler {
                 fi
             fi
             #printart
-            #tput sc
+            #echoti sc
             ;;
         "x"|"y")
             if ! command -v fzf-tmux; then
-                tput cup 0 0
-                echo "$(tput el)fzf binary not found, please install it"
+                echoti cup 0 0
+                echo "$(echoti el)fzf binary not found, please install it"
                 zselect -t 200
                 while read dummy ; do : ; done 
                 return
@@ -1456,7 +1415,7 @@ function usr1input_handler {
                 fi
             fi
             #printart
-            #tput sc
+            #echoti sc
             ;;
         "j")
             jrestoreartname="$artname"
@@ -1519,7 +1478,7 @@ function usr1input_handler {
         "p")
             if [[ $goaltime != "" && $goaldone = "0" || $goaltime = "" && $pausegoals = "1" ]]; then
                 $sttycmd $sttyorig
-                tput cnorm
+                echoti cnorm
                 if [[ $pausegoals = "" || $pausegoals = "0" ]]; then
                     if askforconfirmation "pause goals"; then
                         pausegoals="1"
@@ -1542,7 +1501,7 @@ function usr1input_handler {
                 fi
                 $sttycmd -echo
                 $sttycmd -icanon min 0 time 0
-                tput civis
+                echoti civis
             else
                 echo "No goals set, so nothing to pause"
                 zselect -t 200
@@ -1552,7 +1511,7 @@ function usr1input_handler {
         "e")
             if [[ ! -z $goal ]]; then
                 $sttycmd $sttyorig
-                tput cnorm
+                echoti cnorm
                 if askforconfirmation "restart previous goal '$goal'"; then
                     goalsprint="1"
                     pausegoals="0"
@@ -1562,7 +1521,7 @@ function usr1input_handler {
                 fi
                 $sttycmd -echo
                 $sttycmd -icanon min 0 time 0
-                tput civis
+                echoti civis
             else
                 echo "No goals set, so nothing to restart"
                 zselect -t 200
@@ -1570,8 +1529,8 @@ function usr1input_handler {
             fi
             ;;
         "g")
-            tput cup 0 0
-            tput el
+            echoti cup 0 0
+            echoti el
             tempgoal=""
             $sttycmd $sttyorig
             if [[ $bashavailable = "1" ]]; then
@@ -1713,7 +1672,7 @@ EOF
                     fi
                     clear
                     less -R <<<"$datehelpstr" 2>/dev/null
-                    tput smcup
+                    echoti smcup
                 else
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
                         printsprints="1"
@@ -1851,7 +1810,7 @@ EOF
             if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 clear
                 printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
-                tput smcup
+                echoti smcup
             else
                 infostring+="\nPress any key to continue "
                 printf "$infostring"
@@ -1866,14 +1825,14 @@ EOF
         "l")
             if [[ ! -z $goaltime ]]; then
                 $sttycmd $sttyorig
-                tput cnorm
+                echoti cnorm
                 if askforconfirmation "clear goals"; then
                     goaltime=""
                     pausegoals="0"
                 fi
                 $sttycmd -echo
                 $sttycmd -icanon min 0 time 0
-                tput civis
+                echoti civis
             else
                 echo "No active goal to clear"
                 zselect -t 200
@@ -1881,8 +1840,8 @@ EOF
             fi
             ;;
         "m")
-            tput cup 0 0
-            tput el
+            echoti cup 0 0
+            echoti el
             temptitle=""
             $sttycmd $sttyorig
             #printf "Enter message (Ctrl-d to cancel): "
@@ -1914,7 +1873,7 @@ EOF
             ;;
         "r")
             $sttycmd $sttyorig
-            tput cnorm
+            echoti cnorm
             if askforconfirmation "reset start time, and goal"; then
                 resetstarttime="1"
                 goaltime=""
@@ -1922,11 +1881,11 @@ EOF
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput civis
+            echoti civis
             ;;
         "q")
             $sttycmd $sttyorig
-            tput cnorm
+            echoti cnorm
             if askforconfirmation "quit arttime"; then
                 trap -;
                 pkill -P $$;
@@ -1940,14 +1899,14 @@ EOF
             fi
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
-            tput civis
+            echoti civis
             ;;
         #"s")
-        #    tput cup 0 0
-        #    tput el
+        #    echoti cup 0 0
+        #    echoti el
         #    tempsamples=""
         #    $sttycmd $sttyorig
-        #    tput cnorm
+        #    echoti cnorm
         #    if [[ ! -z $updateonminute ]]; then
         #        # XXX: look here
         #        printf "Enter samples per minute (current value = $samples): "
@@ -1957,9 +1916,9 @@ EOF
         #    read tempsamples
         #    $sttycmd -echo
         #    $sttycmd -icanon min 0 time 0
-        #    tput civis
+        #    echoti civis
         #    if [[ -z $tempsamples || ! $tempsamples =~ ^([1-9]\|[1-9][0-9]+)$ ]]; then
-        #        tput cup 0 0
+        #        echoti cup 0 0
         #        printf "Error: samples should be an integer > 0"
         #        zselect -t 200
         #    else
@@ -1982,8 +1941,8 @@ EOF
         "z")
             $sttycmd $sttyorig
             printf "$tput_smcup"
-            tput cup 0 0
-            tput cnorm
+            echoti cup 0 0
+            echoti cnorm
             clear
             zoneselector
             $sttycmd -echo
