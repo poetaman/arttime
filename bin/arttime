@@ -851,14 +851,14 @@ function printart {
             printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "${flipartstring}"
         else
             # NOTE: For now unreachable, might be needed in future
-            printf "${tput_cup00}%s%$((termwidth-${#1}-1))s$tchar\e[38;5;${artcolor}m%s\n" "$1" " " "${flipartstring/#*\\n/}"
+            printf "${tput_cup00}%s%$((termwidth-${#1}-1))s$tchar\n\e[38;5;${artcolor}m%s\n" "$1" " " "${flipartstring#*$'\n'}"
         fi
     else
         toggleflipart="1"
         if [[ -z $1 ]]; then
             printf "${tput_cup00}\e[38;5;${artcolor}m%s\n" "${artstring}"
         else
-            printf "${tput_cup00}%s%$((termwidth-${#1}-1))s$tchar\e[38;5;${artcolor}m%s\n" "$1" " " "${artstring/#*\\n/}"
+            printf "${tput_cup00}%s%$((termwidth-${#1}-1))s$tchar\n\e[38;5;${artcolor}m%s\n" "$1" " " "${artstring#*$'\n'}"
         fi
     fi
     #if [[ "$usr1detected" = "1" ]]; then
