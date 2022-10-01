@@ -245,10 +245,16 @@ done
 
 #echo "$textwidth, $shiftwidth"
 if [[ $style = "0" || $style = "" ]]; then
-    title="${title//❝/“}"
-    title="${title//❞/”}"
-    subtitle="${subtitle//❝/“}"
-    subtitle="${subtitle/❞/”}"
+    title="${title//❝ /\"}"
+    title="${title// ❞/\"}"
+    title="${title//“/\"}"
+    title="${title//”/\"}"
+    title="${title//—/-}"
+    subtitle="${subtitle//❝/\"}"
+    subtitle="${subtitle/❞/\"}"
+    subtitle="${subtitle//“/\"}"
+    subtitle="${subtitle//”/\"}"
+    subtitle="${subtitle//—/-}"
 else
     title="${title//“/❝}"
     title="${title//”/❞}"
