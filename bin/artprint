@@ -315,4 +315,4 @@ if [[ ! -z "$subtitle" ]]; then
     #done
 fi
 #printf "%$((termwidth-1))s$tchar" " "
-
+printf "[0m"
