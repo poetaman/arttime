@@ -2,7 +2,7 @@
 # Copyrights 2022 Aman Mehra.
 # Check ./LICENSE_CODE, ./LICENSE_ART, and ./LICENSE_ADDENDUM_CFLA
 # files to know the terms of license
-# License files are also on github: https://github.com/reportaman/arttime
+# License files are also on github: https://github.com/poetaman/arttime
 
 zparseopts -D -E -F - \
     l=local_arg_array \
@@ -33,7 +33,7 @@ Description:
     beauty of text art with functionality of a feature-rich clock/timer
     /pattern-based time manager. For more information on arttime, run
     ./bin/arttime -h and visit it's github page:
-    https://github.com/reportaman/arttime
+    https://github.com/poetaman/arttime
 
 Options:
     -l --local          Install arttime executables locally in ~/.local/bin

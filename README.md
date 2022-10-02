@@ -45,18 +45,18 @@ Contents
 - For consistent art & message display in multiple applications, a script ``artprint`` is also available in the same directory as ``arttime``.
 - Multiple ways to select text art: random, by name (with completion hints), via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
 - Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping!
-- Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/reportaman/arttime/blob/main/LICENSE_ADDENDUM_CFLA), please be mindful.
+- Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/poetaman/arttime/blob/main/LICENSE_ADDENDUM_CFLA), please be mindful.
 - Best for privacy: Unlike commercial apps that connect to internet, track your activity and send/sell your data, arttime runs solely on your computer. It does not connect to internet, does not look at or track your data, and does not send any data outside your computer. Unlike binaries, arttime is a human-readable text file that can always be reviewed.
 - Secure: Unlike most other interactive software projects which rely on multiple 3rd-party packages that are hard to audit, this project relies solely on what comes pre-installed on Unix-style operating systems like macOS/Linux, and no 3rd-party packages. This makes it much more secure compared to other software out there.
 
 Note: arttime is tuned to consume less power and memory. It uses only about ~0.3% of CPU time while running, and only around 6MB of RAM in steady state on my machine.
 
 # Call for artists
-Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images). If you are a text artist, or find a treasure trove of libre ascii/text art, please feel free to leave a link to the work in [arttime discussions](https://github.com/reportaman/arttime/discussions).
+Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images). If you are a text artist, or find a treasure trove of libre ascii/text art, please feel free to leave a link to the work in [arttime discussions](https://github.com/poetaman/arttime/discussions).
 
 ## What does and doesn't constitute text art?
    - Does: Manually typed/composed text in some text editor/program, this is most text art in the collection.
-   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository, example: [gravity (D.H. 1992)](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/gravity), [concentricfield (D.H. 1991)](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/concentricfield), [globe (D.H. 1991)](https://github.com/reportaman/arttime/blob/main/share/arttime/textart/globe).
+   - Does: Output of a manually coded algorithm (not AI) that generates text art. Check the work of artist with initials ``D.H.`` in this repository, example: [gravity (D.H. 1992)](https://github.com/poetaman/arttime/blob/main/share/arttime/textart/gravity), [concentricfield (D.H. 1991)](https://github.com/poetaman/arttime/blob/main/share/arttime/textart/concentricfield), [globe (D.H. 1991)](https://github.com/poetaman/arttime/blob/main/share/arttime/textart/globe).
    - Doesn't: Output of a program that converts digital image (jpeg, etc) to a similar looking text version. Such art does sparingly exist in the collection of this repository, though it is only to show how arttime can be used. It is not a priority for curation, unless there is a strong reason.
    - Doesn't: AI generated "text art", its not a priority for curation here.
 
@@ -101,13 +101,13 @@ There are two installation methods: 1) Simple, 2) Manual. As the name suggests, 
 - Open some "Terminal" application on your computer
 - Copy following line from start to end. *(Note: hovering your computer mouse near the right end of the following box will show a button inside the box, clicking it will copy the line for you. Or else you will have to press and hold to the mouse to scroll and select the entire line from beginning to end, and copy it.)*
 ```
-zsh -c "$(curl -fsSL https://gist.githubusercontent.com/reportaman/bdc598ee607e9767fe33da50e993c650/raw/bf8d5db844e0bec7a386c977a5785bd88bb0f003/arttime_online_installer.sh)"
+zsh -c "$(curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/bf8d5db844e0bec7a386c977a5785bd88bb0f003/arttime_online_installer.sh)"
 ```
 - Paste the above copied line in some "Terminal" application, and press ``Enter``
 - When installation completes, do one of the following (easiest choice first): 1) restart "Terminal" application, or 2) open a new tab in "Terminal" application, or 3) for more terminal-aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
 - Type ``arttime`` and press ``Enter``, arttime will launch!
 
-Note: The simple install method installs arttime under ``~/.local``, which is a standard install directory for local installation. It also clones the arttime github repository under ``~/packages/github/reportaman``.
+Note: The simple install method installs arttime under ``~/.local``, which is a standard install directory for local installation. It also clones the arttime github repository under ``~/packages/github/poetaman``.
 
 ---
 
