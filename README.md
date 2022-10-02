@@ -101,7 +101,7 @@ There are two installation methods: 1) Simple, 2) Manual. As the name suggests, 
 - Open some "Terminal" application on your computer
 - Copy following line from start to end. *(Note: hovering your computer mouse near the right end of the following box will show a button inside the box, clicking it will copy the line for you. Or else you will have to press and hold to the mouse to scroll and select the entire line from beginning to end, and copy it.)*
 ```
-zsh -c "$(curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/bf8d5db844e0bec7a386c977a5785bd88bb0f003/arttime_online_installer.sh)"
+zsh -c "$(curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/1d2b5521a87c9efdc7edbd6189afd15b2a6a0abf/arttime_online_installer.sh)"
 ```
 - Paste the above copied line in some "Terminal" application, and press ``Enter``
 - When installation completes, do one of the following (easiest choice first): 1) restart "Terminal" application, or 2) open a new tab in "Terminal" application, or 3) for more terminal-aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
