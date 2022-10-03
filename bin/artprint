@@ -231,12 +231,12 @@ printf "%$((termwidth-1)).s$tchar\n" " " {0..$shiftheight}
 
 if [[ -z $artcolor ]]; then
     if [[ -z "$theme" || "$theme" = "dark" ]]; then
-        printf "\e[0m\e[1m\e[38;5;1m"
+        printf "\e[0m\e[38;5;1m" #\e[1m
     else
-        printf "\e[0m\e[1m\e[38;5;m"
+        printf "\e[0m\e[38;5;m" #\e[1m
     fi
 else
-    printf "\e[0m\e[1m\e[38;5;${artcolor}m"
+    printf "\e[0m\e[38;5;${artcolor}m" #\e[1m
 fi
 pr -t $prshiftopt <<<"$art" | while IFS= read -r line; do
     artlinewidth=$(findtextwidth $line)
