@@ -464,7 +464,7 @@ fi
 
 tputset_str=$(echoti smcup; echoti civis; echoti rmam)
 function tputset { printf "$tputset_str"; }
-tputreset_str=$(echoti rmcup; echoti smam; echoti cnorm)
+tputreset_str=$(echoti smam; echoti cnorm; echoti rmcup)
 function tputreset { printf "$tputreset_str"; }
 
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
