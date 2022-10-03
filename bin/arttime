@@ -1889,11 +1889,9 @@ EOF
             if askforconfirmation "quit arttime"; then
                 trap -;
                 pkill -P $$;
+                echoti cup $LINES 0
+                printf "\n"
                 tputreset;
-                if [[ $terminfo[smcup] == "" || $terminfo[rmcup] == "" ]]; then
-                    echoti cup $LINES 0
-                    printf "\n"
-                fi
                 if [[ $trapintactive = "1" ]]; then
                     set -e
                     (exit 130)
