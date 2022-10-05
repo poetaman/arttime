@@ -22,7 +22,7 @@ Contents
 🧜🏼‍♀️ Beauty of text art meets functionality of a feature-rich clock / timer / pattern-based time manager ⏰. ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal.
 
 ## Purpose/features
-- Bring curated text/ascii art to artless terminals, currently 300+ high-quality text art to choose from
+- Bring curated text/ascii art to artless terminals, currently 400+ high-quality text art to choose from
 - Provide a feature-rich alarm timer/time manager for commandline.
   - Set multiple timers, supports specifying delta in time (like ``1h 30m`` from now) or absoulte time (like ``Dec 22 2:45PM EST``).
   - Configurable pattern-based time management: Set a repeating pattern of times to get notifications at. This makes [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) just one of billions of patterns possible for time management, and makes you set a pattern that works for you. Entire time management program can be paused+delayed and un-paused by pressing a key (``p``). Note: for now even absolute goals like ``1PM`` get delayed, in future users will be able to override that. 
