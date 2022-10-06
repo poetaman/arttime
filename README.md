@@ -92,7 +92,7 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 # Installation
 
-There are two installation methods: 1) Simple, 2) Manual. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), and 2) Manual method is for users who are fluent in using terminal and want to customize installation.
+There are two installation methods: 1) Simple, 2) Manual, 3) Package manager. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), 2) Manual method is for users who are fluent in using terminal and want the most customize install experience (check any optional dependencies at [arttime dependencies](https://github.com/poetaman/arttime/wiki#dependencies)), 3) Package manager method automates dependency installation, though mostly requires superuser password to install.
 
 ---
 
@@ -119,9 +119,12 @@ Note: The simple install method installs arttime under ``~/.local``, which is a 
 
 ---
 
+3) Package manager method:
 Arttime might also be available as a package or build receipe in your favorite system distribution:
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/arttime.svg)](https://repology.org/project/arttime/versions)
+
+If you don't see your favorite distribution and would like to volunteer then get in touch. Useful links: [arttime dependencies](https://github.com/poetaman/arttime/wiki#dependencies), [arttime discussions](https://github.com/poetaman/arttime/discussions), [@ehaupt](https://github.com/ehaupt)'s [FreeBSD PR](https://github.com/poetaman/arttime/pull/25)/[FreeBSD port](https://github.com/freebsd/freebsd-ports/commit/7f2f0cc69b9348a6bfcbdbeee5793616628307b4)/[FreeBSD art](https://github.com/poetaman/arttime/pull/25/commits/943fa08cffaa16a59a9aefbfd432467afc65b1c4). Once you have added a package, open a pull request with some representative art like [FreeBSD art](https://github.com/poetaman/arttime/pull/25/commits/943fa08cffaa16a59a9aefbfd432467afc65b1c4) to get representation for your favorite distribution!
 
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
