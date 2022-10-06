@@ -126,8 +126,8 @@ Note: The simple install method installs arttime under ``~/.local``, which is a 
   - Yet another possibility is that the colorscheme that you have selected in your terminal emulator is not good enough. Most of the art in the repository looks good on a dark background, at the very least try a dark background. Depending on what terminal emulator you use, colorscheme of arttime can be changed on-the-fly too (this is simple to do in [iTerm2](https://iterm2.com)). For instance check [iterm2colorschemes](https://iterm2colorschemes.com) on how to install hundreds of colorschemes.
 - No desktop notification?
   - Currently macOS, Linux, and BSD Unixes have been tested. They use the native technique so should work across versions. Pull requests for other OSes (like WSL on Windows, etc) will be considered if the technique is native enough.
-- No notification sound on Linux?
-  - Sounds on Linux/BSD Unixes are played using [PulseAudio](https://en.wikipedia.org/wiki/PulseAudio)'s [paplay](https://linux.die.net/man/1/paplay) as that seems to be the most standard way. Other suggestions are welcome, and will be considered.
+- No notification sound on Linux/BSD Unix?
+  - Sounds on Linux/BSD Unixes are played using [PulseAudio](https://en.wikipedia.org/wiki/PulseAudio)'s [paplay](https://linux.die.net/man/1/paplay) as that seems to be the most standard way. Other suggestions are welcome, and will be considered. There is an bug in BSD Unixes which will be worked around soon, check https://github.com/poetaman/arttime/issues/27.
 - Notifications for arttime do not stay for long time on macOS?
   - This setting cannot be controlled by arttime. You will have to do this one time change on your computer: Open System Preferences > Select Notifications & Focus > Scroll to Script Editor > Change "Script editor alert style" to "Alerts". Make sure "Allow Notifications" is selected. Additionally check the combination of boxes based on your preferences. Also change the focus settings as described in next bullet point.
 - Notification don't always appear on macOS, example: during a Zoom call?
