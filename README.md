@@ -117,6 +117,12 @@ Note: The simple install method installs arttime under ``~/.local``, which is a 
 - Run ``./install.sh`` with your options of choice
 - Rest is similar to the last 2 steps of simple installer
 
+---
+
+Arttime might also be available as a package or build receipe in your favorite system distribution:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/arttime.svg)](https://repology.org/project/arttime/versions)
+
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
   - This is mostly because zsh on your system is old. Try upgrading zsh to version 5.8 or above. Latest macOS already comes with version 5.9 preinstalled on the computer. If you use a Linux distribution that has very old zsh in its package repositories, you might have to build zsh with a higher version with some more effort.
