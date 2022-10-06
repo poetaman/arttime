@@ -19,7 +19,7 @@ Contents
 
 
 # arttime
-Beauty of text art meets functionality of a feature-rich clock / timer / pattern-based time manager. In addition to its functional/productivity features, ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal. It is a cross-platform application with native notifications/sounds that runs well on macOS, Linux, and BSD Unixes.
+Beauty of text-art meets functionality of a feature-rich clock / timer / pattern-based time manager. In addition to its functional/productivity features, ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal. It is a cross-platform application with native notifications/sounds that runs well on macOS, Linux, and BSD Unixes.
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 400+ high-quality text art to choose from
