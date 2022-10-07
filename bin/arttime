@@ -328,9 +328,15 @@ function notifydesktop {
         local notifystr="display notification \"$notifymessage\" with title \"$notifytitle\" subtitle \"$notifysubtitle\" sound name \"Blow\""
         osascript -e $notifystr 2>/dev/null
     elif [[ $machine = "Linux" || $machine = "BSD" ]]; then
+        [[ -z $XDG_DATA_DIRS ]] && export XDG_DATA_DIRS="$HOME/.local/share:/usr/share/xfce4:/usr/local/share:/usr/share"
         read -r freedesk_message_sound <<(print -rC1 -- ${(s[:])^XDG_DATA_DIRS}/sounds/freedesktop/stereo/message-new-instant.oga(ND))
-        [[ -n $freedesk_message_sound && -e $freedesk_message_sound ]] && paplay $freedesk_message_sound 2>/dev/null &
-        notify-send -u critical $notifytitle "$notifysubtitle\r$notifymessage" 2>/dev/null
+        if command -v ogg123 &>/dev/null; then
+            soundcommand="ogg123"
+        else
+            soundcommand="paplay"
+        fi
+        [[ -n $freedesk_message_sound && -e $freedesk_message_sound ]] && $soundcommand $freedesk_message_sound &>/dev/null &
+        notify-send -u critical $notifytitle "$notifysubtitle\r$notifymessage" &>/dev/null
     fi
 }
 
