@@ -332,6 +332,8 @@ function notifydesktop {
         read -r freedesk_message_sound <<(print -rC1 -- ${(s[:])^XDG_DATA_DIRS}/sounds/freedesktop/stereo/message-new-instant.oga(ND))
         if command -v paplay &>/dev/null && pulseaudio --check &>/dev/null; then
             soundcommand="paplay"
+        elif command -v pw-play &>/dev/null && {pactl info 2>/dev/null | grep "Server Name" 2>/dev/null | grep "PipeWire" &>/dev/null}; then
+            soundcommand="pw-play" 
         else
             soundcommand="ogg123"
         fi
