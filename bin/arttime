@@ -847,6 +847,7 @@ tput_civis=$(echoti civis)
 tput_cnorm=$(echoti cnorm)
 tput_smcup=$(echoti smcup)
 tput_cuu1=$(echoti cuu1)
+tput_cub1=$(echoti cub1)
 
 toggleflipart="0"
 function printart {
@@ -1182,7 +1183,7 @@ function trapcont_nonblocking {
 
 function askforconfirmation {
     local response=""
-    printf "Do you really want to $1? [y/n]: "
+    printf "Do you really want to $1? [y/n]:  ${tput_cub1}${tput_cnorm}"
     read -k1 response
     if [[ $response = "y" || $response = "Y" ]]; then
         return 0
@@ -1485,7 +1486,6 @@ function usr1input_handler {
         "p")
             if [[ $goaltime != "" && $goaldone = "0" || $goaltime = "" && $pausegoals = "1" ]]; then
                 $sttycmd $sttyorig
-                echoti cnorm
                 if [[ $pausegoals = "" || $pausegoals = "0" ]]; then
                     if askforconfirmation "pause goals"; then
                         pausegoals="1"
@@ -1518,7 +1518,6 @@ function usr1input_handler {
         "e")
             if [[ ! -z $goal ]]; then
                 $sttycmd $sttyorig
-                echoti cnorm
                 if askforconfirmation "restart previous goal '$goal'"; then
                     goalsprint="1"
                     pausegoals="0"
@@ -1832,7 +1831,6 @@ EOF
         "l")
             if [[ ! -z $goaltime ]]; then
                 $sttycmd $sttyorig
-                echoti cnorm
                 if askforconfirmation "clear goals"; then
                     goaltime=""
                     pausegoals="0"
@@ -1880,7 +1878,6 @@ EOF
             ;;
         "r")
             $sttycmd $sttyorig
-            echoti cnorm
             if askforconfirmation "reset start time, and goal"; then
                 resetstarttime="1"
                 goaltime=""
@@ -1892,7 +1889,6 @@ EOF
             ;;
         "q")
             $sttycmd $sttyorig
-            echoti cnorm
             if askforconfirmation "quit arttime"; then
                 trap -;
                 pkill -P $$;
