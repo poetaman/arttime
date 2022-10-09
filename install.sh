@@ -177,14 +177,22 @@ else
     loginshell="${SHELL}"
     loginshell=$(basename ${SHELL})
     if [[ $loginshell == *zsh* ]]; then
-        echo "\n# Following line was automatically added by arttime installer" >>~/.zshrc
-        echo 'export PATH='"$bindir"':$PATH' >>~/.zshrc
-        echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/.zshrc'
-        echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
+        profile='.zshrc'
     elif [[ $loginshell == *bash* ]]; then
-        echo "\n# Following line was automatically added by arttime installer" >>~/.profile
-        echo 'export PATH='"$bindir"':$PATH' >>~/.profile
-        echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/.profile'
+        if [[ -e $HOME/.bash_profile ]]; then
+            profile='.bash_profile'
+        else
+            profile='.profile'
+        fi
+    elif [[ $loginshell == *ksh* ]]; then
+        profile='.profile'
+    else
+        profile=''
+    fi
+    if [[ ! -z $profile ]]; then
+        echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
+        echo 'export PATH='"$bindir"':$PATH' >>$HOME/$profile
+        echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
         echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
     else
         echo "\nInstallation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable,\n    2) Restart your terminal application, type 'arttime' and press Enter."
