@@ -192,7 +192,6 @@ else
         echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
         echo 'export PATH='"$bindir"':$PATH' >>$HOME/$profile
         echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
-        echo "      Feel free to move or remove it after next login/reboot to a more appropriate location."
         echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
     else
         echo "\nInstallation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter."
