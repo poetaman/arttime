@@ -4,6 +4,12 @@
 # files to know the terms of license
 # License files are also on github: https://github.com/poetaman/arttime
 
+autoload -Uz is-at-least
+if ! is-at-least "5.8"; then
+    echo "Error: your zsh version $ZSH_VERSION is less than the required version: 5.8"
+    exit 1
+fi
+
 zparseopts -D -E -F - \
     l=local_arg_array \
     -local=local_arg_array \
