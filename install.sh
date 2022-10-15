@@ -10,6 +10,8 @@ if ! is-at-least "5.8"; then
     exit 1
 fi
 
+zmodload zsh/terminfo
+
 zparseopts -D -E -F - \
     l=local_arg_array \
     -local=local_arg_array \
@@ -154,8 +156,8 @@ cd $installerdir/share/arttime/textart
 artfilearray=()
 artfilearray=(*(.))
 artfilearraysize="${#artfilearray}"
-tput_cuu1=$(tput cuu1)
-tput civis
+tput_cuu1=$(echoti cuu1)
+echoti civis
 for ((i = 1; i <= $artfilearraysize; i++)); do
     file="$artfilearray[i]"
     if [[ -f "$artdir/$file" ]]; then
@@ -203,4 +205,4 @@ else
         echo "\nInstallation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter."
     fi
 fi
-tput cnorm
+echoti cnorm
