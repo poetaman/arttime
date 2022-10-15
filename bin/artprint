@@ -37,12 +37,12 @@ Invocation:
 
 Description:
     artprint prints text art with optional title/subtitle in center of
-    terminal screen, or indented to height/width passed in optional 
+    terminal screen, or indented to height/width passed as optional 
     arguments.
     
     Why artprint? To provide a consistent display of text art in multiple
     applications. While artprint is a program in the arttime repository and
-    used by arttime to print art on screen, is not tied or limited
+    used by arttime to print art on screen, it is not tied or limited
     to arttime. One can use artprint to bring the beauty of text art
     to various aspects of their development environment, without having
     to reinvent the wheel.
@@ -101,9 +101,9 @@ Examples:
         in artdir
     $ artprint -t "Hello World - Jurrasic"
         prints trex art with "Hello World - trex" under the trex ASCII art
-    $ artprint -t "Hello World - Jurrasic" --ac 2 --style 1
-        prints "Hello World — Jurrasic" (en dash replaced with em dash)
-        under the trex ascii art colored in color 2 (green)
+    $ artprint -t "Hello World - Jurrasic" --ac 2
+        prints "Hello World - Jurrasic" under the trex ASCII art
+        colored in color 2 (green)
 EOF
 echo $VAR
 }
