@@ -27,6 +27,7 @@ local_arg="$local_arg_array[-1]"
 global_arg="$global_arg_array[-1]"
 prefix_arg="$prefix_arg_array[-1]"
 help_arg="$help_arg_array[-1]"
+machine="$(uname -s)"
 
 function printhelp {
 read -r -d '' VAR <<-'EOF'
@@ -178,6 +179,33 @@ for ((i = 1; i <= $artfilearraysize; i++)); do
     fi
     echo "Progress: ${(l:3:: :)percentdone}% done$tput_cuu1\r"
 done
+
+if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
+    if ! command -v notify-send &>/dev/null; then
+        echo "[4mDEPENDS[0m: If you want desktop notifications, you need notify-send."
+    fi
+    if command -v paplay &>/dev/null; then
+        if pulseaudio --check &>/dev/null; then
+            pulserunning="1"
+        else
+            pulserunning="0"
+        fi
+    fi
+    if command -v pw-play &>/dev/null; then
+        if {pactl info 2>/dev/null | grep "Server Name" 2>/dev/null | grep "PipeWire" &>/dev/null}; then
+            piperunning="1"
+        else
+            piperunning="0"
+        fi
+    fi
+    if command -v ogg123 &>/dev/null; then
+        vorbisinstalled="1"
+    fi
+    if [[ $pulserunning != "1" && $piperunning != "1" && $vorbisinstalled != "1" ]]; then
+        echo "[4mDEPENDS[0m: If you want desktop sounds, you need one of: 1) pulseaudio daemon running, or 2) pipewire daemon running, or 3) vorbis-tools."
+    fi
+fi
+
 # Check if path to arttime excutable is on user's $PATH
 if [[ ":$PATH:" == *":$bindir:"* ]]; then
     echo "\nInstallation complete!\nRestart your terminal application, type 'arttime' and press Enter."
