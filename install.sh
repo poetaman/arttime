@@ -204,7 +204,7 @@ if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
         vorbisinstalled="1"
     fi
     if [[ $pulserunning != "1" && $piperunning != "1" && $vorbisinstalled != "1" ]]; then
-        echo "[4mDEPENDS[0m: If you want desktop sounds, you need one of: 1) pulseaudio daemon running, or 2) pipewire daemon running, or 3) vorbis-tools."
+        echo "[4mDEPENDS[0m: If you want desktop sounds, you need one of: 1) pulseaudio daemon\n         running, or 2) pipewire daemon running, or 3) vorbis-tools."
     fi
 fi
 
