@@ -180,6 +180,8 @@ for ((i = 1; i <= $artfilearraysize; i++)); do
     echo "Progress: ${(l:3:: :)percentdone}% done$tput_cuu1\r"
 done
 
+printf "\n"
+
 if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
     if ! command -v notify-send &>/dev/null; then
         echo "[4mDEPENDS[0m: If you want desktop notifications, you need notify-send."
@@ -208,7 +210,7 @@ fi
 
 # Check if path to arttime excutable is on user's $PATH
 if [[ ":$PATH:" == *":$bindir:"* ]]; then
-    echo "\nInstallation complete!\nRestart your terminal application, type 'arttime' and press Enter."
+    echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
 else
     loginshell="${SHELL}"
     loginshell=$(basename ${SHELL})
@@ -227,10 +229,10 @@ else
     if [[ ! -z $profile ]]; then
         echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
         echo 'export PATH='"$bindir"':$PATH' >>$HOME/$profile
-        echo '\nNote: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
+        echo 'Note: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
         echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
     else
-        echo "\nInstallation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter."
+        echo "Installation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter."
     fi
 fi
 echoti cnorm
