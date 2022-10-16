@@ -92,7 +92,7 @@ https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-
 
 # Installation
 
-There are three installation methods: 1) Simple, 2) Manual, 3) Package manager. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also mostly no password required), 2) Manual method is for users who are fluent in using terminal and want the most customize install experience (check any optional dependencies at [arttime dependencies](https://github.com/poetaman/arttime/wiki#dependencies)), 3) Package manager method automates dependency installation, though mostly requires superuser password to install.
+There are three installation methods: 1) Simple, 2) Manual, 3) Package manager. As the name suggests, 1) Simple method should be used by users who want a simple install experience (also no password required), 2) Manual method is for users who are fluent in using terminal and want the most customize install experience (check any optional dependencies at [arttime dependencies](https://github.com/poetaman/arttime/wiki#dependencies)), 3) Package manager method automates dependency installation, though mostly requires admin password to install.
 
 ---
 
@@ -102,8 +102,8 @@ There are three installation methods: 1) Simple, 2) Manual, 3) Package manager. 
 ```
 zsh -c '{url="https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/7b93ec8bad86cc9feec75a8486bc82111953dd8a/arttime_online_installer.sh"; zsh -c "$(curl -fsSL $url || wget -qO- $url)"}'
 ```
-- Paste the above copied line in some "Terminal" application, and press ``Enter``
-- When installation completes, do one of the following (easiest choice first): 1) restart "Terminal" application, or 2) open a new tab in "Terminal" application, or 3) for more terminal-aware users: "source" your respective ``~/.bashrc`` or ``~/.zshrc``
+- Paste the above copied line in "Terminal" application, and press ``Enter``
+- Installer will print any further action you need to take before running it.
 - Type ``arttime`` and press ``Enter``, arttime will launch!
 
 Note: The simple install method installs arttime under ``~/.local``, which is a standard install directory for local installation. It also clones the arttime github repository under ``~/packages/github/poetaman``.
