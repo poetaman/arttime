@@ -206,6 +206,8 @@ if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
     if [[ $pulserunning != "1" && $piperunning != "1" && $vorbisinstalled != "1" ]]; then
         echo "[4mDEPENDS[0m: If you want desktop sounds, you need one of: 1) pulseaudio daemon\n         running, or 2) pipewire daemon running, or 3) vorbis-tools."
     fi
+elif [[ $machine =~ ^Darwin.*$ ]]; then
+    echo "[4mNote[0m: Notification settings on macOS are not fully in control of an application.\n      To check if you have desired notification settings, open following link.\n      https://github.com/poetaman/arttime/issues/11"
 fi
 
 # Check if path to arttime excutable is on user's $PATH
