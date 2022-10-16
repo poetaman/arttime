@@ -234,7 +234,7 @@ else
         echo 'Note: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
         echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
     else
-        echo "Installation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter."
+        echo "Installation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter.\nTo run it right away from this shell, execute arttime by specifying its full path:\n       $bindir/arttime"
     fi
 fi
 echoti cnorm
