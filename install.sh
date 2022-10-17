@@ -212,7 +212,7 @@ fi
 
 # Check if path to arttime excutable is on user's $PATH
 if [[ ":$PATH:" == *":$bindir:"* ]]; then
-    echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
+    echo "Installation complete!\nType 'arttime' and press Enter to start arttime."
 else
     loginshell="${SHELL}"
     loginshell=$(basename ${SHELL})
@@ -232,7 +232,7 @@ else
         echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
         echo 'export PATH='"$bindir"':$PATH' >>$HOME/$profile
         echo 'Note: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
-        echo "Installation complete!\nRestart your terminal application, type 'arttime' and press Enter."
+        echo "Installation complete!\nSource ~/$profile or restart terminal. Then type 'arttime' and press Enter to start arttime."
     else
         echo "Installation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter.\nTo run it right away from this shell, execute arttime by specifying its full path:\n       $bindir/arttime"
     fi
