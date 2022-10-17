@@ -30,6 +30,7 @@ zmodload zsh/terminfo
 zparseopts -D -E -F - \
     a:=artname_arg \
     b:=flipartname_arg \
+    -random=random_arg \
     t:=title_arg \
     g:=goal_arg \
     h=help_arg \
@@ -153,6 +154,8 @@ Options:
     -b          b-art art file name in artdir, or fill path to a art file 
                 (no default)
     -t          title message placed under art (default: line 1 in artfiles)
+    --random    select and display a random art from arttime's collection
+                When passed, user should not pass option -a or -b
     -g          goal time. arttime calls alarm/countdown time as "goal time"
                 The reason it's both alarm/countdown time is either format
                 can be specified. Goal can be 1) "10s" from current time, or 
@@ -201,6 +204,8 @@ Examples:
     $ arttime
         prints help/learn art on launch, pressing 'h' shows default a-art
         (butterfly)
+    $ arttime --nolearn --random
+        selects and displays a random art from arttime's collection
     $ arttime --nolearn -t "Hello World - Butterfly"
         prints butterfly art with "Hello World - Butterfly" under
         the trex ASCII art
@@ -358,6 +363,7 @@ nonblocking=""
 artname="${artname_arg[-1]}"
 title="${title_arg[-1]}"
 flipartname="${flipartname_arg[-1]}"
+randomarg="${random_arg[-1]}"
 theme="${theme_arg[-1]}"
 goal="${goal_arg[-1]}"
 termwidth="$COLUMNS"
@@ -389,7 +395,7 @@ function settimeformats {
         hm="$hm24"
         hms="$hms24"
     else
-        printf "E: --hours can only be passed a value of 24 or 12 (default)"
+        printf "E: --hours can only be passed a value of 24 or 12 (default)\n"
         exit 1
     fi
     tflocal="%s|%b %d, $hm"
@@ -409,7 +415,12 @@ fi
 
 
 if [[ -z $artname && ! -z $flipartname ]]; then
-    printf "E: if b-art is passed, a-art should also be passed"
+    printf "E: if b-art is passed, a-art should also be passed\n"
+    exit 1
+fi
+
+if [[ ! -z $artname || ! -z $flipartname ]] && [[ ! -z $randomarg ]]; then
+    printf "E: if --random is passed, a-art/b-art should not be passed\n"
     exit 1
 fi
 
@@ -429,20 +440,29 @@ function checkartfile {
 }
 checkartfile $artname
 if [[ "$?" != "0" ]]; then
-    printf "E: artfile not found for a-art: $artname"
+    printf "E: artfile not found for a-art: $artname\n"
     exit 1
 fi
 checkartfile $flipartname
 if [[ "$?" != "0" ]]; then
-    printf "E: artfile not found for b-art: $flipartname"
+    printf "E: artfile not found for b-art: $flipartname\n"
     exit 1
 fi
 
+if [[ ! -z $randomarg ]]; then
+    prevdir=$PWD
+    cd $artdir
+    defaultshuffle=(*(.DNnoe['REPLY=$RANDOM']))
+    cd $prevdir
+    defaultart="$defaultshuffle[1]"
+else
+    defaultart="butterfly"
+fi
 
 if [[ ! -z "$nolearn" ]]; then
     helpactive="0"
     if [[ -z "$artname" ]]; then
-        artname="butterfly"
+        artname="$defaultart"
     fi
     restoreartname="help"
     if [[ ! -z "$flipartname" ]]; then
@@ -451,7 +471,7 @@ if [[ ! -z "$nolearn" ]]; then
 else
     helpactive="1"
     if [[ -z "$artname" ]]; then
-        restoreartname="butterfly"
+        restoreartname="$defaultart"
     else
         restoreartname="$artname"
     fi
