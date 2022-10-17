@@ -15,6 +15,7 @@ zparseopts -D -E -F - \
     t:=title_arg \
     s:=subtitle_arg \
     a:=artname_arg \
+    -random=random_arg \
     h=help_arg \
     -tc:=titlecolor_arg \
     -sc:=subtitlecolor_arg \
@@ -73,6 +74,8 @@ Options:
     -a          artfile in artdir, or full path to a art file (default: trex)
     -t          title message placed under art (default: line 1 in artfile)
     -s          subtitle message (default: none, not printed)
+    --random    select and print a random art from arttime's collection
+                When passed, user should not pass option -a
 
     --ac        art color*, value between [1,15]
     --tc        title color*, value between [1,15]
@@ -99,6 +102,8 @@ Examples:
     $ artprint
         prints trex art with default title message from the file named trex
         in artdir
+    $ artprint --random
+        prints a random art from arttime's collection
     $ artprint -t "Hello World - Jurrasic"
         prints trex art with "Hello World - trex" under the trex ASCII art
     $ artprint -t "Hello World - Jurrasic" --ac 2
@@ -119,11 +124,17 @@ artcolor="${artcolor_arg[-1]}"
 titlecolor="${titlecolor_arg[-1]}"
 subtitlecolor="${subtitlecolor_arg[-1]}"
 artname="${artname_arg[-1]}"
+randomarg="${random_arg[-1]}"
 theme="${theme_arg[-1]}"
 widtharg="${width_arg[-1]}"
 heightarg="${height_arg[-1]}"
 style="${style_arg[-1]}"
 debug="${debug_arg[-1]}"
+
+if [[ $artname != "" && $randomarg != "" ]]; then
+    echo "Error: options -a <artname> and --random should not be passed together."
+    exit 1
+fi
 
 # directories
 bindir="${0:a:h}"
@@ -135,8 +146,19 @@ else
     tchar=" "
 fi
 
+if [[ ! -z $randomarg ]]; then
+    prevdir=$PWD
+    cd $artdir
+    defaultshuffle=(*(.DNnoe['REPLY=$RANDOM']))
+    cd $prevdir
+    defaultart="$defaultshuffle[1]"
+else
+    defaultart="butterfly"
+fi
+
+
 if [[ -z $artname ]]; then
-    artfile="$artdir/trex"
+    artfile="$artdir/$defaultart"
 else
     if [[ -f "${artname/#\~/$HOME}" ]]; then
         artfile="${artname/#\~/$HOME}"
