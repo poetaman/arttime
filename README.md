@@ -126,6 +126,17 @@ Arttime might also be available as a package or build receipe in your favorite s
 
 If you don't see your favorite distribution and would like to volunteer then get in touch. Useful links: [arttime dependencies](https://github.com/poetaman/arttime/wiki#dependencies), [arttime discussions](https://github.com/poetaman/arttime/discussions), [@ehaupt](https://github.com/ehaupt)'s [FreeBSD PR](https://github.com/poetaman/arttime/pull/25)/[FreeBSD port](https://github.com/freebsd/freebsd-ports/commit/7f2f0cc69b9348a6bfcbdbeee5793616628307b4)/[FreeBSD art](https://github.com/poetaman/arttime/pull/25/commits/943fa08cffaa16a59a9aefbfd432467afc65b1c4). Once you have added a package, open a pull request with some representative art like [FreeBSD mascot](https://github.com/poetaman/arttime/pull/25/commits/943fa08cffaa16a59a9aefbfd432467afc65b1c4) to get representation for your favorite distribution/OS (mascots are preferred over logos).
 
+# Try arttime in docker™ before installing?
+If you have docker™ installed and want to give arttime a quick try, Copy-Paste-Enter the following command in a terminal application after starting docker desktop on your computer. Note: arttime or its committers don't endorse docker™ or are responsible if it turns out to be a [spywear](https://www.zdnet.com/article/docker-malware-is-now-common-so-devs-need-to-take-docker-security-seriously/).
+```
+docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
+  export SHELL=$(command -v zsh)
+  apt update
+  apt install -y curl less procps
+  curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/d3d5e29427304d977044b594fbb6cc84616c30d4/arttime_online_installer.sh | TERM=xterm-256color zsh
+  TERM=xterm-256color ~/.local/bin/arttime;'
+```
+
 # Troubleshooting
 - Error launching without any arguments, or art with unicode characters is not centered in terminal?
   - This is mostly because zsh on your system is old. Try upgrading zsh to version 5.8 or above. Latest macOS already comes with version 5.9 preinstalled on the computer. If you use a Linux distribution that has very old zsh in its package repositories, you might have to build zsh with a higher version with some more effort.
