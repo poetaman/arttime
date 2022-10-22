@@ -1338,7 +1338,7 @@ function usr1input_handler {
             fi
             $sttycmd $sttyorig
             printf "$tput_smcup"
-            clear
+            echoti clear
             echoti cup 0 0
             if [[ $1 = "a" ]]; then
                 artselector
@@ -1704,7 +1704,7 @@ and jump directly to the section on "Date input formats".
 EOF
                         fi
                     fi
-                    clear
+                    echoti clear
                     less -R <<<"$datehelpstr" 2>/dev/null
                     echoti smcup
                 else
@@ -1842,7 +1842,7 @@ EOF
                 done
             fi
             if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
-                clear
+                echoti clear
                 printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
                 echoti smcup
             else
@@ -1976,7 +1976,7 @@ EOF
             printf "$tput_smcup"
             echoti cup 0 0
             echoti cnorm
-            clear
+            echoti clear
             zoneselector
             $sttycmd -echo
             $sttycmd -icanon min 0 time 0
@@ -2140,14 +2140,14 @@ function trapwinch {
             if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
                 termwidth="$COLUMNS"
                 termheight="$LINES"
-                clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
+                echoti clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
             fi
         fi
     else
         if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
             termwidth="$COLUMNS"
             termheight="$LINES"
-            clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
+            echoti clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
         fi
     fi
     if [[ $winchdetected = "1" ]]; then
