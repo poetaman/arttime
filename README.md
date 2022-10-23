@@ -13,6 +13,7 @@ Contents
    * [What does and doesn't constitute text art?](#what-does-and-doesnt-constitute-text-art)
 * [Screenshots](#screenshots)
 * [Installation](#installation)
+   * [Try arttime in docker?](#try-arttime-in-docker)
 * [Troubleshooting](#troubleshooting)
 * [Acknowledgements](#acknowledgements)
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
@@ -126,8 +127,8 @@ Arttime might also be available as a package or build receipe in your favorite s
 
 If you don't see your favorite distribution and would like to volunteer then get in touch. Useful links: [arttime dependencies](https://github.com/poetaman/arttime/wiki#dependencies), [arttime discussions](https://github.com/poetaman/arttime/discussions), [@ehaupt](https://github.com/ehaupt)'s [FreeBSD PR](https://github.com/poetaman/arttime/pull/25)/[FreeBSD port](https://github.com/freebsd/freebsd-ports/commit/7f2f0cc69b9348a6bfcbdbeee5793616628307b4)/[FreeBSD art](https://github.com/poetaman/arttime/pull/25/commits/943fa08cffaa16a59a9aefbfd432467afc65b1c4). Once you have added a package, open a pull request with some representative art like [FreeBSD mascot](https://github.com/poetaman/arttime/pull/25/commits/943fa08cffaa16a59a9aefbfd432467afc65b1c4) to get representation for your favorite distribution/OS (mascots are preferred over logos).
 
-# Try arttime in docker™ before installing?
-If you have docker™ installed and want to give arttime a quick try, Copy-Paste-Enter the following command in a terminal application after starting docker desktop on your computer. Note: arttime or its committers don't endorse docker™ or are responsible if it turns out to be a [spywear](https://www.zdnet.com/article/docker-malware-is-now-common-so-devs-need-to-take-docker-security-seriously/).
+## Try arttime in docker?
+Docker™ being a containerized environment can be a preferred way of trying applications for some geeks. With docker™ already installed you can give arttime a quick try in a docker container, though without arttime's sounds/notifications. Copy-Paste-Enter the following command in a terminal application after starting [Docker Desktop](https://www.docker.com) on your computer. Note: arttime, its committers or artists don't endorse docker™ in any form or manner. It's presented here only for geeks who know what they are doing and prefer to try it in a container before installing; for everybody else its recommended to jump directly to [Installation](#installation).
 ```
 docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
   export SHELL=$(command -v zsh)
