@@ -135,7 +135,7 @@ Note to docker geeks: arttime will start in UTC timezone unless you have environ
 docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
   export SHELL=$(command -v zsh)
   apt update
-  apt install -y curl less procps
+  apt install -y curl less
   curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/d3d5e29427304d977044b594fbb6cc84616c30d4/arttime_online_installer.sh | TERM=xterm-256color zsh
   TERM=xterm-256color ~/.local/bin/arttime;'
 ```
