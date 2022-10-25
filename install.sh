@@ -179,8 +179,11 @@ for ((i = 1; i <= $artfilearraysize; i++)); do
     fi
     echo "Progress: ${(l:3:: :)percentdone}% done$tput_cuu1\r"
 done
-
 printf "\n"
+
+if ! command -v less &>/dev/null; then
+    echo "[4mDEPENDS[0m: Command 'less' not found, please install it for arttime's internal help utility."
+fi
 
 if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
     if ! command -v notify-send &>/dev/null; then
