@@ -1154,13 +1154,13 @@ function printtime {
 killdone="0"
 
 function trapint_nonblocking {
-    trap -; kill ${1}; pkill -P $$; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
+    trap -; kill ${1}; command -v pkill &>/dev/null && pkill -P $$; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
 }
 
 function trapint_blocking {
     #while read dummy ; do : ; done
     # exec 0>&- 2>dev/null;
-    #trap -; pkill -P $$; tputreset; $sttycmd $sttyorig; set -e; (exit 130);
+    #trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; $sttycmd $sttyorig; set -e; (exit 130);
     trapintactive="1"
     trapusr1_both "q"
     trapintactive="0"
@@ -1168,14 +1168,14 @@ function trapint_blocking {
 
 function trapexit_nonblocking {
     trap -;
-    pkill -P $$;
+    command -v pkill &>/dev/null && pkill -P $$;
     if [[ "$killdone" = "0" ]]; then
         kill ${1}; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
     fi
 }
 
 function trapexit_blocking {
-    trap -; pkill -P $$; tputreset; $sttycmd $sttyorig;  set -e; (exit 1);
+    trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; $sttycmd $sttyorig;  set -e; (exit 1);
 }
 
 function trapstop_blocking {
@@ -1465,7 +1465,7 @@ function usr1input_handler {
                     termheight="$LINES"
                     winchdetected="0"
                 fi
-                artname=$(basename $pathname)
+                artname=$(basename "$pathname")
                 prevartname=""
                 setartstring
                 local questionstr="Select this? (c:cancel, j:next, y:select), name: $artname "
@@ -1705,7 +1705,11 @@ EOF
                         fi
                     fi
                     echoti clear
-                    less -R <<<"$datehelpstr" 2>/dev/null
+                    if command -v less &>/dev/null; then
+                        less -R <<<"$datehelpstr" 2>/dev/null
+                    else
+                        sed -e 's/\x1b\[[0-9;]*m//g' <<<"$datehelpstr" | more 2>/dev/null
+                    fi
                     echoti smcup
                 else
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
@@ -1843,7 +1847,11 @@ EOF
             fi
             if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 echoti clear
-                printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
+                if command -v less &>/dev/null; then
+                    printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
+                else
+                    printf "Press 'q' to continue\n$infostring\n " | sed -e 's/\x1b\[[0-9;]*m//g' | more 2>/dev/null
+                fi
                 echoti smcup
             else
                 infostring+="\nPress any key to continue "
@@ -1919,7 +1927,7 @@ EOF
             $sttycmd $sttyorig
             if askforconfirmation "quit arttime"; then
                 trap -;
-                pkill -P $$;
+                command -v pkill &>/dev/null && pkill -P $$;
                 echoti cup $LINES 0
                 printf "\n"
                 tputreset;

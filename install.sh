@@ -214,8 +214,7 @@ fi
 if [[ ":$PATH:" == *":$bindir:"* ]]; then
     echo "Installation complete!\nType 'arttime' and press Enter to start arttime."
 else
-    loginshell="${SHELL}"
-    loginshell=$(basename ${SHELL})
+    loginshell=$(basename "${SHELL}")
     if [[ $loginshell == *zsh* ]]; then
         profile='.zshrc'
     elif [[ $loginshell == *bash* ]]; then
