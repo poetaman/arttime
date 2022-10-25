@@ -1705,11 +1705,7 @@ EOF
                         fi
                     fi
                     echoti clear
-                    if command -v less &>/dev/null; then
-                        less -R <<<"$datehelpstr" 2>/dev/null
-                    else
-                        sed -e 's/\x1b\[[0-9;]*m//g' <<<"$datehelpstr" | more 2>/dev/null
-                    fi
+                    less -R <<<"$datehelpstr" 2>/dev/null
                     echoti smcup
                 else
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
@@ -1847,11 +1843,7 @@ EOF
             fi
             if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 echoti clear
-                if command -v less &>/dev/null; then
-                    printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
-                else
-                    printf "Press 'q' to continue\n$infostring\n " | sed -e 's/\x1b\[[0-9;]*m//g' | more 2>/dev/null
-                fi
+                printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
                 echoti smcup
             else
                 infostring+="\nPress any key to continue "
