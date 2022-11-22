@@ -1175,6 +1175,7 @@ function trapexit_nonblocking {
 }
 
 function trapexit_blocking {
+    rm ~/.cache/arttime/$UID-$$.morestr 2>/dev/null
     trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; $sttycmd $sttyorig;  set -e; (exit 1);
 }
 
@@ -1705,12 +1706,16 @@ EOF
                     echoti clear
                     if command -v less &>/dev/null; then
                         pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
-                        datehelpstr=$(printf "$pagernavstr\n$datehelpstr")
-                        less -R <<<"$datehelpstr" 2>/dev/null
+                        pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
+                        less -R <<<"$pagerprintstr" 2>/dev/null
                     elif command -v more &>/dev/null; then
-                        pagernavstr="Note: 'less' not found, defaulting to 'more'.\nPress 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
-                        datehelpstr=$(printf "$pagernavstr\n$datehelpstr")
-                        more <<<"$datehelpstr" 2>/dev/null
+                        pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
+                        pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
+                        #more <<<"$pagerprintstr"
+                        mkdir -p ~/.cache/arttime
+                        printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
+                        more ~/.cache/arttime/$UID-$$.morestr
+                        rm ~/.cache/arttime/$UID-$$.morestr
                     fi
                     echoti smcup
                 else
@@ -1851,12 +1856,16 @@ EOF
                 echoti clear
                 if command -v less &>/dev/null; then
                     pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
-                    infostring=$(printf "$pagernavstr\n$infostring")
-                    less -R <<<"$infostring"  2>/dev/null
+                    pagerprintstr=$(printf "$pagernavstr\n$infostring")
+                    less -R <<<"$pagerprintstr"  2>/dev/null
                 elif command -v more &>/dev/null; then
-                    pagernavstr="Note: 'less' not found, defaulting to 'more'.\nPress 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
-                    infostring=$(printf "$pagernavstr\n$infostring")
-                    more <<<"$infostring"  2>/dev/null
+                    pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
+                    pagerprintstr=$(printf "$pagernavstr\n$infostring")
+                    #more <<<"$pagerprintstr"
+                    mkdir -p ~/.cache/arttime
+                    printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
+                    more ~/.cache/arttime/$UID-$$.morestr
+                    rm ~/.cache/arttime/$UID-$$.morestr
                 fi
                 echoti smcup
             else
