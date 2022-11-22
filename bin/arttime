@@ -1590,7 +1590,6 @@ function usr1input_handler {
                     if [[ -z $datehelpstr ]]; then
                         if [[ $dateisgnu = "1" ]]; then
 read -r -d '' datehelpstr <<-'EOF'
-Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
 You reached this help page because you entered an [31mincorrect[0m
 value for goal time or used an [31munrecognized[0m format or entered 'help'.
 
@@ -1646,7 +1645,6 @@ and jump directly to the section on "Date input formats".
 EOF
                     else
 read -r -d '' datehelpstr <<-'EOF'
-Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
 You reached this help page because you entered an [31mincorrect[0m
 value for goal time or used an [31munrecognized[0m format or entered 'help'.
 
@@ -1705,7 +1703,15 @@ EOF
                         fi
                     fi
                     echoti clear
-                    less -R <<<"$datehelpstr" 2>/dev/null
+                    if command -v less &>/dev/null; then
+                        pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
+                        datehelpstr=$(printf "$pagernavstr\n$datehelpstr")
+                        less -R <<<"$datehelpstr" 2>/dev/null
+                    elif command -v more &>/dev/null; then
+                        pagernavstr="Note: 'less' not found, defaulting to 'more'.\nPress 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
+                        datehelpstr=$(printf "$pagernavstr\n$datehelpstr")
+                        more <<<"$datehelpstr" 2>/dev/null
+                    fi
                     echoti smcup
                 else
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
@@ -1843,7 +1849,15 @@ EOF
             fi
             if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 echoti clear
-                printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
+                if command -v less &>/dev/null; then
+                    pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
+                    infostring=$(printf "$pagernavstr\n$infostring")
+                    less -R <<<"$infostring"  2>/dev/null
+                elif command -v more &>/dev/null; then
+                    pagernavstr="Note: 'less' not found, defaulting to 'more'.\nPress 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
+                    infostring=$(printf "$pagernavstr\n$infostring")
+                    more <<<"$infostring"  2>/dev/null
+                fi
                 echoti smcup
             else
                 infostring+="\nPress any key to continue "
