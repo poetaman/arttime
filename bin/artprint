@@ -10,6 +10,8 @@ if ! is-at-least "5.8"; then
     exit 1
 fi
 
+arttime_version="1.9.3"
+
 zmodload zsh/zutil
 zparseopts -D -E -F - \
     t:=title_arg \
@@ -25,6 +27,7 @@ zparseopts -D -E -F - \
     -height:=height_arg \
     -style:=style_arg \
     -debug=debug_arg \
+    -version=version_arg \
     -help=help_arg \
     || return
 
@@ -89,6 +92,8 @@ Options:
                 value of 1 (--style 1) uses curly underlines, among other
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
+    --version   Print version number of arttime it was shipped with, and exit
+                Note: artprint doesn't have it's own version number
     -h, --help  Print this help string, and exit
 
     *Note: artfile can have ANSI color sequences embedded in it.
@@ -115,6 +120,9 @@ echo $VAR
 
 if [[ ! -z $help_arg[-1] ]]; then
     printhelp
+    exit 0
+elif [[ ! -z $version_arg[-1] ]]; then
+    echo "$arttime_version"
     exit 0
 fi
 
