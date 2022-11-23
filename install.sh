@@ -5,23 +5,42 @@
 # License files are also on github: https://github.com/poetaman/arttime
 
 autoload -Uz is-at-least
-if ! is-at-least "5.8"; then
-    echo "Error: your zsh version $ZSH_VERSION is less than the required version: 5.8"
+if ! is-at-least "5.7"; then
+    echo "Error: your zsh version $ZSH_VERSION is less than the required version: 5.7"
     exit 1
 fi
 
 zmodload zsh/terminfo
-
-zparseopts -D -E -F - \
-    l=local_arg_array \
-    -local=local_arg_array \
-    g=global_arg_array \
-    -global=global_arg_array \
-    p:=prefix_arg_array \
-    -prefix:=prefix_arg_array \
-    h=help_arg_array \
-    -help=help_arg_array \
-    || return
+zmodload zsh/zutil
+if is-at-least "5.8"; then
+    zparseopts -D -E -F - \
+        l=local_arg_array \
+        -local=local_arg_array \
+        g=global_arg_array \
+        -global=global_arg_array \
+        p:=prefix_arg_array \
+        -prefix:=prefix_arg_array \
+        h=help_arg_array \
+        -help=help_arg_array \
+        || return
+else
+    zparseopts -D -E - \
+        l=local_arg_array \
+        -local=local_arg_array \
+        g=global_arg_array \
+        -global=global_arg_array \
+        p:=prefix_arg_array \
+        -prefix:=prefix_arg_array \
+        h=help_arg_array \
+        -help=help_arg_array \
+        || return
+    if [[ "${#@}" != "0" ]]; then
+        printf "Error: install.sh does not understand the following part of passed options,\n    "
+        printf ' %s ' "[1m[4m$@[0m"
+        printf '\n%s\n' "check the valid options by invoking install.sh with --help"
+        exit 1
+    fi
+fi
 
 local_arg="$local_arg_array[-1]"
 global_arg="$global_arg_array[-1]"
@@ -182,7 +201,7 @@ done
 printf "\n"
 
 if ! command -v less &>/dev/null; then
-    echo "[4mDEPENDS[0m: Command 'less' not found, please install it for arttime's internal help utility."
+    echo "[4mDEPENDS[0m: Command 'less' not found, arttime will default to 'more'.\n         Though installing 'less' is recommended for better experience."
 fi
 
 if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then

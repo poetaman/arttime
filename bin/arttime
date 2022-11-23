@@ -5,10 +5,12 @@
 # License files are also on github: https://github.com/poetaman/arttime
 
 autoload -Uz is-at-least
-if ! is-at-least "5.8"; then
-    echo "Error: your zsh version $ZSH_VERSION is less than the required version: 5.8"
+if ! is-at-least "5.7"; then
+    echo "Error: your zsh version $ZSH_VERSION is less than the required version: 5.7"
     exit 1
 fi
+
+arttime_version="1.9.3"
 
 zmodload zsh/zselect
 zmodload zsh/zutil
@@ -27,25 +29,55 @@ zmodload zsh/terminfo
 #     -tf-local:=tflocal_arg \
 #     -tf-other:=tfother_arg \
 
-zparseopts -D -E -F - \
-    a:=artname_arg \
-    b:=flipartname_arg \
-    -random=random_arg \
-    t:=title_arg \
-    g:=goal_arg \
-    h=help_arg \
-    -theme:=theme_arg \
-    -tc:=titlecolor_arg \
-    -ac:=artcolor_arg \
-    -style:=style_arg \
-    -pa:=pbpendingchar_arg \
-    -pb:=pbcompletechar_arg \
-    -pl:=pblength_arg \
-    -hours:=hours_arg \
-    -debug=debug_arg \
-    -nolearn=nolearn_arg \
-    -help=help_arg \
-    || return
+if is-at-least "5.8"; then
+    zparseopts -D -E -F - \
+        a:=artname_arg \
+        b:=flipartname_arg \
+        -random=random_arg \
+        t:=title_arg \
+        g:=goal_arg \
+        h=help_arg \
+        -theme:=theme_arg \
+        -tc:=titlecolor_arg \
+        -ac:=artcolor_arg \
+        -style:=style_arg \
+        -pa:=pbpendingchar_arg \
+        -pb:=pbcompletechar_arg \
+        -pl:=pblength_arg \
+        -hours:=hours_arg \
+        -debug=debug_arg \
+        -nolearn=nolearn_arg \
+        -version=version_arg \
+        -help=help_arg \
+        || return
+else
+    zparseopts -D -E - \
+        a:=artname_arg \
+        b:=flipartname_arg \
+        -random=random_arg \
+        t:=title_arg \
+        g:=goal_arg \
+        h=help_arg \
+        -theme:=theme_arg \
+        -tc:=titlecolor_arg \
+        -ac:=artcolor_arg \
+        -style:=style_arg \
+        -pa:=pbpendingchar_arg \
+        -pb:=pbcompletechar_arg \
+        -pl:=pblength_arg \
+        -hours:=hours_arg \
+        -debug=debug_arg \
+        -nolearn=nolearn_arg \
+        -version=version_arg \
+        -help=help_arg \
+        || return
+    if [[ "${#@}" != "0" ]]; then
+        printf "Error: arttime does not understand the following part of passed options,\n    "
+        printf ' %s ' "[1m[4m$@[0m"
+        printf '\n%s\n' "check the valid options by invoking arttime with --help"
+        exit 1
+    fi
+fi
 
 function printhelp {
 read -r -d '' VAR <<-'EOF'
@@ -56,15 +88,14 @@ Invocation:
     arttime [OPTIONS]...
 
 Description:
-    arttime brings curated text-art to otherwise artless terminal emulators
-    of starving developers (and other users who can use terminal emulators).
-    While doing so, it blends display of art (a not-so-techie thing) with
-    functionality of a nifty clock/timer which is a retake on the
-    stereotypical alarms/timers. With one line of title message under the
-    art, it also provides one line of opportunity for developers to
-    display their activism (a not-so-techie thing either) or just attach
-    a functional message for themselves for usual developer activity
-    on terminal (like "debug the failing build tonight").
+    arttime brings curated text art to otherwise artless terminal emulators
+    of starving developers, and others who can use a terminal.
+    While doing so, it blends display of art with functionality of a nifty
+    clock/timer/time-manager which is a retake on stereotypical alarms/timers.
+    With one line of title message under the art, it also provides one line of
+    opportunity for developers to display their activism (not-so-techie thing)
+    or just attach a functional message for themselves for usual developer
+    activity on terminal (like "debug the failing build tonight").
 
     Animation: Some great ascii artists of web 1.0 era have produced text
     art that when displayed one after another creates an illusion of motion.
@@ -191,6 +222,7 @@ Options:
                 arttime display intended text art upon launch.
                 The help/learn page can still be toggled by pressing 'h'
                 at any time while application is running.
+    --version   Print version number of arttime, and exit
     -h, --help  Print this help string, and exit
 
     *Note: artfile can have ANSI color sequences embedded in it.
@@ -220,6 +252,9 @@ echo $VAR
 
 if [[ ! -z $help_arg[-1] ]]; then
     printhelp
+    exit 0
+elif [[ ! -z $version_arg[-1] ]]; then
+    echo "$arttime_version"
     exit 0
 fi
 
@@ -1175,6 +1210,7 @@ function trapexit_nonblocking {
 }
 
 function trapexit_blocking {
+    rm ~/.cache/arttime/$UID-$$.morestr 2>/dev/null
     trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; $sttycmd $sttyorig;  set -e; (exit 1);
 }
 
@@ -1590,7 +1626,6 @@ function usr1input_handler {
                     if [[ -z $datehelpstr ]]; then
                         if [[ $dateisgnu = "1" ]]; then
 read -r -d '' datehelpstr <<-'EOF'
-Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
 You reached this help page because you entered an [31mincorrect[0m
 value for goal time or used an [31munrecognized[0m format or entered 'help'.
 
@@ -1646,7 +1681,6 @@ and jump directly to the section on "Date input formats".
 EOF
                     else
 read -r -d '' datehelpstr <<-'EOF'
-Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m.
 You reached this help page because you entered an [31mincorrect[0m
 value for goal time or used an [31munrecognized[0m format or entered 'help'.
 
@@ -1705,7 +1739,20 @@ EOF
                         fi
                     fi
                     echoti clear
-                    less -R <<<"$datehelpstr" 2>/dev/null
+                    if command -v less &>/dev/null; then
+                        pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
+                        pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
+                        less -R <<<"$pagerprintstr" 2>/dev/null
+                    elif command -v more &>/dev/null; then
+                        pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
+                        pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
+                        #more <<<"$pagerprintstr"
+                        mkdir -p ~/.cache/arttime
+                        printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
+                        more ~/.cache/arttime/$UID-$$.morestr
+                        rm ~/.cache/arttime/$UID-$$.morestr
+                    fi
+                    echoti civis
                     echoti smcup
                 else
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
@@ -1843,7 +1890,20 @@ EOF
             fi
             if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 echoti clear
-                printf "Press 'q' to continue\n$infostring\n " | less -R 2>/dev/null
+                if command -v less &>/dev/null; then
+                    pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
+                    pagerprintstr=$(printf "$pagernavstr\n$infostring")
+                    less -R <<<"$pagerprintstr"  2>/dev/null
+                elif command -v more &>/dev/null; then
+                    pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
+                    pagerprintstr=$(printf "$pagernavstr\n$infostring")
+                    #more <<<"$pagerprintstr"
+                    mkdir -p ~/.cache/arttime
+                    printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
+                    more ~/.cache/arttime/$UID-$$.morestr
+                    rm ~/.cache/arttime/$UID-$$.morestr
+                fi
+                echoti civis
                 echoti smcup
             else
                 infostring+="\nPress any key to continue "
