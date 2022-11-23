@@ -101,7 +101,7 @@ There are three installation methods: 1) Simple, 2) Manual, 3) Package manager. 
 - Open some "Terminal" application on your computer
 - Copy following line from start to end. *(Note: hovering your computer mouse near the right end of the following box will show a button inside the box, clicking it will copy the line for you. Or else you will have to press and hold to the mouse to scroll and select the entire line from beginning to end, and copy it.)*
 ```
-zsh -c '{url="https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/d3d5e29427304d977044b594fbb6cc84616c30d4/arttime_online_installer.sh"; zsh -c "$(curl -fsSL $url || wget -qO- $url)"}'
+zsh -c '{url="https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/8487de3cf4cf4a7feff5d3a0d97defad95164eb3/arttime_online_installer.sh"; zsh -c "$(curl -fsSL $url || wget -qO- $url)"}'
 ```
 - Paste the above copied line in "Terminal" application, and press ``Enter``
 - Installer will print any further action you need to take before running it.
@@ -136,7 +136,7 @@ docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
   export SHELL=$(command -v zsh)
   apt update
   apt install -y curl less
-  curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/d3d5e29427304d977044b594fbb6cc84616c30d4/arttime_online_installer.sh | TERM=xterm-256color zsh
+  curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/8487de3cf4cf4a7feff5d3a0d97defad95164eb3/arttime_online_installer.sh | TERM=xterm-256color zsh
   TERM=xterm-256color ~/.local/bin/arttime;'
 ```
 
