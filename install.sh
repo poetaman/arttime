@@ -12,34 +12,29 @@ fi
 
 zmodload zsh/terminfo
 zmodload zsh/zutil
+
 if is-at-least "5.8"; then
-    zparseopts -D -E -F - \
-        l=local_arg_array \
-        -local=local_arg_array \
-        g=global_arg_array \
-        -global=global_arg_array \
-        p:=prefix_arg_array \
-        -prefix:=prefix_arg_array \
-        h=help_arg_array \
-        -help=help_arg_array \
-        || return
+    zparseoptscmd='zparseopts -D -E -F - '
 else
-    zparseopts -D -E - \
-        l=local_arg_array \
-        -local=local_arg_array \
-        g=global_arg_array \
-        -global=global_arg_array \
-        p:=prefix_arg_array \
-        -prefix:=prefix_arg_array \
-        h=help_arg_array \
-        -help=help_arg_array \
-        || return
-    if [[ "${#@}" != "0" ]]; then
-        printf "Error: install.sh does not understand the following part of passed options,\n    "
-        printf ' %s ' "[1m[4m$@[0m"
-        printf '\n%s\n' "check the valid options by invoking install.sh with --help"
-        exit 1
-    fi
+    zparseoptscmd='zparseopts -D -E - '
+fi
+
+$(printf "$zparseoptscmd") \
+    l=local_arg_array \
+    -local=local_arg_array \
+    g=global_arg_array \
+    -global=global_arg_array \
+    p:=prefix_arg_array \
+    -prefix:=prefix_arg_array \
+    h=help_arg_array \
+    -help=help_arg_array \
+    || return
+
+if [[ "${#@}" != "0" ]]; then
+    printf "Error: install.sh does not understand the following part of passed options,\n    "
+    printf ' %s ' "[1m[4m$@[0m"
+    printf '\n%s\n' "check the valid options by invoking install.sh with --help"
+    exit 1
 fi
 
 local_arg="$local_arg_array[-1]"
