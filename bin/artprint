@@ -13,48 +13,36 @@ fi
 arttime_version="1.9.3"
 
 zmodload zsh/zutil
+
 if is-at-least "5.8"; then
-    zparseopts -D -E -F - \
-        t:=title_arg \
-        s:=subtitle_arg \
-        a:=artname_arg \
-        -random=random_arg \
-        h=help_arg \
-        -tc:=titlecolor_arg \
-        -sc:=subtitlecolor_arg \
-        -ac:=artcolor_arg \
-        -theme:=theme_arg \
-        -width:=width_arg \
-        -height:=height_arg \
-        -style:=style_arg \
-        -debug=debug_arg \
-        -version=version_arg \
-        -help=help_arg \
-        || return
+    zparseoptscmd='zparseopts -D -E -F - '
 else
-    zparseopts -D -E - \
-        t:=title_arg \
-        s:=subtitle_arg \
-        a:=artname_arg \
-        -random=random_arg \
-        h=help_arg \
-        -tc:=titlecolor_arg \
-        -sc:=subtitlecolor_arg \
-        -ac:=artcolor_arg \
-        -theme:=theme_arg \
-        -width:=width_arg \
-        -height:=height_arg \
-        -style:=style_arg \
-        -debug=debug_arg \
-        -version=version_arg \
-        -help=help_arg \
-        || return
-    if [[ "${#@}" != "0" ]]; then
-        printf "Error: artprint does not understand the following part of passed options,\n    "
-        printf ' %s ' "[1m[4m$@[0m"
-        printf '\n%s\n' "check the valid options by invoking artprint with --help"
-        exit 1
-    fi
+    zparseoptscmd='zparseopts -D -E - '
+fi
+
+$(printf "$zparseoptscmd") \
+   t:=title_arg \
+   s:=subtitle_arg \
+   a:=artname_arg \
+   -random=random_arg \
+   h=help_arg \
+   -tc:=titlecolor_arg \
+   -sc:=subtitlecolor_arg \
+   -ac:=artcolor_arg \
+   -theme:=theme_arg \
+   -width:=width_arg \
+   -height:=height_arg \
+   -style:=style_arg \
+   -debug=debug_arg \
+   -version=version_arg \
+   -help=help_arg \
+   || return
+
+if [[ "${#@}" != "0" ]]; then
+    printf "Error: artprint does not understand the following part of passed options,\n    "
+    printf ' %s ' "[1m[4m$@[0m"
+    printf '\n%s\n' "check the valid options by invoking artprint with --help"
+    exit 1
 fi
 
 function printhelp {
