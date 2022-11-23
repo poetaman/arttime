@@ -10,6 +10,8 @@ if ! is-at-least "5.8"; then
     exit 1
 fi
 
+arttime_version="1.9.3"
+
 zmodload zsh/zselect
 zmodload zsh/zutil
 zmodload zsh/datetime
@@ -44,6 +46,7 @@ zparseopts -D -E -F - \
     -hours:=hours_arg \
     -debug=debug_arg \
     -nolearn=nolearn_arg \
+    -version=version_arg \
     -help=help_arg \
     || return
 
@@ -56,15 +59,14 @@ Invocation:
     arttime [OPTIONS]...
 
 Description:
-    arttime brings curated text-art to otherwise artless terminal emulators
-    of starving developers (and other users who can use terminal emulators).
-    While doing so, it blends display of art (a not-so-techie thing) with
-    functionality of a nifty clock/timer which is a retake on the
-    stereotypical alarms/timers. With one line of title message under the
-    art, it also provides one line of opportunity for developers to
-    display their activism (a not-so-techie thing either) or just attach
-    a functional message for themselves for usual developer activity
-    on terminal (like "debug the failing build tonight").
+    arttime brings curated text art to otherwise artless terminal emulators
+    of starving developers, and others who can use a terminal.
+    While doing so, it blends display of art with functionality of a nifty
+    clock/timer/time-manager which is a retake on stereotypical alarms/timers.
+    With one line of title message under the art, it also provides one line of
+    opportunity for developers to display their activism (not-so-techie thing)
+    or just attach a functional message for themselves for usual developer
+    activity on terminal (like "debug the failing build tonight").
 
     Animation: Some great ascii artists of web 1.0 era have produced text
     art that when displayed one after another creates an illusion of motion.
@@ -191,6 +193,7 @@ Options:
                 arttime display intended text art upon launch.
                 The help/learn page can still be toggled by pressing 'h'
                 at any time while application is running.
+    --version   Print version number of arttime, and exit
     -h, --help  Print this help string, and exit
 
     *Note: artfile can have ANSI color sequences embedded in it.
@@ -220,6 +223,9 @@ echo $VAR
 
 if [[ ! -z $help_arg[-1] ]]; then
     printhelp
+    exit 0
+elif [[ ! -z $version_arg[-1] ]]; then
+    echo "$arttime_version"
     exit 0
 fi
 
