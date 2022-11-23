@@ -201,7 +201,7 @@ done
 printf "\n"
 
 if ! command -v less &>/dev/null; then
-    echo "[4mDEPENDS[0m: Command 'less' not found, please install it for arttime's internal help utility."
+    echo "[4mDEPENDS[0m: Command 'less' not found, arttime will default to 'more'.\n         Though installing 'less' is recommended for better experience."
 fi
 
 if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
