@@ -1717,6 +1717,7 @@ EOF
                         more ~/.cache/arttime/$UID-$$.morestr
                         rm ~/.cache/arttime/$UID-$$.morestr
                     fi
+                    echoti civis
                     echoti smcup
                 else
                     if [[ $returngoaltime = "loop" && ( $returngoaltimestr = "-" || $returngoaltimestr =~ ^[0-9]+$ ) ]]; then
@@ -1867,6 +1868,7 @@ EOF
                     more ~/.cache/arttime/$UID-$$.morestr
                     rm ~/.cache/arttime/$UID-$$.morestr
                 fi
+                echoti civis
                 echoti smcup
             else
                 infostring+="\nPress any key to continue "
