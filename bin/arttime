@@ -16,6 +16,7 @@ zmodload zsh/zselect
 zmodload zsh/zutil
 zmodload zsh/datetime
 zmodload zsh/terminfo
+setopt extendedglob
 
 # NOTE: enable minute/nonblocking mode if/when its functional,
 # or remove it completely as sample rate is a waste now that
@@ -38,7 +39,7 @@ fi
 $(printf "$zparseoptscmd") \
    a:=artname_arg \
    b:=flipartname_arg \
-   -random=random_arg \
+   -random:=random_arg \
    t:=title_arg \
    g:=goal_arg \
    h=help_arg \
@@ -104,11 +105,13 @@ Description:
     Another note: This application was created at the outskirts of
     Silicon Valley which has a buzzing scene of tarot-card readers (for 
     unknown reasons). This inspired the author to add a key-binding to
-    emulate tarot-card experience. Pressing and holding a key ('j')
+    emulate tarot-card experience. Pressing and holding a key ('o')
     on the keyboard for a couple seconds makes the application settle 
-    on a randomly selected art file (emulating a tarot-card picking).
-    arttime can serve as a free source of "receving message from the
-    universe", or just a laugh. The author takes no responsibility for
+    on a randomly selected tarot art (emulating a tarot-card picking).
+    Instead if one presses and holds 'j', the application settles
+    on a randomly selected text art which is not a tarot card. In this way
+    arttime can serve as a free source of "receving messages from the
+    universe" or just a laugh. The author takes no responsibility for
     the meaning one derives from such activity of playing with The Random.
 
 Layout:
@@ -169,7 +172,12 @@ Options:
     -b          b-art art file name in artdir, or fill path to a art file 
                 (no default)
     -t          title message placed under art (default: line 1 in artfiles)
-    --random    select and display a random art from arttime's collection
+    --random [all|tarot|notarot]
+                select and display a random art from arttime's collection
+                Meaning of value passed:
+                    all     : select from pool of all art files
+                    tarot   : select from only tarot art files
+                    notarot : select from all art except tarot
                 When passed, user should not pass option -a or -b
     -g          goal time. arttime calls alarm/countdown time as "goal time"
                 The reason it's both alarm/countdown time is either format
@@ -220,8 +228,8 @@ Examples:
     $ arttime
         prints help/learn art on launch, pressing 'h' shows default a-art
         (butterfly)
-    $ arttime --nolearn --random
-        selects and displays a random art from arttime's collection
+    $ arttime --nolearn --random all
+        selects and displays a random art from entire arttime collection
     $ arttime --nolearn -t "Hello World - Butterfly"
         prints butterfly art with "Hello World - Butterfly" under
         the trex ASCII art
@@ -439,7 +447,12 @@ if [[ -z $artname && ! -z $flipartname ]]; then
 fi
 
 if [[ ! -z $artname || ! -z $flipartname ]] && [[ ! -z $randomarg ]]; then
-    printf "E: if --random is passed, a-art/b-art should not be passed\n"
+    printf "E: if --random [all|tarot|notarot] is passed, a-art/b-art should not be passed\n"
+    exit 1
+fi
+
+if [[ $randomarg != "" && $randomarg != "all" && $randomarg != "tarot" && $randomarg != "notarot" ]]; then
+    printf "E: --random was passed \"$randomarg\", it can only be passed vales \"all\" or \"tarot\" or \"notarot\" \n"
     exit 1
 fi
 
@@ -471,7 +484,13 @@ fi
 if [[ ! -z $randomarg ]]; then
     prevdir=$PWD
     cd $artdir
-    defaultshuffle=(*(.DNnoe['REPLY=$RANDOM']))
+    if [[ $randomarg == "all" ]]; then
+        defaultshuffle=(*(.Nnoe['REPLY=$RANDOM']))
+    elif [[ $randomarg == "tarot" ]]; then
+        defaultshuffle=(tarot-*(.Nnoe['REPLY=$RANDOM']))
+    else
+        defaultshuffle=(^tarot-*(.Nnoe['REPLY=$RANDOM']))
+    fi
     cd $prevdir
     defaultart="$defaultshuffle[1]"
 else
@@ -1473,35 +1492,41 @@ function usr1input_handler {
             #printart
             #echoti sc
             ;;
-        "j")
+        "j"|"o")
             jrestoreartname="$artname"
             jrestoreflipartname="$flipartname"
             flipartname=""
-            local jresponse=""
-            local shuffledart=($artdir/*(.DNnoe['REPLY=$RANDOM']))
-            for pathname in "$shuffledart[@]"; do
-                if [[ $winchdetected = "1" ]]; then
-                    termwidth="$COLUMNS"
-                    termheight="$LINES"
-                    winchdetected="0"
+            local readresponse="$1"
+            while [[ $1 == "j" && $readresponse == "j" || $1 == "o" && $readresponse == "o" ]]; do
+                if [[ $1 = "j" ]]; then
+                    local shuffledart=($artdir/^tarot-*(.Nnoe['REPLY=$RANDOM']))
+                else
+                    local shuffledart=($artdir/tarot-*(.Nnoe['REPLY=$RANDOM']))
                 fi
-                artname=$(basename "$pathname")
-                prevartname=""
-                setartstring
-                local questionstr="Select this? (c:cancel, j:next, y:select), name: $artname "
-                printart $questionstr
-                lasttime=""
-                printtime "1"
-                # NOTE: now this pain of overlaying the same string twice is not necessary
-                #printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
-                jresponse=""
-                read -k1 jresponse
-                if [[ $jresponse = "y" || $jresponse = "c" ]]; then
-                    break
-                fi
+                for pathname in "$shuffledart[@]"; do
+                    if [[ $winchdetected = "1" ]]; then
+                        termwidth="$COLUMNS"
+                        termheight="$LINES"
+                        winchdetected="0"
+                    fi
+                    artname=$(basename "$pathname")
+                    prevartname=""
+                    setartstring
+                    local questionstr="Select this? (c:cancel, $1:next, y:select), name: $artname "
+                    printart $questionstr
+                    lasttime=""
+                    printtime "1"
+                    # NOTE: now this pain of overlaying the same string twice is not necessary
+                    #printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
+                    readresponse=""
+                    read -k1 readresponse
+                    if [[ $readresponse = "y" || $readresponse = "c" ]]; then
+                        break
+                    fi
+                done
             done
             # If response is not 'y', then restore the original state
-            if [[ $jresponse != "y" ]]; then
+            if [[ $readresponse != "y" ]]; then
                 artname="$jrestoreartname"
                 flipartname="$jrestoreflipartname"
                 prevartname=""
