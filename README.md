@@ -37,7 +37,7 @@ Beauty of text-art meets functionality of a feature-rich clock / timer / pattern
 - Support animated text art: flip-flop between two related ascii arts every second
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
 - Support productivity: mindful suspension (``Ctrl-z``) and continuation (``fg``). Doesn't occupy terminal screen or consume power while suspended, but still shows correct elapsed time when continued.
-- Random art selection makes it a fun game, or serious tarot-style reading for believers in The Random
+- Random art selection makes it a fun game.
 - Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
 - Works on macOS out of the box. No need to install homebrew, developer tools. Zero dependencies
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
@@ -87,7 +87,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 9. Random art selection. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (Note: following video playback works in Safari on macOS, but for some reason not in Safari on iPhone 8, perhaps because of a github.com bug?).
 
-https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-84b3-8e69affdf64f.mp4 
+https://user-images.githubusercontent.com/71736629/205250431-e1f31140-914d-4850-85d7-4a9b649f9ed4.mov
 
 10. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
