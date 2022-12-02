@@ -89,9 +89,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 https://user-images.githubusercontent.com/71736629/169684098-1f44732c-92fd-466a-84b3-8e69affdf64f.mp4 
 
-10. Tarot card picking. ``$ arttime --nolearn`` then press and hold ``o`` for a few seconds. After some time arttime will settle on some randomly selected tarot card. Press ``y`` to select it, or ``c`` to cancel. Tarot art was done by text artist [littlebitspace](https://littlebitspace.com). It requires your font to have Unicode block [Symbols for legacy computing](https://en.wikipedia.org/wiki/Symbols_for_Legacy_Computing), ideally viewed in a squarish Commodore-64 font like [C64 Pro Mono](https://style64.org/c64-truetype).
-
-11. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
+10. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
 # Installation
 
