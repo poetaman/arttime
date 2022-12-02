@@ -162,3 +162,4 @@ docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
 1. text artists: mostly great text artists of web 1.0 era like [jgs (Joann Stark)](https://github.com/oldcompcz/jgs), et al.
 2. [ascii-image-converter](https://github.com/TheZoraiz/ascii-image-converter): So far the best digital image to colored text converter
 3. [aewan](http://aewan.sourceforge.net): free ascii text coloring tool. Project seems stalled, but works. Tested on Linux VM running on aarch64 Macbook.
+4. [littlebitspace](https://littlebitspace.com): for providing his tarot art for arttime.
