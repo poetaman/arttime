@@ -162,14 +162,14 @@ Kebindings:
 
 Options:
     There are options to control art displayed at launch, colors, string
-    styling, setting a timer/alarm, controlling time sampling rate, etc. 
+    styling, setting a timer or pattern of timers, etc. 
     arttime looks for text art files in a directory relative to
     its own location (let's call it artdir):
         artdir="<dir_of_arttime>/../share/arttime/textart/*"
 
-    -a          a-art art file name in artdir, or full path to a art file
+    -a          a-art art file name in artdir
                 (default: butterfly)
-    -b          b-art art file name in artdir, or fill path to a art file 
+    -b          b-art art file name in artdir
                 (no default)
     -t          title message placed under art (default: line 1 in artfiles)
     --random [all|tarot|notarot]
