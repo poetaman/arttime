@@ -90,7 +90,7 @@ Options:
     is part of arttime repository, which intends to be a platform/repository
     of text art.
 
-    -a          artfile in artdir, or full path to a art file (default: trex)
+    -a          artfile in artdir (default: trex)
     -t          title message placed under art (default: line 1 in artfile)
     -s          subtitle message (default: none, not printed)
     --random [all|tarot|notarot]
