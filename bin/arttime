@@ -484,6 +484,7 @@ fi
 if [[ ! -z $randomarg ]]; then
     prevdir=$PWD
     cd $artdir
+    RANDOM="${EPOCHREALTIME#*.}"
     if [[ $randomarg == "all" ]]; then
         defaultshuffle=(*(.Nnoe['REPLY=$RANDOM']))
     elif [[ $randomarg == "tarot" ]]; then
@@ -1498,6 +1499,7 @@ function usr1input_handler {
             flipartname=""
             local readresponse="$1"
             while [[ $readresponse == "$1" ]]; do
+                RANDOM="${EPOCHREALTIME#*.}"
                 if [[ $1 = "j" ]]; then
                     local shuffledart=($artdir/^tarot-*(.Nnoe['REPLY=$RANDOM']))
                 else
