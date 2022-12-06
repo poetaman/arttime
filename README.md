@@ -89,7 +89,12 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 https://user-images.githubusercontent.com/71736629/205250431-e1f31140-914d-4850-85d7-4a9b649f9ed4.mov
 
-10. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
+10. Pick random tarot art. ``$ arttime --nolearn -a tarot -t "Only tarot can help in debugging undocumented code..."`` then press and hold ``o`` for a few seconds. After some time arttime will settle on some randomly selected tarot card. Press ``y`` to select it, or ``c`` to cancel. Tarot art was done by text artist [littlebitspace](https://littlebitspace.com). It requires your font to have Unicode block [Symbols for legacy computing](https://en.wikipedia.org/wiki/Symbols_for_Legacy_Computing), ideally viewed in a squarish Commodore 64 font like [C64 Pro Mono](https://style64.org/c64-truetype).
+
+<img width="1012" alt="Screenshot 2022-12-05 at 8 20 55 PM" src="https://user-images.githubusercontent.com/71736629/205813373-d7e79acf-10d6-440e-90bf-3904bf0e3d76.png">
+
+
+11. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
 # Installation
 
@@ -162,4 +167,3 @@ docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
 1. text artists: mostly great text artists of web 1.0 era like [jgs (Joann Stark)](https://github.com/oldcompcz/jgs), et al.
 2. [ascii-image-converter](https://github.com/TheZoraiz/ascii-image-converter): So far the best digital image to colored text converter
 3. [aewan](http://aewan.sourceforge.net): free ascii text coloring tool. Project seems stalled, but works. Tested on Linux VM running on aarch64 Macbook.
-4. [littlebitspace](https://littlebitspace.com): for providing his tarot art for arttime.
