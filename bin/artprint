@@ -10,7 +10,7 @@ if ! is-at-least "5.7"; then
     exit 1
 fi
 
-arttime_version="1.9.3"
+arttime_version="1.9.8"
 
 zmodload zsh/zutil
 setopt extendedglob
