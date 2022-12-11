@@ -87,7 +87,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 9. Random art selection. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (Note: following video playback works in Safari on macOS, but for some reason not in Safari on iPhone 8, perhaps because of a github.com bug?).
 
-https://user-images.githubusercontent.com/71736629/205250431-e1f31140-914d-4850-85d7-4a9b649f9ed4.mov
+https://user-images.githubusercontent.com/71736629/206934934-25b4632f-ee56-421a-a120-1c44bcf64ac4.mp4
 
 10. Pick random tarot art. ``$ arttime --nolearn -a tarot -t "Only tarot can help in debugging undocumented code..."`` then press and hold ``o`` for a few seconds. After some time arttime will settle on some randomly selected tarot card. Press ``y`` to select it, or ``c`` to cancel. Tarot art was done by text artist [littlebitspace](https://littlebitspace.com). It requires your font to have Unicode block [Symbols for legacy computing](https://en.wikipedia.org/wiki/Symbols_for_Legacy_Computing), ideally viewed in a squarish Commodore 64 font like [C64 Pro Mono](https://style64.org/c64-truetype).
 
