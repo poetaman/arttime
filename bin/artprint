@@ -6,7 +6,7 @@
 
 autoload -Uz is-at-least
 if ! is-at-least "5.7"; then
-    echo "Error: your zsh version $ZSH_VERSION is less than the required version: 5.7"
+    echo "E: your zsh version $ZSH_VERSION is less than the required version: 5.7"
     exit 1
 fi
 
@@ -35,13 +35,14 @@ $(printf "$zparseoptscmd") \
    -width:=width_arg \
    -height:=height_arg \
    -style:=style_arg \
+   -get:=get_arg \
    -debug=debug_arg \
    -version=version_arg \
    -help=help_arg \
    || return
 
 if [[ "${#@}" != "0" ]]; then
-    printf "Error: artprint does not understand the following part of passed options,\n    "
+    printf "E: artprint does not understand the following part of passed options,\n    "
     printf ' %s ' "[1m[4m$@[0m"
     printf '\n%s\n' "check the valid options by invoking artprint with --help"
     exit 1
@@ -113,6 +114,13 @@ Options:
                 value of 1 (--style 1) uses curly underlines, among other
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
+
+    --get <comma,separated,string>
+                print parts of art file specifed by comma separated list
+                and exit. The three parts are: title, art, and metadata.
+                This is useful for retriving data in it's raw format,
+                without further processing.
+    
     --version   Print version number of arttime it was shipped with, and exit
                 Note: artprint doesn't have it's own version number
     -h, --help  Print this help string, and exit
@@ -158,10 +166,11 @@ theme="${theme_arg[-1]}"
 widtharg="${width_arg[-1]}"
 heightarg="${height_arg[-1]}"
 style="${style_arg[-1]}"
+getarg="${get_arg[-1]}"
 debug="${debug_arg[-1]}"
 
 if [[ $artname != "" && $randomarg != "" ]]; then
-    echo "Error: options -a <artname> and --random [all|tarot|notarot] should not be passed together."
+    echo "E: options -a <artname> and --random [all|tarot|notarot] should not be passed together."
     exit 1
 fi
 
@@ -212,10 +221,72 @@ if [[ ! -f "$artfile" ]]; then
     artfile="/dev/null"
 fi
 
-art=$(tail -n +2 "$artfile")
+artfilecontents=$(<"$artfile")
+read -r titledefault <<<"$artfilecontents"
+artfilecontents=${artfilecontents#*$'\n'}
+
+metabeginregex='^#[[:space:]]*BEGIN_ARTTIME_METADATA[[:space:]]*$'
+metaendregex='^#[[:space:]]*END_ARTTIME_METADATA[[:space:]]*$'
+artarray=()
+metadataarray=()
+art=''
+metadata=''
+filephase=0
+while IFS= read -r line; do
+    case $filephase in
+        0)
+            if [[ $line =~ $metabeginregex ]]; then
+                metadataarray+=($line)
+                filephase=1
+            else
+                artarray+=("$line")
+            fi
+            ;;
+        1)
+            metadataarray+=($line)
+            if [[ $line =~ $metaendregex ]]; then
+                filephase=2
+            fi
+            ;;
+        2)
+            ;;
+    esac
+done <<<"$artfilecontents"
+
+art=$(printf '\n%s' "${(@)artarray:0:$}")
+art=${art#*$'\n'}
+metadata=$(printf '\n%s' "$metadataarray[@]")
+metadata=${metadata#*$'\n'}
+
+if [[ ! -z "$getarg" ]]; then
+    getargarray=(${(s/,/)getarg})
+    for substr in "$getargarray[@]"; do
+        if ! [[ $substr == "art" || $substr == "metadata" || $substr == "title" ]]; then
+            printf "E: '$substr' not recognized, --get can only be passed comma-separated list containing values (art title metadata)"
+            exit 1
+        fi
+    done
+    outputstr=""
+    for substr in "$getargarray[@]"; do
+        case $substr in
+            "art")
+                outputstr=$(printf "%s\n%s" "$outputstr" "$art")
+                ;;
+            "metadata")
+                [[ ! -z "$metadata" ]] && outputstr=$(printf "%s\n%s" "$outputstr" "$metadata")
+                ;;
+            "title")
+                outputstr=$(printf "%s\n%s" "$outputstr" "$titledefault")
+                ;;
+        esac
+    done
+    outputstr=${outputstr#*$'\n'}
+    [[ ! -z $outputstr ]] && printf "$outputstr\n"
+    exit 0
+fi
 
 if [[ -z $title ]]; then
-    title=$(head -n1 "$artfile")
+    title="$titledefault"
 elif [[ $title = "-" ]]; then 
     title=""
 fi
