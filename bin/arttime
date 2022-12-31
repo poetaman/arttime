@@ -1620,8 +1620,9 @@ function usr1input_handler {
                 readstatus="0"
             else
                 toggleflipart=$(((toggleflipart+1)%2))
-                local tempscreen=$(printart;lasttime="";printtime '1')
-                vared -p "$tempscreen${tput_cup00}Enter goal ('help' to learn):${tput_cnorm} " -c tempgoal;
+                #local tempscreen=$(printart;lasttime="";printtime '1')
+                echoti cup $LINES 0
+                vared -p "${tput_cup00}Enter goal ('help' to learn):${tput_cnorm} " -c tempgoal;
             fi
             printf "$tput_civis"
             $sttycmd -echo
@@ -1956,8 +1957,9 @@ EOF
                 readstatus="0"
             else
                 toggleflipart=$(((toggleflipart+1)%2))
-                local tempscreen=$(printart;lasttime="";printtime '1')
-                vared -p "$tempscreen${tput_cup00}Enter title message ('orig' to reset):${tput_cnorm} " -c temptitle;
+                #local tempscreen=$(printart;lasttime="";printtime '1')
+                echoti cup $LINES 0
+                vared -p "${tput_cup00}Enter title message ('orig' to reset):${tput_cnorm} " -c temptitle;
                 readstatus="$?"
             fi
             printf "$tput_civis"
