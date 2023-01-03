@@ -53,9 +53,21 @@ $(printf "$zparseoptscmd") \
    -hours:=hours_arg \
    -debug=debug_arg \
    -nolearn=nolearn_arg \
+   -line-editor:=lineeditor_arg \
    -version=version_arg \
    -help=help_arg \
    || return
+# NOTE: --line-editor and --debug are "undocumented" options that are not printed by --help
+#   --debug
+#       As the name suggests, it is for debug. It's meaning might change over time.
+#   --line-editor [zle|readline]
+#       There is a bug in zsh's line editor interface that makes it more desirable to
+#       read a line using bash on slower machines/connections. It avoids a flicker on last line
+#       of screen; on fast machines this problem won't occur. This option might get removed
+#       at some point, and it not recommended to be used. The line editor passed with this
+#       option only applies to keybindings 'g' (set goal) and 'm' (set title message).
+#       Another reason to not use this is it that arttime will add more zle-specific completion
+#       features in future, and they might not be available with readline.
 
 if [[ "${#@}" != "0" ]]; then
     printf "Error: arttime does not understand the following part of passed options,\n    "
@@ -281,12 +293,6 @@ else
     fi
 fi
 
-if command -v bash &>/dev/null; then
-    bashavailable="1"
-else
-    bashavailable="0"
-fi
-
 function getaart {
     if [[ $helpactive = "1" ]]; then
         echo $restoreartname
@@ -406,6 +412,7 @@ nolearn="${nolearn_arg[-1]}"
 #tflocal="${tflocal_arg[-1]}"
 #tfother="${tfother_arg[-1]}"
 hoursfmt="$hours_arg[-1]"
+lineeditor="${lineeditor_arg[-1]}"
 
 hm12="%I:%M%p"
 hms12="%I:%M:%S%p"
@@ -453,6 +460,20 @@ fi
 
 if [[ $randomarg != "" && $randomarg != "all" && $randomarg != "tarot" && $randomarg != "notarot" ]]; then
     printf "E: --random was passed \"$randomarg\", it can only be passed vales \"all\" or \"tarot\" or \"notarot\" \n"
+    exit 1
+fi
+
+if [[ $lineeditor == "" || $lineeditor == "zle" ]]; then
+    usereadline="0"
+elif [[ $lineeditor == "readline" ]]; then
+    if command -v bash &>/dev/null; then
+        usereadline="1"
+    else
+        printf "E: --line-editor readline requires bash installed\n"
+        exit 1
+    fi
+else
+    printf "E: --line-editor can only accept values: readline or zle (default)\n"
     exit 1
 fi
 
@@ -915,6 +936,7 @@ tput_cnorm=$(echoti cnorm)
 tput_smcup=$(echoti smcup)
 tput_cuu1=$(echoti cuu1)
 tput_cub1=$(echoti cub1)
+tput_el=$(echoti el)
 
 toggleflipart="0"
 function printart {
@@ -1367,6 +1389,26 @@ function formattimedelta {
     echo "$timestate$formattedtime"
 }
 
+zlelinepromptstr=""
+function zlelineprompt {
+    if [[ $belowstr = "" && $printprogressbarflag = "1" ]]; then
+        #printprogressbar
+        shiftwidth=$(((termwidth-${#progressbar})/2))
+        [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
+        padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+        [[ ! $padwidth -gt 0 ]] && padwidth=0
+        echoti cup $LINES 0
+        printf "%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar" " " "$progressbar" " "
+    else
+        #printemptyline
+        shiftwidth=$((termwidth-1))
+        echoti cup $LINES 0
+        printf "%${shiftwidth}s$tchar" " "
+    fi
+    printf "${tput_cup00}${zlelinepromptstr} $tput_cnorm"
+}
+zle -N zlelineprompt
+
 function usr1input_handler {
     case "$1" in
         "a"|"b")
@@ -1431,7 +1473,7 @@ function usr1input_handler {
         "x"|"y")
             if ! command -v fzf-tmux; then
                 echoti cup 0 0
-                echo "$(echoti el)fzf binary not found, please install it"
+                echo "${tput_el}fzf binary not found, please install it"
                 zselect -t 200
                 while read dummy ; do : ; done 
                 return
@@ -1610,19 +1652,17 @@ function usr1input_handler {
             fi
             ;;
         "g")
-            echoti cup 0 0
-            echoti el
             tempgoal=""
             $sttycmd $sttyorig
-            if [[ $bashavailable = "1" ]]; then
-                printf "${tput_cup00}${tput_cnorm}"
+            if [[ $usereadline == "1" ]]; then
+                printf "${tput_cup00}${tput_el}${tput_cnorm}"
                 tempgoal=$(bash -c 'read -e -p "Enter goal (\"help\" to learn): " retvar; echo $retvar');
                 readstatus="0"
             else
                 toggleflipart=$(((toggleflipart+1)%2))
-                #local tempscreen=$(printart;lasttime="";printtime '1')
                 echoti cup $LINES 0
-                vared -p "${tput_cup00}Enter goal ('help' to learn):${tput_cnorm} " -c tempgoal;
+                zlelinepromptstr="Enter goal ('help' to learn):"
+                vared -i zlelineprompt -p "$tput_cup00$tput_el$zlelinepromptstr " -c tempgoal;
             fi
             printf "$tput_civis"
             $sttycmd -echo
@@ -1945,21 +1985,17 @@ EOF
             fi
             ;;
         "m")
-            echoti cup 0 0
-            echoti el
             temptitle=""
             $sttycmd $sttyorig
-            #printf "Enter message (Ctrl-d to cancel): "
-            #read temptitle
-            if [[ $bashavailable = "1" ]]; then
-                printf "${tput_cup00}${tput_cnorm}"
+            if [[ $usereadline == "1" ]]; then
+                printf "${tput_cup00}${tput_el}${tput_cnorm}"
                 temptitle=$(bash -c 'read -e -p "Enter title message (\"orig\" to reset): " retvar; echo $retvar');
                 readstatus="0"
             else
                 toggleflipart=$(((toggleflipart+1)%2))
-                #local tempscreen=$(printart;lasttime="";printtime '1')
                 echoti cup $LINES 0
-                vared -p "${tput_cup00}Enter title message ('orig' to reset):${tput_cnorm} " -c temptitle;
+                zlelinepromptstr="Enter title message ('orig' to reset):"
+                vared -i zlelineprompt -p "$tput_cup00$tput_el$zlelinepromptstr " -c temptitle;
                 readstatus="$?"
             fi
             printf "$tput_civis"
