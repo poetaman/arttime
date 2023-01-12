@@ -22,7 +22,7 @@ Contents
 # arttime
 Beauty of text-art meets functionality of a feature-rich clock / timer / pattern-based time manager. In addition to its functional/productivity features, ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal. It is a cross-platform application with native notifications/sounds that runs well on macOS, Linux, and BSD Unixes.
 
-Artime is rooted in Unix philosopy, you can pipe keystrokes into it instead of just typing them. Keystrokes can come from any of: keyboard, file, pipe, here-string, or even unix/tcp socket. More information on this feature will be added in [arttime wiki: scriptable](https://github.com/poetaman/arttime/wiki#scriptable).
+Artime is rooted in Unix philosopy, you can pipe keystrokes into it instead of typing them. Keystrokes can come from: keyboard, file, pipe, here-string, and even remotely. It can be scripted/controlled from any language of choice. More information on this feature will be added in [arttime wiki: scriptable](https://github.com/poetaman/arttime/wiki#scriptable).
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 500+ high-quality text art to choose from
