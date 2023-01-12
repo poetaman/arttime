@@ -22,6 +22,8 @@ Contents
 # arttime
 Beauty of text-art meets functionality of a feature-rich clock / timer / pattern-based time manager. In addition to its functional/productivity features, ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal. It is a cross-platform application with native notifications/sounds that runs well on macOS, Linux, and BSD Unixes.
 
+Arrtime is rooted in Unix philosopy, you can pipe keystrokes into it instead of typing them.
+
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 500+ high-quality text art to choose from
 - Provide a feature-rich alarm timer/time manager for commandline.
@@ -33,6 +35,7 @@ Beauty of text-art meets functionality of a feature-rich clock / timer / pattern
   - Interactively switch time zones.
   - A configurable text-based progress bar shows what percentage of the timer is complete/pending. Example: >>>>------ (--style 0) ■■■■□□□□□□ (--style 1)
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
+- Scriptable: Want to script/control arttime programmatically or even remotely? You can feed/pipe keystrokes from a string, file or another program (coded in any language of your choice), making it the most Unix-friendly interactive application in it's category. More details in [arttime wiki: scriptable](https://github.com/poetaman/arttime/wiki#scriptable).
 - Provide users with 1 line of text under art to share their mind, display their activism
 - Support animated text art: flip-flop between two related ascii arts every second
 - Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
