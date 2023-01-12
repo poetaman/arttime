@@ -16,6 +16,7 @@ zmodload zsh/zselect
 zmodload zsh/zutil
 zmodload zsh/datetime
 zmodload zsh/terminfo
+zmodload zsh/system
 setopt extendedglob
 
 # NOTE: enable minute/nonblocking mode if/when its functional,
@@ -26,7 +27,7 @@ setopt extendedglob
 #   s:=samples_arg \
 # This means all functions ending in _nonblocking, etc are unreachable for now 
 
-# Note: To allow user to specify fully custom time format in future add
+# NOTE: To allow user to specify fully custom time format in future add
 #     -tf-local:=tflocal_arg \
 #     -tf-other:=tfother_arg \
 
@@ -64,7 +65,7 @@ $(printf "$zparseoptscmd") \
 #       There is a bug in zsh's line editor interface that makes it more desirable to
 #       read a line using bash on slower machines/connections. It avoids a flicker on last line
 #       of screen; on fast machines this problem won't occur. This option might get removed
-#       at some point, and it not recommended to be used. The line editor passed with this
+#       at some point, and it is not recommended for use. The line editor passed with this
 #       option only applies to keybindings 'g' (set goal) and 'm' (set title message).
 #       Another reason to not use this is it that arttime will add more zle-specific completion
 #       features in future, and they might not be available with readline.
@@ -261,6 +262,87 @@ elif [[ ! -z $version_arg[-1] ]]; then
     echo "$arttime_version"
     exit 0
 fi
+
+fd0closed="0"
+handoff="0"
+modestrnorm=""
+modestrscript="$(echoti cub 6)SCRIPT"
+function setmodestr {
+    if [[ -t 0 ]]; then
+        modestr=$modestrnorm
+    else
+        modestr=$modestrscript
+    fi
+}
+setmodestr
+
+inputstr=""
+function readstr {
+    inputstr="$1"
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
+    else
+        while read -r -s -k1 -t0 inputchar ; do : ; done
+        printf "$promptstr${tput_cnorm} "
+        local inputchard=""
+        local inputcharint=0
+        local inputchardint=0
+        while true; do
+            readchar || break
+            inputcharint=$(printf '%d' "'$inputchar")
+            if ((inputcharint == 10 || inputcharint == 13 )); then
+                break
+            elif ((inputchardint == 92 && inputcharint == 110)); then
+                inputstr="${inputstr:0:-1}"
+                break
+            else
+                inputchard=$inputchar
+                inputchardint=$(printf '%d' "'$inputchar")
+                inputstr+=$inputchar
+                printf $inputchar
+            fi
+        done
+        retstatus="0"
+    fi
+    return $retstatus
+}
+
+inputchar=""
+function readchar {
+    inputchar=""
+    if [[ ! -z $1 ]]; then
+        local timeout="-t$1"
+    else
+        local timeout=""
+    fi
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        read -r -s $timeout -k1 inputchar; retstatus="$?"
+    else
+        ERRNO=0
+        sysread -s1 -c1 $timeout -i0 inputchar; retstatus=$?; reterrno=$ERRNO
+        case "$retstatus" in
+            "0"|"4")
+                retstatus=0
+                ;;
+            *)
+                fd0closed="1"
+                exec 0<&-
+                exec 0<>$TTY
+                sttyset
+                setmodestr
+                handoff="1"
+                ;;
+        esac
+    fi
+    return $retstatus
+}
+function slurp {
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        while read -r -s -k1 -t0 inputchar ; do : ; done 
+    else
+        while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
+    fi
+}
 
 unamestr="$(uname -s)"
 case "${unamestr}" in
@@ -835,11 +917,33 @@ fi
 
 #setsleeptimecenti
 
-sttycmd='/bin/stty'
-sttyorig=$($sttycmd -g)
-# NOTE: disable showing characters typed by user while showing dino
-$sttycmd -echo
-$sttycmd -icanon min 0 time 0 
+sttycmd="/bin/stty"
+sttyorig=""
+
+function sttyget {
+    sttyorig=$($sttycmd -g </dev/tty 2>/dev/null)
+}
+
+function sttyset {
+    $sttycmd -echo </dev/tty 2>/dev/null
+    $sttycmd -icanon min 0 time 0 </dev/tty 2>/dev/null
+}
+
+function sttyresetint {
+    if [[ -t 0 ]]; then
+        $sttycmd $sttyorig </dev/tty 2>/dev/null
+    else
+        $sttycmd $sttyorig </dev/tty 2>/dev/null
+        $sttycmd -echo </dev/tty 2>/dev/null
+    fi
+}
+
+function sttyresetext {
+    $sttycmd $sttyorig </dev/tty 2>/dev/null
+}
+
+sttyget
+sttyset
 
 function setcolors {
     if [[ -z "$theme" || "$theme" = "dark" ]]; then
@@ -926,8 +1030,6 @@ function setartstring {
     #exit
 }
 
-# NOTE: tput sequences of at least printart and printtime
-# are better cached, rest is a low priority
 tput_cup00=$(echoti cup 0 0)
 tput_sc=$(echoti sc)
 tput_rc=$(echoti rc)
@@ -937,6 +1039,7 @@ tput_smcup=$(echoti smcup)
 tput_cuu1=$(echoti cuu1)
 tput_cub1=$(echoti cub1)
 tput_el=$(echoti el)
+tput_clear=$(echoti clear)
 
 toggleflipart="0"
 function printart {
@@ -1177,7 +1280,26 @@ function printtime {
     else
         printprogressbarflag="0"
     fi
-    if [[ $belowstr = "" || $1 != "1"  ]]; then
+    
+    if [[ $belowstr == "" || $1 == "1" || $handoff == "1" ]]; then
+        #printprogressbar
+        #printbelowstr
+        #printmodestr
+        if [[ $printprogressbarflag = "1" ]]; then
+            #printprogressbar
+            shiftwidth=$(((termwidth-${#progressbar})/2))
+            [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
+            padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
+            [[ ! $padwidth -gt 0 ]] && padwidth=0
+            printf "$tput_sc\n%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar$belowstr$modestr$tput_rc" " " "$progressbar" " "
+        else
+            #printemptyline
+            shiftwidth=$((termwidth-1))
+            printf "$tput_sc\n%${shiftwidth}s$tchar$belowstr$modestr$tput_rc" " "
+        fi
+        handoff=""
+    else
+        #printprogressbar
         if [[ $printprogressbarflag = "1" ]]; then
             #printprogressbar
             shiftwidth=$(((termwidth-${#progressbar})/2))
@@ -1190,22 +1312,8 @@ function printtime {
             shiftwidth=$((termwidth-1))
             printf "\n%${shiftwidth}s$tchar$tput_cuu1" " "
         fi
-    else
-        #printprogressbar
-        #printbelowstr
-        if [[ $printprogressbarflag = "1" ]]; then
-            #printprogressbar
-            shiftwidth=$(((termwidth-${#progressbar})/2))
-            [[ ! $shiftwidth -gt 0 ]] && shiftwidth=0
-            padwidth=$((termwidth-${#progressbar}-shiftwidth-1))
-            [[ ! $padwidth -gt 0 ]] && padwidth=0
-            printf "$tput_sc\n%${shiftwidth}s\e[38;5;${artcolor}m%s\e[0m%${padwidth}s$tchar$belowstr$tput_rc" " " "$progressbar" " "
-        else
-            #printemptyline
-            shiftwidth=$((termwidth-1))
-            printf "$tput_sc\n%${shiftwidth}s$tchar$belowstr$tput_rc" " "
-        fi
     fi
+    
     #if [[ "$usr1detected" = "1" ]]; then
     #    trapusr1_both
     #fi
@@ -1215,13 +1323,13 @@ function printtime {
 killdone="0"
 
 function trapint_nonblocking {
-    trap -; kill ${1}; command -v pkill &>/dev/null && pkill -P $$; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
+    trap -; kill ${1}; command -v pkill &>/dev/null && pkill -P $$; killdone="1"; tputreset; sttyresetext; exit 0;
 }
 
 function trapint_blocking {
-    #while read dummy ; do : ; done
+    #while read -k1 dummy ; do : ; done
     # exec 0>&- 2>dev/null;
-    #trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; $sttycmd $sttyorig; set -e; (exit 130);
+    #trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; sttyresetext; set -e; (exit 130);
     trapintactive="1"
     trapusr1_both "q"
     trapintactive="0"
@@ -1231,51 +1339,52 @@ function trapexit_nonblocking {
     trap -;
     command -v pkill &>/dev/null && pkill -P $$;
     if [[ "$killdone" = "0" ]]; then
-        kill ${1}; killdone="1"; tputreset; $sttycmd $sttyorig; exit 0;
+        kill ${1}; killdone="1"; tputreset; sttyresetext; exit 0;
     fi
 }
 
 function trapexit_blocking {
     rm ~/.cache/arttime/$UID-$$.morestr 2>/dev/null
-    trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; $sttycmd $sttyorig;  set -e; (exit 1);
+    trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; sttyresetext;  set -e; (exit 1);
 }
 
 function trapstop_blocking {
-    tputreset; $sttycmd $sttyorig; trap - TSTP; suspend; # kill -TSTP $$
+    tputreset; sttyresetext; trap - TSTP; suspend; # kill -TSTP $$
 }
 
 function trapstop_nonblocking {
-    tputreset; $sttycmd $sttyorig; trap - TSTP; suspend; # kill -TSTP $$
+    tputreset; sttyresetext; trap - TSTP; suspend; # kill -TSTP $$
 }
 
 function trapcont_blocking {
     trap "trapstop_blocking" TSTP;
     #killdone="0"; 
-    sttyorig=$($sttycmd -g)
-    $sttycmd -echo
-    $sttycmd -icanon min 0 time 0 
+    sttyget
+    sttyset
     tputset
     printart
-    printtime
+    printtime "1"
 }
 
 function trapcont_nonblocking {
     trap "trapstop_nonblocking" TSTP;
     #killdone="0"; 
-    sttyorig=$($sttycmd -g)
-    $sttycmd -echo
-    $sttycmd -icanon min 0 time 0 
+    sttyget
+    sttyset
     tputset
     printart
-    printtime
+    printtime "1"
 }
 
 
 function askforconfirmation {
-    local response=""
+    if [[ ! -t 0 ]]; then
+        while read -r -s -k1 -t0 inputchar ; do : ; done
+    fi
     printf "Do you really want to $1? [y/n]:  ${tput_cub1}${tput_cnorm}"
-    read -k1 response
-    if [[ $response = "y" || $response = "Y" ]]; then
+    readchar
+    printf "$inputchar"
+    if [[ $inputchar = "y" || $inputchar = "Y" ]]; then
         return 0
     else
         return 1
@@ -1285,12 +1394,11 @@ function askforconfirmation {
 #setopt nomenucomplete
 #setopt menu_complete
 #zmodload -i zsh/complist
-tmpartname=""
 function artselector {
     local curcontext=artselector:::
-    tmpartname="";
     printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
-    vared -p "Enter artname:${tput_cnorm} " -c tmpartname;
+    promptstr="Enter artname:"
+    readstr
 }
 function _artselector {
     _files -W $artdir
@@ -1306,7 +1414,6 @@ function artselector2 {
     artnametemp=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
     cd $restoredir
     local curcontext=artselector2:::
-    tmpartname="";
     if command -v column &>/dev/null; then
         echo $artnametemp  | tr ' ' '\n' | column -c$(echoti cols)
         printf '\n'
@@ -1315,7 +1422,8 @@ function artselector2 {
         printf '%s  ' $artnametemp
         printf '\n\n'
     fi
-    vared -p "Enter artname:${tput_cnorm} " -c tmpartname;
+    promptstr="Enter artname:"
+    readstr
 }
 function _artselector2 {
     _describe 'possible b-art' artnametemp
@@ -1326,26 +1434,29 @@ function zoneselector {
     local restorepwd=$PWD
     cd /usr/share/zoneinfo
     local curcontext=zoneselector:::
-    tmpzonename="./"
+    inputstr="./"
     printf "Press tab key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
-    while [[ ! -f /usr/share/zoneinfo/$tmpzonename && ! -z $tmpzonename && $tmpzonename != "./orig" && $tmpzonename != "orig" ]]; do
-        if [[ $tmpzonename =~ ^[./]+$ ]]; then
-            tmpzonename="./"
-            vared -p "Enter zonename (press tab): " -c tmpzonename;
-        elif [[ -d /usr/share/zoneinfo/$tmpzonename ]]; then
-            if [[ $tmpzonename[-1] != "/" ]]; then
-                tmpzonename=$tmpzonename'/'
+    while [[ ! -f /usr/share/zoneinfo/$inputstr && ! -z $inputstr && $inputstr != "./orig" && $inputstr != "orig" ]]; do
+        if [[ $inputstr =~ ^[./]+$ ]]; then
+            inputstr="./"
+            promptstr="Enter zonename (press tab):"
+            readstr $inputstr
+        elif [[ -d /usr/share/zoneinfo/$inputstr ]]; then
+            if [[ $inputstr[-1] != "/" ]]; then
+                inputstr=$inputstr'/'
             fi
-            vared -p "Enter zonename (press tab): " -c tmpzonename;
+            promptstr="Enter zonename (press tab):"
+            readstr $inputstr
         else
-            tmpzonename="./"
-            vared -p "Enter zonename (press tab): " -c tmpzonename;
+            inputstr="./"
+            promptstr="Enter zonename (press tab):"
+            readstr $inputstr
         fi
     done
-    if [[ $tmpzonename = "./orig" || $tmpzonename = "orig" ]]; then
-        tmpzonename=$tzlonginit
+    if [[ $inputstr = "./orig" || $inputstr = "orig" ]]; then
+        inputstr=$tzlonginit
     fi
-    tmpzonename=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${tmpzonename:a})
+    inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${inputstr:a})
     cd $restorepwd
 }
 function _zoneselector {
@@ -1389,7 +1500,7 @@ function formattimedelta {
     echo "$timestate$formattedtime"
 }
 
-zlelinepromptstr=""
+promptstr=""
 function zlelineprompt {
     if [[ $belowstr = "" && $printprogressbarflag = "1" ]]; then
         #printprogressbar
@@ -1405,12 +1516,20 @@ function zlelineprompt {
         echoti cup $LINES 0
         printf "%${shiftwidth}s$tchar" " "
     fi
-    printf "${tput_cup00}${zlelinepromptstr} $tput_cnorm"
+    printf "${tput_cup00}${promptstr} $tput_cnorm"
 }
 zle -N zlelineprompt
 
 function usr1input_handler {
-    case "$1" in
+    local commandkey=$1
+    if [[ ! -t 0 ]]; then
+        case $commandkey; in
+            "x") commandkey="a";;
+            "y") commandkey="b";;
+              *) ;;
+        esac
+    fi
+    case "$commandkey" in
         "a"|"b")
             local initialartname="$artname"
             local initialflipartname="$flipartname"
@@ -1418,46 +1537,45 @@ function usr1input_handler {
                 artname="$restoreartname"
                 flipartname="$restoreflipartname"
             fi
-            $sttycmd $sttyorig
+            sttyresetint
             printf "$tput_smcup"
-            echoti clear
-            echoti cup 0 0
-            if [[ $1 = "a" ]]; then
+            local modestrclr="$tput_clear$(echoti cup $LINES $COLUMNS)$modestr"
+            printf "$modestrclr$tput_cup00"
+            if [[ $commandkey = "a" ]]; then
                 artselector
             else
                 printf "Set b-art, finding art that matches height of a-art ($artname)...\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
                 artselector2
             fi
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
+            sttyset
             tputset
-            if [[ $tmpartname = "" ]]; then
-                if [[ $1 = "b" ]]; then
+            if [[ $inputstr = "" ]]; then
+                if [[ $commandkey = "b" ]]; then
                     flipartname=""
                 fi
-            elif [[ ! -f "$artdir/$tmpartname" ]]; then
-                printf "E: No file found for art: $tmpartname.\nPress any key to continue..."
-                read -t3 -k1
-                while read dummy ; do : ; done 
+            elif [[ ! -f "$artdir/$inputstr" ]]; then
+                printf "E: No file found for art: $inputstr.\nPress any key to continue..."
+                readchar 3
+                slurp
             else
-                if [[ $1 = "a" ]]; then
-                    artname="$tmpartname"
+                if [[ $commandkey = "a" ]]; then
+                    artname="$inputstr"
                 else
-                    flipartname="$tmpartname"
+                    flipartname="$inputstr"
                 fi
             fi
             prevartname=""
             if ! setartstring; then
                 printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
-                if [[ $1 = "b" ]]; then
+                if [[ $commandkey = "b" ]]; then
                     artname="$initialartname"
                     flipartname="$initialflipartname"
                     setartstring
                 fi
-                read -t5 -k1
-                while read dummy ; do : ; done
+                readchar 5
+                slurp
             else
-                if [[ $tmpartname = "" || ! -f "$artdir/$tmpartname" ]]; then
+                if [[ $inputstr = "" || ! -f "$artdir/$inputstr" ]]; then
                     if [[ $helpactive = "1" ]]; then
                         artname="$initialartname"
                         flipartname="$initialflipartname"
@@ -1475,7 +1593,7 @@ function usr1input_handler {
                 echoti cup 0 0
                 echo "${tput_el}fzf binary not found, please install it"
                 zselect -t 200
-                while read dummy ; do : ; done 
+                slurp
                 return
             fi
             local initialartname="$artname"
@@ -1485,8 +1603,8 @@ function usr1input_handler {
                 flipartname="$restoreflipartname"
             fi
             tputreset
-            $sttycmd $sttyorig
-            if [[ $1 = "x" ]]; then
+            sttyresetext
+            if [[ $commandkey = "x" ]]; then
                 artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
             else
                 local restoredir=$PWD
@@ -1496,16 +1614,15 @@ function usr1input_handler {
                 artnametemp=$(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p' | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
                 cd $restoredir
             fi
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
+            sttyset
             tputset
             if [[ $artnametemp = "" ]]; then
             elif [[ ! -f "$artdir/$artnametemp" ]]; then
                 printf "${tput_cup00}E: No file found for art: $artnametemp.\nPress any key to continue..."
-                read -t3 -k1
-                while read dummy ; do : ; done 
+                readchar 3
+                slurp
             else
-                if [[ $1 = "x" ]]; then
+                if [[ $commandkey = "x" ]]; then
                     artname="$artnametemp"
                 else
                     flipartname="$artnametemp"
@@ -1514,13 +1631,13 @@ function usr1input_handler {
             prevartname=""
             if ! setartstring; then
             printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
-                if [[ $1 = "y" ]]; then
+                if [[ $commandkey = "y" ]]; then
                     artname="$initialartname"
                     flipartname="$initialflipartname"
                     setartstring
                 fi
-                read -t5 -k1
-                while read dummy ; do : ; done
+                readchar 5
+                slurp
             else
                 if [[ $artnametemp = "" || ! -f "$artdir/$artnametemp" ]]; then
                     if [[ $helpactive = "1" ]]; then
@@ -1539,10 +1656,10 @@ function usr1input_handler {
             jrestoreartname="$artname"
             jrestoreflipartname="$flipartname"
             flipartname=""
-            local readresponse="$1"
-            while [[ $readresponse == "$1" ]]; do
+            inputchar="$commandkey"
+            while [[ $inputchar == "$commandkey" ]]; do
                 RANDOM="${EPOCHREALTIME#*.}"
-                if [[ $1 = "j" ]]; then
+                if [[ $commandkey = "j" ]]; then
                     local shuffledart=($artdir/^tarot-*(.Nnoe['REPLY=$RANDOM']))
                 else
                     local shuffledart=($artdir/tarot-*(.Nnoe['REPLY=$RANDOM']))
@@ -1556,21 +1673,20 @@ function usr1input_handler {
                     artname=$(basename "$pathname")
                     prevartname=""
                     setartstring
-                    local questionstr="Select this? (c:cancel, $1:next, y:select), name: $artname "
+                    local questionstr="Select this? (c:cancel, $commandkey:next, y:select), name: $artname "
                     printart $questionstr
                     lasttime=""
                     printtime "1"
                     # NOTE: now this pain of overlaying the same string twice is not necessary
                     #printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
-                    readresponse=""
-                    read -k1 readresponse
-                    if [[ $readresponse = "y" || $readresponse = "c" ]]; then
+                    readchar
+                    if [[ $inputchar = "y" || $inputchar = "c" ]]; then
                         break
                     fi
                 done
             done
             # If response is not 'y', then restore the original state
-            if [[ $readresponse != "y" ]]; then
+            if [[ $inputchar != "y" ]]; then
                 artname="$jrestoreartname"
                 flipartname="$jrestoreflipartname"
                 prevartname=""
@@ -1602,7 +1718,7 @@ function usr1input_handler {
         #    ;;
         "p")
             if [[ $goaltime != "" && $goaldone = "0" || $goaltime = "" && $pausegoals = "1" ]]; then
-                $sttycmd $sttyorig
+                sttyresetint
                 if [[ $pausegoals = "" || $pausegoals = "0" ]]; then
                     if askforconfirmation "pause goals"; then
                         pausegoals="1"
@@ -1623,18 +1739,17 @@ function usr1input_handler {
                         sprintendtime=$goalentryarray[1]
                     fi
                 fi
-                $sttycmd -echo
-                $sttycmd -icanon min 0 time 0
+                sttyset
                 echoti civis
             else
                 echo "No goals set, so nothing to pause"
                 zselect -t 200
-                while read dummy ; do : ; done 
+                slurp
             fi
             ;;
         "e")
             if [[ ! -z $goal ]]; then
-                $sttycmd $sttyorig
+                sttyresetint
                 if askforconfirmation "restart previous goal '$goal'"; then
                     goalsprint="1"
                     pausegoals="0"
@@ -1642,33 +1757,37 @@ function usr1input_handler {
                     sprintstarttime=$(strftime '%s')
                     setgoals $sprintstarttime
                 fi
-                $sttycmd -echo
-                $sttycmd -icanon min 0 time 0
+                sttyset
                 echoti civis
             else
                 echo "No goals set, so nothing to restart"
                 zselect -t 200
-                while read dummy ; do : ; done 
+                slurp
             fi
             ;;
         "g")
-            tempgoal=""
-            $sttycmd $sttyorig
+            inputstr=""
+            sttyresetint
             if [[ $usereadline == "1" ]]; then
                 printf "${tput_cup00}${tput_el}${tput_cnorm}"
-                tempgoal=$(bash -c 'read -e -p "Enter goal (\"help\" to learn): " retvar; echo $retvar');
-                readstatus="0"
+                inputstr=$(bash -c 'read -e -p "Enter goal (\"help\" to learn): " retvar; echo $retvar');
+                retstatus="0"
             else
                 toggleflipart=$(((toggleflipart+1)%2))
-                echoti cup $LINES 0
-                zlelinepromptstr="Enter goal ('help' to learn):"
-                vared -i zlelineprompt -p "$tput_cup00$tput_el$zlelinepromptstr " -c tempgoal;
+                promptstr="Enter goal ('help' to learn):"
+                if [[ -t 0 || $fd0closed == "1" ]]; then
+                    echoti cup $LINES 0
+                    vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
+                else
+                    promptstr="$tput_cup00$promptstr"
+                    readstr
+                    retstatus="$?"
+                fi
             fi
             printf "$tput_civis"
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
-            if [[ ! -z $tempgoal ]]; then
-                goal="$tempgoal"
+            sttyset
+            if [[ ! -z $inputstr ]]; then
+                goal="$inputstr"
                 goalsprint="1"
                 pausegoals="0"
                 accumulatedsprinttime="0"
@@ -1790,19 +1909,34 @@ and jump directly to the section on "Date input formats".
 EOF
                         fi
                     fi
-                    echoti clear
                     if command -v less &>/dev/null; then
                         pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
                         pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
-                        less -R <<<"$pagerprintstr" 2>/dev/null
+                        if [[ -t 0 ]]; then
+                            printf "$tput_clear"
+                            less -R <<<"$pagerprintstr" 2>/dev/null
+                        else
+                            local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                            printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                            inputchar=""
+                            while readchar && [[ $inputchar != "q" ]]; do :; done
+                        fi
                     elif command -v more &>/dev/null; then
                         pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
                         pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
-                        #more <<<"$pagerprintstr"
-                        mkdir -p ~/.cache/arttime
-                        printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
-                        more ~/.cache/arttime/$UID-$$.morestr
-                        rm ~/.cache/arttime/$UID-$$.morestr
+                        if [[ -t 0 ]]; then
+                            printf "$tput_clear"
+                            #more <<<"$pagerprintstr"
+                            mkdir -p ~/.cache/arttime
+                            printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
+                            more ~/.cache/arttime/$UID-$$.morestr
+                            rm ~/.cache/arttime/$UID-$$.morestr
+                        else
+                            local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                            printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                            inputchar=""
+                            while readchar && [[ $inputchar != "q" ]]; do :; done
+                        fi
                     fi
                     echoti civis
                     echoti smcup
@@ -1871,8 +2005,8 @@ EOF
             printtime "1"
             if [[ $setartstringerr = "1" ]]; then
                 printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
-                read -t5 -k1
-                while read dummy ; do : ; done
+                readchar 5
+                slurp
             fi
             ;;
         "i"|"I")
@@ -1940,93 +2074,111 @@ EOF
                     fi
                 done
             fi
-            if [[ $1 = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
-                echoti clear
+            if [[ $commandkey = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 if command -v less &>/dev/null; then
                     pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
                     pagerprintstr=$(printf "$pagernavstr\n$infostring")
-                    less -R <<<"$pagerprintstr"  2>/dev/null
+                    if [[ -t 0 ]]; then
+                        printf "$tput_clear"
+                        less -R <<<"$pagerprintstr" 2>/dev/null
+                    else
+                        local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                        printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                        inputchar=""
+                        while readchar && [[ $inputchar != "q" ]]; do :; done
+                    fi
                 elif command -v more &>/dev/null; then
                     pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
                     pagerprintstr=$(printf "$pagernavstr\n$infostring")
-                    #more <<<"$pagerprintstr"
-                    mkdir -p ~/.cache/arttime
-                    printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
-                    more ~/.cache/arttime/$UID-$$.morestr
-                    rm ~/.cache/arttime/$UID-$$.morestr
+                    if [[ -t 0 ]]; then
+                        printf "$tput_clear"
+                        #more <<<"$pagerprintstr"
+                        mkdir -p ~/.cache/arttime
+                        printf "$pagerprintstr" >~/.cache/arttime/$UID-$$.morestr
+                        more ~/.cache/arttime/$UID-$$.morestr
+                        rm ~/.cache/arttime/$UID-$$.morestr
+                    else
+                        local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                        printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                        inputchar=""
+                        while readchar && [[ $inputchar != "q" ]]; do :; done
+                    fi
                 fi
                 echoti civis
                 echoti smcup
             else
                 infostring+="\nPress any key to continue "
                 printf "$infostring"
-                read -t5 -k1
+                readchar 5
             fi
 #tput -S <<HERE
 #            cup 1 0
 #            el
 #HERE
-            while read dummy ; do : ; done
+            slurp
             ;;
         "l")
-            if [[ ! -z $goaltime ]]; then
-                $sttycmd $sttyorig
+            if [[ $goaltime != "" || $pausegoals = "1" ]]; then
+                sttyresetint
                 if askforconfirmation "clear goals"; then
                     goaltime=""
                     pausegoals="0"
                 fi
-                $sttycmd -echo
-                $sttycmd -icanon min 0 time 0
+                sttyset
                 echoti civis
             else
                 echo "No active goal to clear"
                 zselect -t 200
-                while read dummy ; do : ; done 
+                slurp
             fi
             ;;
         "m")
-            temptitle=""
-            $sttycmd $sttyorig
+            inputstr=""
+            sttyresetint
             if [[ $usereadline == "1" ]]; then
                 printf "${tput_cup00}${tput_el}${tput_cnorm}"
-                temptitle=$(bash -c 'read -e -p "Enter title message (\"orig\" to reset): " retvar; echo $retvar');
-                readstatus="0"
+                inputstr=$(bash -c 'read -e -p "Enter title message (\"orig\" to reset): " retvar; echo $retvar');
+                retstatus="0"
             else
                 toggleflipart=$(((toggleflipart+1)%2))
-                echoti cup $LINES 0
-                zlelinepromptstr="Enter title message ('orig' to reset):"
-                vared -i zlelineprompt -p "$tput_cup00$tput_el$zlelinepromptstr " -c temptitle;
-                readstatus="$?"
+                promptstr="Enter title message ('orig' to reset):"
+                if [[ -t 0 || $fd0closed == "1" ]]; then
+                    echoti cup $LINES 0
+                    vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
+                else
+                    promptstr="$tput_cup00$promptstr"
+                    readstr
+                    retstatus="$?"
+                fi
             fi
             printf "$tput_civis"
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
-            if [[ $temptitle = "" || $readstatus != "0" ]]; then
-            elif [[ $temptitle = "-" ]]; then
+            sttyset
+            if [[ $inputstr = "" || $retstatus != "0" ]]; then
+            elif [[ $inputstr = "-" ]]; then
                 title=' - '
-            elif [[ $temptitle = "orig" ]]; then
+            elif [[ $inputstr = "orig" ]]; then
                 title=""
             else
-                title="$temptitle"
+                title="$inputstr"
             fi
             prevartname=""
             setartstring
             #printart
             ;;
         "r")
-            $sttycmd $sttyorig
+            sttyresetint
             if askforconfirmation "reset start time, and goal"; then
                 resetstarttime="1"
                 goaltime=""
                 pausegoals="0"
             fi
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
+            sttyset
             echoti civis
             ;;
         "q")
-            $sttycmd $sttyorig
+            sttyresetint
             if askforconfirmation "quit arttime"; then
+                sttyresetext
                 trap -;
                 command -v pkill &>/dev/null && pkill -P $$;
                 echoti cup $LINES 0
@@ -2039,15 +2191,14 @@ EOF
                     exit 0
                 fi
             fi
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
             echoti civis
+            sttyset
             ;;
         #"s")
         #    echoti cup 0 0
         #    echoti el
         #    tempsamples=""
-        #    $sttycmd $sttyorig
+        #    sttyreset
         #    echoti cnorm
         #    if [[ ! -z $updateonminute ]]; then
         #        # XXX: look here
@@ -2081,17 +2232,16 @@ EOF
             #printart
             ;;
         "z")
-            $sttycmd $sttyorig
+            sttyresetint
             printf "$tput_smcup"
-            echoti cup 0 0
             echoti cnorm
-            echoti clear
+            local modestrclr="$tput_clear$(echoti cup $LINES $COLUMNS)$modestr"
+            printf "$modestrclr$tput_cup00"
             zoneselector
-            $sttycmd -echo
-            $sttycmd -icanon min 0 time 0
+            sttyset
             tputset
-            if [[ ! -z $tmpzonename ]]; then
-                TZ=$tmpzonename
+            if [[ ! -z $inputstr ]]; then
+                TZ=$inputstr
                 notetimezone
                 tzlongcurrent="$tzlong"
                 tzshortcurrent="$tzshort"
@@ -2119,9 +2269,12 @@ EOF
             fi
             ;;
         *)
-            echo "Press 'h' to see which keys do what"
-            zselect -t 200
-            while read dummy ; do : ; done 
+            commandkeyint=$(printf '%d' "'$commandkey")
+            if [[ -t 0 ]] || ((commandkeyint != 10 && commandkeyint != 13)); then
+                    echo "Press 'h' to see which keys do what"
+                    zselect -t 200
+                    slurp
+            fi
             ;;
     esac
 }
@@ -2140,17 +2293,17 @@ function trapusr1_both {
 #HERE
     printf "${tput_sc}${tput_cup00}"
     # slurp previous user input
-    userinput="$1"
-    if [[ -z $userinput ]]; then
-        #while read dummy ; do : ; done 
+    inputchar="$1"
+    if [[ -z $inputchar ]]; then
+        #while read -k1 dummy ; do : ; done 
         printf "\r ⌨ ";
-        read -t 2 -k userinput
-        printf "$userinput "
+        readchar 2
+        printf "$inputchar "
     else
-        #while read dummy ; do : ; done 
+        #while read -k1 dummy ; do : ; done 
     fi
-    if [[ ! -z "$userinput" ]]; then
-        usr1input_handler $userinput
+    if [[ ! -z "$inputchar" ]]; then
+        usr1input_handler $inputchar
     fi
 #tput -S <<HERE
 #    cup 0 0
@@ -2161,7 +2314,6 @@ function trapusr1_both {
     lasttime=""
     printtime "1"
     resetstarttime="0"
-    userinput=""
     if [[ $nonblocking = "1" ]]; then
         trap "trapstop_nonblocking" TSTP
     else
@@ -2191,8 +2343,26 @@ function arttime_blocking {
         epochtimereal=$EPOCHREALTIME
         epochtimerealarray=("${(@s/./)epochtimereal}")
         timetoepoch=$((1.0 - 0.$epochtimerealarray[2] + 0.01))
-        read -t "$timetoepoch" -k tmpusrinput
-        if [[ $? = "0" ]]; then
+        if [[ -t 0 || $fd0closed == "1" ]]; then
+            read -r -s -t $timetoepoch -k1 tmpusrinput; retstatus="$?"
+        else
+            ERRNO=0
+            sysread -s1 -c1 -t $timetoepoch -i0 tmpusrinput; retstatus=$?; reterrno=$ERRNO
+            case "$retstatus" in
+                "0"|"4")
+                    ;;
+                *)
+                    while read -r -s -k1 -t0 inputchar ; do : ; done
+                    fd0closed="1"
+                    exec 0<&-
+                    exec 0<>$TTY
+                    sttyset
+                    setmodestr
+                    handoff="1"
+                    ;;
+            esac
+        fi
+        if [[ $retstatus = "0" ]]; then
             trapusr1_both "$tmpusrinput"
         fi
         #if [[ -z $artcolor ]]; then
@@ -2249,14 +2419,14 @@ function trapwinch {
             if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
                 termwidth="$COLUMNS"
                 termheight="$LINES"
-                echoti clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
+                printf "$tput_clear"; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
             fi
         fi
     else
         if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
             termwidth="$COLUMNS"
             termheight="$LINES"
-            echoti clear; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
+            printf "$tput_clear"; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
         fi
     fi
     if [[ $winchdetected = "1" ]]; then
@@ -2273,4 +2443,4 @@ else
     arttime_blocking
 fi
 tputreset
-$sttycmd $sttyorig
+sttyresetext

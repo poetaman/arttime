@@ -268,8 +268,6 @@ else
     done <<<$(ansifilter --ignore-csi <<<$art);
 fi
 
-# NOTE For some reason 6 works better than suspected 4 lines
-# perhaps there is a hidden source of empty lines
 if [[ -z $title ]]; then
     if [[ -z $subtitle ]]; then
         shiftheight=$(((termheight-textheight-2)/2))
