@@ -13,8 +13,8 @@ fi
 arttime_version="1.9.8"
 
 zmodload zsh/zutil
+zmodload zsh/terminfo
 setopt extendedglob
-
 
 if is-at-least "5.8"; then
     zparseoptscmd='zparseopts -D -E -F - '
@@ -355,7 +355,8 @@ if [[ ! -z "$title" ]]; then
     if [[ ! $padwidth -gt 0 ]]; then
         padwidth=0
     fi
-    printf "%${shiftwidth}s\e[3m%${titlewidth}s\e[0m%${padwidth}s$tchar" " " "$title" " "
+    tput_sitm=$(echoti sitm 2>/dev/null)
+    printf "%${shiftwidth}s${tput_sitm}%${titlewidth}s\e[0m%${padwidth}s$tchar" " " "$title" " "
     #/usr/bin/fmt -c -w $termwidth <<< "$title"  | while IFS= read -r line; do
     #    printf "%s%$((termwidth-${#line}-1))s$tchar" "$line" " "
     #done
