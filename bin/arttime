@@ -1539,7 +1539,7 @@ function usr1input_handler {
             fi
             sttyresetint
             printf "$tput_smcup"
-            local modestrclr="$tput_clear$(echoti cup $LINES $COLUMNS)$modestr"
+            local modestrclr="$tput_clear$(echoti cup $LINES $((COLUMNS-1)))$modestr"
             printf "$modestrclr$tput_cup00"
             if [[ $commandkey = "a" ]]; then
                 artselector
@@ -1916,7 +1916,7 @@ EOF
                             printf "$tput_clear"
                             less -R <<<"$pagerprintstr" 2>/dev/null
                         else
-                            local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                            local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
                             printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
                             inputchar=""
                             while readchar && [[ $inputchar != "q" ]]; do :; done
@@ -1932,7 +1932,7 @@ EOF
                             more ~/.cache/arttime/$UID-$$.morestr
                             rm ~/.cache/arttime/$UID-$$.morestr
                         else
-                            local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                            local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
                             printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
                             inputchar=""
                             while readchar && [[ $inputchar != "q" ]]; do :; done
@@ -2082,7 +2082,7 @@ EOF
                         printf "$tput_clear"
                         less -R <<<"$pagerprintstr" 2>/dev/null
                     else
-                        local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                        local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
                         printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
                         inputchar=""
                         while readchar && [[ $inputchar != "q" ]]; do :; done
@@ -2098,7 +2098,7 @@ EOF
                         more ~/.cache/arttime/$UID-$$.morestr
                         rm ~/.cache/arttime/$UID-$$.morestr
                     else
-                        local modestrclr="$(echoti cup $LINES $COLUMNS)$modestr"
+                        local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
                         printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
                         inputchar=""
                         while readchar && [[ $inputchar != "q" ]]; do :; done
@@ -2235,7 +2235,7 @@ EOF
             sttyresetint
             printf "$tput_smcup"
             echoti cnorm
-            local modestrclr="$tput_clear$(echoti cup $LINES $COLUMNS)$modestr"
+            local modestrclr="$tput_clear$(echoti cup $LINES $((COLUMNS-1)))$modestr"
             printf "$modestrclr$tput_cup00"
             zoneselector
             sttyset
