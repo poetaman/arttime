@@ -263,87 +263,6 @@ elif [[ ! -z $version_arg[-1] ]]; then
     exit 0
 fi
 
-fd0closed="0"
-handoff="0"
-modestrnorm=""
-modestrscript="$(echoti cub 6)SCRIPT"
-function setmodestr {
-    if [[ -t 0 ]]; then
-        modestr=$modestrnorm
-    else
-        modestr=$modestrscript
-    fi
-}
-setmodestr
-
-inputstr=""
-function readstr {
-    inputstr="$1"
-    if [[ -t 0 || $fd0closed == "1" ]]; then
-        vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
-    else
-        while read -r -s -k1 -t0 inputchar ; do : ; done
-        printf "$promptstr${tput_cnorm} "
-        local inputchard=""
-        local inputcharint=0
-        local inputchardint=0
-        while true; do
-            readchar || break
-            inputcharint=$(printf '%d' "'$inputchar")
-            if ((inputcharint == 10 || inputcharint == 13 )); then
-                break
-            elif ((inputchardint == 92 && inputcharint == 110)); then
-                inputstr="${inputstr:0:-1}"
-                break
-            else
-                inputchard=$inputchar
-                inputchardint=$(printf '%d' "'$inputchar")
-                inputstr+=$inputchar
-                printf $inputchar
-            fi
-        done
-        retstatus="0"
-    fi
-    return $retstatus
-}
-
-inputchar=""
-function readchar {
-    inputchar=""
-    if [[ ! -z $1 ]]; then
-        local timeout="-t$1"
-    else
-        local timeout=""
-    fi
-    if [[ -t 0 || $fd0closed == "1" ]]; then
-        read -r -s $timeout -k1 inputchar; retstatus="$?"
-    else
-        ERRNO=0
-        sysread -s1 -c1 $timeout -i0 inputchar; retstatus=$?; reterrno=$ERRNO
-        case "$retstatus" in
-            "0"|"4")
-                retstatus=0
-                ;;
-            *)
-                fd0closed="1"
-                exec 0<&-
-                exec 0<>$TTY
-                sttyset
-                setmodestr
-                handoff="1"
-                ;;
-        esac
-    fi
-    return $retstatus
-}
-function slurp {
-    if [[ -t 0 || $fd0closed == "1" ]]; then
-        while read -r -s -k1 -t0 inputchar ; do : ; done 
-    else
-        while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
-    fi
-}
-
 unamestr="$(uname -s)"
 case "${unamestr}" in
     Linux*)     machine=Linux;;
@@ -638,6 +557,89 @@ elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
     echo "W: titlecolor (--tc) accepts takes range [0:15] defaulting to 2" >&2
     titlecolorarg="2"
 fi
+
+fd0closed="0"
+handoff="0"
+modestrnorm=""
+modestrscript="$(echoti cub 6)SCRIPT"
+modestrpos=$(echoti cup $termheight $((termwidth-1)))
+function setmodestr {
+    if [[ -t 0 ]]; then
+        modestr=$modestrnorm
+    else
+        modestr=$modestrpos$modestrscript
+    fi
+}
+setmodestr
+
+inputstr=""
+function readstr {
+    inputstr="$1"
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
+    else
+        while read -r -s -k1 -t0 inputchar ; do : ; done
+        printf "$promptstr${tput_cnorm} "
+        local inputchard=""
+        local inputcharint=0
+        local inputchardint=0
+        while true; do
+            readchar || break
+            inputcharint=$(printf '%d' "'$inputchar")
+            if ((inputcharint == 10 || inputcharint == 13 )); then
+                break
+            elif ((inputchardint == 92 && inputcharint == 110)); then
+                inputstr="${inputstr:0:-1}"
+                break
+            else
+                inputchard=$inputchar
+                inputchardint=$(printf '%d' "'$inputchar")
+                inputstr+=$inputchar
+                printf $inputchar
+            fi
+        done
+        retstatus="0"
+    fi
+    return $retstatus
+}
+
+inputchar=""
+function readchar {
+    inputchar=""
+    if [[ ! -z $1 ]]; then
+        local timeout="-t$1"
+    else
+        local timeout=""
+    fi
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        read -r -s $timeout -k1 inputchar; retstatus="$?"
+    else
+        ERRNO=0
+        sysread -s1 -c1 $timeout -i0 inputchar; retstatus=$?; reterrno=$ERRNO
+        case "$retstatus" in
+            "0"|"4")
+                retstatus=0
+                ;;
+            *)
+                fd0closed="1"
+                exec 0<&-
+                exec 0<>$TTY
+                sttyset
+                setmodestr
+                handoff="1"
+                ;;
+        esac
+    fi
+    return $retstatus
+}
+function slurp {
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        while read -r -s -k1 -t0 inputchar ; do : ; done 
+    else
+        while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
+    fi
+}
+
 
 tputset_str=$(echoti smcup; echoti civis; echoti rmam)
 function tputset { printf "$tputset_str"; }
@@ -1539,8 +1541,7 @@ function usr1input_handler {
             fi
             sttyresetint
             printf "$tput_smcup"
-            local modestrclr="$tput_clear$(echoti cup $LINES $((COLUMNS-1)))$modestr"
-            printf "$modestrclr$tput_cup00"
+            printf "$tput_clear$modestr$tput_cup00"
             if [[ $commandkey = "a" ]]; then
                 artselector
             else
@@ -1916,8 +1917,7 @@ EOF
                             printf "$tput_clear"
                             less -R <<<"$pagerprintstr" 2>/dev/null
                         else
-                            local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
-                            printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                            printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestr}"
                             inputchar=""
                             while readchar && [[ $inputchar != "q" ]]; do :; done
                         fi
@@ -1932,8 +1932,7 @@ EOF
                             more ~/.cache/arttime/$UID-$$.morestr
                             rm ~/.cache/arttime/$UID-$$.morestr
                         else
-                            local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
-                            printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                            printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestr}"
                             inputchar=""
                             while readchar && [[ $inputchar != "q" ]]; do :; done
                         fi
@@ -2082,8 +2081,7 @@ EOF
                         printf "$tput_clear"
                         less -R <<<"$pagerprintstr" 2>/dev/null
                     else
-                        local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
-                        printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                        printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestr}"
                         inputchar=""
                         while readchar && [[ $inputchar != "q" ]]; do :; done
                     fi
@@ -2098,8 +2096,7 @@ EOF
                         more ~/.cache/arttime/$UID-$$.morestr
                         rm ~/.cache/arttime/$UID-$$.morestr
                     else
-                        local modestrclr="$(echoti cup $LINES $((COLUMNS-1)))$modestr"
-                        printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestrclr}"
+                        printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestr}"
                         inputchar=""
                         while readchar && [[ $inputchar != "q" ]]; do :; done
                     fi
@@ -2235,8 +2232,7 @@ EOF
             sttyresetint
             printf "$tput_smcup"
             echoti cnorm
-            local modestrclr="$tput_clear$(echoti cup $LINES $((COLUMNS-1)))$modestr"
-            printf "$modestrclr$tput_cup00"
+            printf "$tput_clear$modestr$tput_cup00"
             zoneselector
             sttyset
             tputset
@@ -2419,6 +2415,8 @@ function trapwinch {
             if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
                 termwidth="$COLUMNS"
                 termheight="$LINES"
+                modestrpos=$(echoti cup $termheight $((termwidth-1)))
+                setmodestr
                 printf "$tput_clear"; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
             fi
         fi
@@ -2426,6 +2424,8 @@ function trapwinch {
         if [[ ! "$termwidth" -eq "$COLUMNS" || ! "$termheight" -eq "$LINES"  ]]; then
             termwidth="$COLUMNS"
             termheight="$LINES"
+            modestrpos=$(echoti cup $termheight $((termwidth-1)))
+            setmodestr
             printf "$tput_clear"; prevartname=""; setartstring; printart; lasttime=""; printtime "1"
         fi
     fi
