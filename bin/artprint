@@ -340,12 +340,12 @@ if [[ ! -z "$title" ]]; then
     printf "%$((termwidth-1)).s$tchar\n" " "
     if [[ -z $titlecolor ]]; then
         if [[ -z "$theme" || "$theme" = "dark" ]]; then
-            printf "\e[0m\e[38;5;2m\e[3m"
+            printf "\e[0m\e[38;5;2m"
         else
-            printf "\e[0m\e[38;5;m\e[3m"
+            printf "\e[0m\e[38;5;m"
         fi
     else
-        printf "\e[0m\e[38;5;${titlecolor}m\e[3m"
+        printf "\e[0m\e[38;5;${titlecolor}m"
     fi
     shiftwidth=$(((termwidth-${titlewidth})/2))
     if [[ ! $shiftwidth -gt 0 ]]; then
@@ -355,7 +355,7 @@ if [[ ! -z "$title" ]]; then
     if [[ ! $padwidth -gt 0 ]]; then
         padwidth=0
     fi
-    printf "%${shiftwidth}s%${titlewidth}s%${padwidth}s$tchar" " " "$title" " "
+    printf "%${shiftwidth}s\e[3m%${titlewidth}s\e[0m%${padwidth}s$tchar" " " "$title" " "
     #/usr/bin/fmt -c -w $termwidth <<< "$title"  | while IFS= read -r line; do
     #    printf "%s%$((termwidth-${#line}-1))s$tchar" "$line" " "
     #done
