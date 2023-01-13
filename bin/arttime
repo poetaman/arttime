@@ -579,7 +579,7 @@ function readstr {
         vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
     else
         while read -r -s -k1 -t0 inputchar ; do : ; done
-        printf "$promptstr${tput_cnorm} "
+        printf "${tput_el}${promptstr}${tput_cnorm} "
         local inputchard=""
         local inputcharint=0
         local inputchardint=0
