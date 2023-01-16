@@ -1329,12 +1329,21 @@ function trapint_nonblocking {
 }
 
 function trapint_blocking {
-    #while read -k1 dummy ; do : ; done
-    # exec 0>&- 2>dev/null;
-    #trap -; command -v pkill &>/dev/null && pkill -P $$; tputreset; sttyresetext; set -e; (exit 130);
-    trapintactive="1"
-    trapusr1_both "q"
-    trapintactive="0"
+    if [[ ! -t 0 ]]; then
+        while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
+        while read -r -s -k1 -t0 inputchar ; do : ; done
+        inputchar=""
+        inputstr=""
+        fd0closed="1"
+        exec 0<&-
+        exec 0<>$TTY
+        sttyset
+        setmodestr
+        handoff="1"
+        winchdetected="1"
+        termwidth=""
+        ignorewinch="0"
+    fi
 }
 
 function trapexit_nonblocking {
@@ -2325,8 +2334,7 @@ function arttime_blocking {
     starttime=$(strftime $timeformat)
     starttimearray=(${(s/|/)starttime})
     printtime "1"
-    #trap "trapint_blocking" INT
-    trap "" INT
+    trap "trapint_blocking" INT
     trap "trapexit_blocking" EXIT TERM HUP QUIT
     #trap "trapusr1_both" USR1
     trap "trapstop_blocking" TSTP
