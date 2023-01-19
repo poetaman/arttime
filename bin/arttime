@@ -573,23 +573,29 @@ function setmodestr {
 setmodestr
 
 inputstr=""
+promptstrpost=""
 function readstr {
     inputstr="$1"
     if [[ -t 0 || $fd0closed == "1" ]]; then
         vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
     else
         while read -r -s -k1 -t0 inputchar ; do : ; done
-        printf "${tput_el}${promptstr}${tput_cnorm} "
+        printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
         local inputchard=""
         local inputcharint=0
         local inputchardint=0
+        retstatus="1"
         while true; do
             readchar || break
             inputcharint=$(printf '%d' "'$inputchar")
             if ((inputcharint == 10 || inputcharint == 13 )); then
+                retstatus="0"
+                printf "$promptstrpost"
                 break
             elif ((inputchardint == 92 && inputcharint == 110)); then
                 inputstr="${inputstr:0:-1}"
+                retstatus="0"
+                printf "$tput_cub1 $tput_cub1$promptstrpost"
                 break
             else
                 inputchard=$inputchar
@@ -598,7 +604,6 @@ function readstr {
                 printf $inputchar
             fi
         done
-        retstatus="0"
     fi
     return $retstatus
 }
@@ -1446,24 +1451,28 @@ function zoneselector {
     cd /usr/share/zoneinfo
     local curcontext=zoneselector:::
     inputstr="./"
+    promptstr="Enter zonename (press tab):"
+    if [[ -t 0 || $fd0closed == "1" ]]; then
+        promptstrpost=""
+    else
+        promptstrpost="\n"
+    fi        
     printf "Press tab key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
     while [[ ! -f /usr/share/zoneinfo/$inputstr && ! -z $inputstr && $inputstr != "./orig" && $inputstr != "orig" ]]; do
         if [[ $inputstr =~ ^[./]+$ ]]; then
             inputstr="./"
-            promptstr="Enter zonename (press tab):"
             readstr $inputstr
         elif [[ -d /usr/share/zoneinfo/$inputstr ]]; then
             if [[ $inputstr[-1] != "/" ]]; then
                 inputstr=$inputstr'/'
             fi
-            promptstr="Enter zonename (press tab):"
             readstr $inputstr
         else
             inputstr="./"
-            promptstr="Enter zonename (press tab):"
             readstr $inputstr
         fi
     done
+    promptstrpost=""
     if [[ $inputstr = "./orig" || $inputstr = "orig" ]]; then
         inputstr=$tzlonginit
     fi
