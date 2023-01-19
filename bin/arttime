@@ -564,7 +564,7 @@ modestrnorm=""
 modestrscript="$(echoti cub 6)SCRIPT"
 modestrpos=$(echoti cup $termheight $((termwidth-1)))
 function setmodestr {
-    if [[ -t 0 ]]; then
+    if [[ -t 0 || $fd0closed == "1" ]]; then
         modestr=$modestrnorm
     else
         modestr=$modestrpos$modestrscript
@@ -611,7 +611,7 @@ function readchar {
     else
         local timeout=""
     fi
-    if [[ -t 0 || $fd0closed == "1" ]]; then
+    if [[ -t 0 || $fd0closed == "1" ]] && [[ -z $2 ]]; then
         read -r -s $timeout -k1 inputchar; retstatus="$?"
     else
         ERRNO=0
@@ -932,7 +932,7 @@ function sttyset {
 }
 
 function sttyresetint {
-    if [[ -t 0 ]]; then
+    if [[ -t 0 || $fd0closed == "1" ]]; then
         $sttycmd $sttyorig </dev/tty 2>/dev/null
     else
         $sttycmd $sttyorig </dev/tty 2>/dev/null
@@ -1329,7 +1329,7 @@ function trapint_nonblocking {
 }
 
 function trapint_blocking {
-    if [[ ! -t 0 ]]; then
+    if ! [[ -t 0 || $fd0closed == "1" ]]; then
         while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
         while read -r -s -k1 -t0 inputchar ; do : ; done
         inputchar=""
@@ -1389,7 +1389,7 @@ function trapcont_nonblocking {
 
 
 function askforconfirmation {
-    if [[ ! -t 0 ]]; then
+    if ! [[ -t 0 || $fd0closed == "1" ]]; then
         while read -r -s -k1 -t0 inputchar ; do : ; done
     fi
     printf "Do you really want to $1? [y/n]:  ${tput_cub1}${tput_cnorm}"
@@ -1533,7 +1533,7 @@ zle -N zlelineprompt
 
 function usr1input_handler {
     local commandkey=$1
-    if [[ ! -t 0 ]]; then
+    if ! [[ -t 0 || $fd0closed == "1" ]]; then
         case $commandkey; in
             "x") commandkey="a";;
             "y") commandkey="b";;
@@ -1667,6 +1667,7 @@ function usr1input_handler {
             jrestoreflipartname="$flipartname"
             flipartname=""
             inputchar="$commandkey"
+            local modestrlocal=$modestr
             while [[ $inputchar == "$commandkey" ]]; do
                 RANDOM="${EPOCHREALTIME#*.}"
                 if [[ $commandkey = "j" ]]; then
@@ -1678,6 +1679,8 @@ function usr1input_handler {
                     if [[ $winchdetected = "1" ]]; then
                         termwidth="$COLUMNS"
                         termheight="$LINES"
+                        modestrpos=$(echoti cup $termheight $((termwidth-1)))
+                        setmodestr
                         winchdetected="0"
                     fi
                     artname=$(basename "$pathname")
@@ -1689,8 +1692,8 @@ function usr1input_handler {
                     printtime "1"
                     # NOTE: now this pain of overlaying the same string twice is not necessary
                     #printf "${tput_cup00}%s%$((termwidth-${#questionstr}-1))s$tchar\n" "$questionstr" " "
-                    readchar
-                    if [[ $inputchar = "y" || $inputchar = "c" ]]; then
+                    readchar "" "$modestrlocal" || break
+                    if [[ $inputchar == "y" || $inputchar == "c" || $inputchar == "" ]]; then
                         break
                     fi
                 done
@@ -1922,7 +1925,7 @@ EOF
                     if command -v less &>/dev/null; then
                         pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
                         pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
-                        if [[ -t 0 ]]; then
+                        if [[ -t 0 || $fd0closed == "1" ]]; then
                             printf "$tput_clear"
                             less -R <<<"$pagerprintstr" 2>/dev/null
                         else
@@ -1933,7 +1936,7 @@ EOF
                     elif command -v more &>/dev/null; then
                         pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
                         pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
-                        if [[ -t 0 ]]; then
+                        if [[ -t 0 || $fd0closed == "1" ]]; then
                             printf "$tput_clear"
                             #more <<<"$pagerprintstr"
                             mkdir -p ~/.cache/arttime
@@ -2086,7 +2089,7 @@ EOF
                 if command -v less &>/dev/null; then
                     pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
                     pagerprintstr=$(printf "$pagernavstr\n$infostring")
-                    if [[ -t 0 ]]; then
+                    if [[ -t 0 || $fd0closed == "1" ]]; then
                         printf "$tput_clear"
                         less -R <<<"$pagerprintstr" 2>/dev/null
                     else
@@ -2097,7 +2100,7 @@ EOF
                 elif command -v more &>/dev/null; then
                     pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
                     pagerprintstr=$(printf "$pagernavstr\n$infostring")
-                    if [[ -t 0 ]]; then
+                    if [[ -t 0 || $fd0closed == "1" ]]; then
                         printf "$tput_clear"
                         #more <<<"$pagerprintstr"
                         mkdir -p ~/.cache/arttime
@@ -2275,7 +2278,7 @@ EOF
             ;;
         *)
             commandkeyint=$(printf '%d' "'$commandkey")
-            if [[ -t 0 ]] || ((commandkeyint != 10 && commandkeyint != 13)); then
+            if [[ -t 0 || $fd0closed == "1" ]] || ((commandkeyint != 10 && commandkeyint != 13)); then
                     echo "Press 'h' to see which keys do what"
                     zselect -t 200
                     slurp
