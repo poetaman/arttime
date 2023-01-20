@@ -576,7 +576,7 @@ inputstr=""
 promptstrpost=""
 function readstr {
     inputstr="$1"
-    if [[ -t 0 || $fd0closed == "1" ]]; then
+    if [[ -t 0 || $fd0closed == "1" ]] && [[ -z $2 ]]; then
         vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
     else
         while read -r -s -k1 -t0 inputchar ; do : ; done
@@ -586,7 +586,7 @@ function readstr {
         local inputchardint=0
         retstatus="1"
         while true; do
-            readchar || break
+            readchar "" "$2" || { inputstr=""; break; }
             inputcharint=$(printf '%d' "'$inputchar")
             if ((inputcharint == 10 || inputcharint == 13 )); then
                 retstatus="0"
@@ -598,10 +598,16 @@ function readstr {
                 printf "$tput_cub1 $tput_cub1$promptstrpost"
                 break
             else
-                inputchard=$inputchar
-                inputchardint=$(printf '%d' "'$inputchar")
-                inputstr+=$inputchar
-                printf $inputchar
+                if [[ ! -z $inputchar ]]; then
+                    inputchard=$inputchar
+                    inputchardint=$(printf '%d' "'$inputchar")
+                    inputstr+=$inputchar
+                    printf $inputchar
+                else
+                    retstatus="1"
+                    inputstr=""
+                    break
+                fi
             fi
         done
     fi
@@ -626,6 +632,7 @@ function readchar {
                 retstatus=0
                 ;;
             *)
+                inputchar=""
                 fd0closed="1"
                 exec 0<&-
                 exec 0<>$TTY
@@ -1414,7 +1421,7 @@ function artselector {
     local curcontext=artselector:::
     printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter artname:"
-    readstr
+    readstr "" $modestr
 }
 function _artselector {
     _files -W $artdir
@@ -1439,7 +1446,7 @@ function artselector2 {
         printf '\n\n'
     fi
     promptstr="Enter artname:"
-    readstr
+    readstr "" $modestr
 }
 function _artselector2 {
     _describe 'possible b-art' artnametemp
@@ -1458,18 +1465,19 @@ function zoneselector {
         promptstrpost="\n"
     fi        
     printf "Press tab key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
+    local modestrlocal=$modestr
     while [[ ! -f /usr/share/zoneinfo/$inputstr && ! -z $inputstr && $inputstr != "./orig" && $inputstr != "orig" ]]; do
         if [[ $inputstr =~ ^[./]+$ ]]; then
             inputstr="./"
-            readstr $inputstr
+            readstr $inputstr $modestrlocal || break
         elif [[ -d /usr/share/zoneinfo/$inputstr ]]; then
             if [[ $inputstr[-1] != "/" ]]; then
                 inputstr=$inputstr'/'
             fi
-            readstr $inputstr
+            readstr $inputstr $modestrlocal || break
         else
             inputstr="./"
-            readstr $inputstr
+            readstr $inputstr $modestrlocal || break
         fi
     done
     promptstrpost=""
@@ -1802,7 +1810,7 @@ function usr1input_handler {
                     vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
                 else
                     promptstr="$tput_cup00$promptstr"
-                    readstr
+                    readstr "" $modestr
                     retstatus="$?"
                 fi
             fi
@@ -2165,7 +2173,7 @@ EOF
                     vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
                 else
                     promptstr="$tput_cup00$promptstr"
-                    readstr
+                    readstr "" $modestr
                     retstatus="$?"
                 fi
             fi
