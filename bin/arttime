@@ -561,6 +561,10 @@ fi
 if [[ -t 0 ]]; then
     streamclosed="1"
 else
+    unset streamfd
+    exec {streamfd}>&0
+    exec 0>&-
+    exec 0>&1
     streamclosed="0"
 fi
 
@@ -631,19 +635,23 @@ function readchar {
         read -r -s $timeout -k1 inputchar; retstatus="$?"
     else
         ERRNO=0
-        sysread -s1 -c1 $timeout -i0 inputchar; retstatus=$?; reterrno=$ERRNO
+        sysread -s1 -c1 $timeout -i$streamfd inputchar; retstatus=$?; reterrno=$ERRNO
         case "$retstatus" in
             "0"|"4")
                 retstatus=0
                 ;;
             *)
+                trap "" INT
+                while read -r -s -k1 -t0 inputchar ; do : ; done
                 inputchar=""
                 streamclosed="1"
-                exec 0<&-
-                exec 0<>$TTY
+                exec {streamfd}>&-
+                unset streamfd
+                exec {streamfd}>&1
                 sttyset
                 setmodestr
                 handoff="1"
+                trap "trapint_blocking" INT
                 ;;
         esac
     fi
@@ -653,7 +661,7 @@ function slurp {
     if [[ $streamclosed == "1" ]]; then
         while read -r -s -k1 -t0 inputchar ; do : ; done 
     else
-        while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
+        while sysread -s1 -c1 -t0 -i$streamfd inputchar ; do : ; done
     fi
 }
 
@@ -1347,13 +1355,14 @@ function trapint_nonblocking {
 
 function trapint_blocking {
     if ! [[ $streamclosed == "1" ]]; then
-        while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
+        while sysread -s1 -c1 -t0 -i$streamfd inputchar ; do : ; done
         while read -r -s -k1 -t0 inputchar ; do : ; done
         inputchar=""
         inputstr=""
         streamclosed="1"
-        exec 0<&-
-        exec 0<>$TTY
+        exec {streamfd}>&-
+        unset streamfd
+        exec {streamfd}>&1
         sttyset
         setmodestr
         handoff="1"
@@ -2376,18 +2385,21 @@ function arttime_blocking {
             read -r -s -t $timetoepoch -k1 tmpusrinput; retstatus="$?"
         else
             ERRNO=0
-            sysread -s1 -c1 -t $timetoepoch -i0 tmpusrinput; retstatus=$?; reterrno=$ERRNO
+            sysread -s1 -c1 -t $timetoepoch -i$streamfd tmpusrinput; retstatus=$?; reterrno=$ERRNO
             case "$retstatus" in
                 "0"|"4")
                     ;;
                 *)
+                    trap "" INT
                     while read -r -s -k1 -t0 inputchar ; do : ; done
                     streamclosed="1"
-                    exec 0<&-
-                    exec 0<>$TTY
+                    exec {streamfd}>&-
+                    unset streamfd
+                    exec {streamfd}>&1
                     sttyset
                     setmodestr
                     handoff="1"
+                    trap "trapint_blocking" INT
                     ;;
             esac
         fi
