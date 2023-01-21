@@ -558,13 +558,18 @@ elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
     titlecolorarg="2"
 fi
 
-fd0closed="0"
+if [[ -t 0 ]]; then
+    streamclosed="1"
+else
+    streamclosed="0"
+fi
+
 handoff="0"
 modestrnorm=""
 modestrscript="$(echoti cub 6)SCRIPT"
 modestrpos=$(echoti cup $termheight $((termwidth-1)))
 function setmodestr {
-    if [[ -t 0 || $fd0closed == "1" ]]; then
+    if [[ $streamclosed == "1" ]]; then
         modestr=$modestrnorm
     else
         modestr=$modestrpos$modestrscript
@@ -576,7 +581,7 @@ inputstr=""
 promptstrpost=""
 function readstr {
     inputstr="$1"
-    if [[ -t 0 || $fd0closed == "1" ]] && [[ -z $2 ]]; then
+    if [[ $streamclosed == "1" ]] && [[ -z $2 ]]; then
         vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
     else
         while read -r -s -k1 -t0 inputchar ; do : ; done
@@ -622,7 +627,7 @@ function readchar {
     else
         local timeout=""
     fi
-    if [[ -t 0 || $fd0closed == "1" ]] && [[ -z $2 ]]; then
+    if [[ $streamclosed == "1" ]] && [[ -z $2 ]]; then
         read -r -s $timeout -k1 inputchar; retstatus="$?"
     else
         ERRNO=0
@@ -633,7 +638,7 @@ function readchar {
                 ;;
             *)
                 inputchar=""
-                fd0closed="1"
+                streamclosed="1"
                 exec 0<&-
                 exec 0<>$TTY
                 sttyset
@@ -645,7 +650,7 @@ function readchar {
     return $retstatus
 }
 function slurp {
-    if [[ -t 0 || $fd0closed == "1" ]]; then
+    if [[ $streamclosed == "1" ]]; then
         while read -r -s -k1 -t0 inputchar ; do : ; done 
     else
         while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
@@ -944,7 +949,7 @@ function sttyset {
 }
 
 function sttyresetint {
-    if [[ -t 0 || $fd0closed == "1" ]]; then
+    if [[ $streamclosed == "1" ]]; then
         $sttycmd $sttyorig </dev/tty 2>/dev/null
     else
         $sttycmd $sttyorig </dev/tty 2>/dev/null
@@ -1341,12 +1346,12 @@ function trapint_nonblocking {
 }
 
 function trapint_blocking {
-    if ! [[ -t 0 || $fd0closed == "1" ]]; then
+    if ! [[ $streamclosed == "1" ]]; then
         while sysread -s1 -c1 -t0 -i0 inputchar ; do : ; done
         while read -r -s -k1 -t0 inputchar ; do : ; done
         inputchar=""
         inputstr=""
-        fd0closed="1"
+        streamclosed="1"
         exec 0<&-
         exec 0<>$TTY
         sttyset
@@ -1401,7 +1406,7 @@ function trapcont_nonblocking {
 
 
 function askforconfirmation {
-    if ! [[ -t 0 || $fd0closed == "1" ]]; then
+    if ! [[ $streamclosed == "1" ]]; then
         while read -r -s -k1 -t0 inputchar ; do : ; done
     fi
     printf "Do you really want to $1? [y/n]:  ${tput_cub1}${tput_cnorm}"
@@ -1459,7 +1464,7 @@ function zoneselector {
     local curcontext=zoneselector:::
     inputstr="./"
     promptstr="Enter zonename (press tab):"
-    if [[ -t 0 || $fd0closed == "1" ]]; then
+    if [[ $streamclosed == "1" ]]; then
         promptstrpost=""
     else
         promptstrpost="\n"
@@ -1550,7 +1555,7 @@ zle -N zlelineprompt
 
 function usr1input_handler {
     local commandkey=$1
-    if ! [[ -t 0 || $fd0closed == "1" ]]; then
+    if ! [[ $streamclosed == "1" ]]; then
         case $commandkey; in
             "x") commandkey="a";;
             "y") commandkey="b";;
@@ -1805,7 +1810,7 @@ function usr1input_handler {
             else
                 toggleflipart=$(((toggleflipart+1)%2))
                 promptstr="Enter goal ('help' to learn):"
-                if [[ -t 0 || $fd0closed == "1" ]]; then
+                if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
                     vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
                 else
@@ -1942,7 +1947,7 @@ EOF
                     if command -v less &>/dev/null; then
                         pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
                         pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
-                        if [[ -t 0 || $fd0closed == "1" ]]; then
+                        if [[ $streamclosed == "1" ]]; then
                             printf "$tput_clear"
                             less -R <<<"$pagerprintstr" 2>/dev/null
                         else
@@ -1953,7 +1958,7 @@ EOF
                     elif command -v more &>/dev/null; then
                         pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
                         pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
-                        if [[ -t 0 || $fd0closed == "1" ]]; then
+                        if [[ $streamclosed == "1" ]]; then
                             printf "$tput_clear"
                             #more <<<"$pagerprintstr"
                             mkdir -p ~/.cache/arttime
@@ -2106,7 +2111,7 @@ EOF
                 if command -v less &>/dev/null; then
                     pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
                     pagerprintstr=$(printf "$pagernavstr\n$infostring")
-                    if [[ -t 0 || $fd0closed == "1" ]]; then
+                    if [[ $streamclosed == "1" ]]; then
                         printf "$tput_clear"
                         less -R <<<"$pagerprintstr" 2>/dev/null
                     else
@@ -2117,7 +2122,7 @@ EOF
                 elif command -v more &>/dev/null; then
                     pagernavstr="Note: 'less' [31mnot found[0m, using 'more'. Press 'q' key to quit this page,\npress 'Enter' to scroll-forward till you see [7m(END)[0m, 'b' to scroll-backwards."
                     pagerprintstr=$(printf "$pagernavstr\n$infostring")
-                    if [[ -t 0 || $fd0closed == "1" ]]; then
+                    if [[ $streamclosed == "1" ]]; then
                         printf "$tput_clear"
                         #more <<<"$pagerprintstr"
                         mkdir -p ~/.cache/arttime
@@ -2168,7 +2173,7 @@ EOF
             else
                 toggleflipart=$(((toggleflipart+1)%2))
                 promptstr="Enter title message ('orig' to reset):"
-                if [[ -t 0 || $fd0closed == "1" ]]; then
+                if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
                     vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
                 else
@@ -2295,7 +2300,7 @@ EOF
             ;;
         *)
             commandkeyint=$(printf '%d' "'$commandkey")
-            if [[ -t 0 || $fd0closed == "1" ]] || ((commandkeyint != 10 && commandkeyint != 13)); then
+            if [[ $streamclosed == "1" ]] || ((commandkeyint != 10 && commandkeyint != 13)); then
                     echo "Press 'h' to see which keys do what"
                     zselect -t 200
                     slurp
@@ -2367,7 +2372,7 @@ function arttime_blocking {
         epochtimereal=$EPOCHREALTIME
         epochtimerealarray=("${(@s/./)epochtimereal}")
         timetoepoch=$((1.0 - 0.$epochtimerealarray[2] + 0.01))
-        if [[ -t 0 || $fd0closed == "1" ]]; then
+        if [[ $streamclosed == "1" ]]; then
             read -r -s -t $timetoepoch -k1 tmpusrinput; retstatus="$?"
         else
             ERRNO=0
@@ -2377,7 +2382,7 @@ function arttime_blocking {
                     ;;
                 *)
                     while read -r -s -k1 -t0 inputchar ; do : ; done
-                    fd0closed="1"
+                    streamclosed="1"
                     exec 0<&-
                     exec 0<>$TTY
                     sttyset
