@@ -43,6 +43,7 @@ $(printf "$zparseoptscmd") \
    -random:=random_arg \
    t:=title_arg \
    g:=goal_arg \
+   k:=keyfile_arg \
    h=help_arg \
    -theme:=theme_arg \
    -tc:=titlecolor_arg \
@@ -84,6 +85,7 @@ Name:
 
 Invocation:
     arttime [OPTIONS]...
+    command_pipe | arttime [OPTIONS]...
 
 Description:
     arttime brings curated text art to otherwise artless terminal emulators
@@ -101,7 +103,23 @@ Description:
     "a-art", and "b-art") that it flip-flops displaying every second.
     A current restriction is that both pieces of art must be of same height,
     or else only "a-art" is displayed.
+
+    Artscript: Arttime can be "scripted" by feeding keystrokes into it
+    from a pipe, file, or string. It understands the language of it's
+    keystrokes ("artlang"). Simplest artscripts are called keypoems. 
+    A keypoem is a file containing keystrokes that arttime understands.
+    Some keypoems come with your installation. For instance run,
+        $ arttime -k welcome_8b
+    to see a welcome keypoem. Artscripts and keypoems save you time by typing
+    the keystrokes for you, and creating a visually appealing effect.
+    Save your most used sequences as your keypoems!
     
+    SCRIPT mode: When keystrokes are being fed from a pipe, file, or string;
+    arttime runs in "SCRIPT" mode. Any keys pressed in this mode by
+    the user are ignored. To immediately quit SCRIPT mode and transfer
+    control back to your keyboard, signalling interrupt to arttime. That
+    can be achieved by pressing Ctrl-c on most terminals.
+
     Call for artists: Much good ascii art was created during web 1.0, 
     but the artform declined after that. arttime intends to be a 
     platform/repository for hosting/displaying ascii/ansi art,
@@ -215,6 +233,12 @@ Options:
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
 
+    -k          feed keystrokes from a keypoem file. The option accepts
+                either name of a file under keypoemdir:
+                    keypoemdir="<dir_of_arttime>/../share/arttime/keypoems/*"
+                or full path to a keypoem file. Example values are:
+                welcome_8b, batscovid_5b, pomodoro4_4b, pomodoro4
+
     --pa        a-character to denote pending part of progress bar
     --pa        b-character to denote complete part of progress bar
     --pl        progress bar length
@@ -246,6 +270,19 @@ Examples:
     $ arttime --nolearn -t "Hello World - Butterfly"
         prints butterfly art with "Hello World - Butterfly" under
         the trex ASCII art
+    $ printf "cccg10s\\nmHello World\\nh" | arttime
+        starts arttime in SCRIPT mode. Keystrokes are accepted from
+        pipe till pipe ends or user signals interrupt (mostly Ctrl-c),
+        and then control is transferred to keyboard. In this case,
+        the color of art is changed 3 times (sets it to blue),
+        set a 10 second timer, set message under art to "Hello World",
+        and toggle help page to show text art (default is a butterfly)
+        Note: Don't escape backslash of newline character \\n.
+    $ arttime -k welcome_8b
+        starts arttime in SCRIPT mode. Keystrokes are read from
+        keypoem "welcome_8b" in keypoemdir ('_8b' denotes 8 bytes/second)
+        till the file ends or user signals interrupt (mostly Ctrl-c),
+        and then control is transferred to keyboard
     $ arttime --nolearn -t "Hello World - Butterfly" --ac 2 --style 1
         prints "Hello World — Butterfly" (en dash replaced with em dash)
         under the butterfly ascii art colored in color 2 (green)
@@ -414,6 +451,7 @@ nolearn="${nolearn_arg[-1]}"
 #tfother="${tfother_arg[-1]}"
 hoursfmt="$hours_arg[-1]"
 lineeditor="${lineeditor_arg[-1]}"
+keyfilearg="${keyfile_arg[-1]}"
 
 hm12="%I:%M%p"
 hms12="%I:%M:%S%p"
@@ -543,7 +581,6 @@ else
     flipartname=""
 fi
 
-
 if [[ $artcolorarg = "" ]]; then
     artcolorarg="1"
 elif ! [[ $artcolorarg =~ ^([0-9]|1[0-5])$ ]]; then
@@ -558,15 +595,33 @@ elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
     titlecolorarg="2"
 fi
 
-if [[ -t 0 ]]; then
-    streamclosed="1"
-else
-    unset streamfd
-    exec {streamfd}>&0
-    exec 0>&-
-    exec 0>&1
-    streamclosed="0"
-fi
+function keyfilefeed {
+    local keyfilepath="$1"
+    if [[ -f $bindir/../share/arttime/keypoems/$keyfilepath ]]; then
+        keyfilepath=$bindir/../share/arttime/keypoems/$keyfilepath
+    elif [[ -f "${keyfilepath/#\~/$HOME}" ]]; then
+        keyfilepath="${keyfilepath/#\~/$HOME}"
+    elif [[ -f "${keyfilepath/\$HOME/$HOME}" ]]; then
+        keyfilepath="${keyfilepath/\$HOME/$HOME}"
+    else
+        keyfilepath=""
+        return 1
+    fi
+    [[ ! -z $streamfd ]] && { exec {streamfd}>&-; unset streamfd; }
+    if [[ $keyfilepath =~ ^.*_([1-9][0-9]*)(b|bps)$ ]]; then
+        coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $((100/match[1])); printf "$REPLY"; done <$keyfilepath }
+        exec {streamfd}<&p
+    elif [[ $keyfilepath =~ ^.*_([1-9][0-9]+)(ms|mspb)$ ]]; then
+        coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $((match[1]/10)); printf "$REPLY"; done <$keyfilepath }
+        exec {streamfd}<&p
+    elif [[ $keyfilepath =~ ^.*_([1-9][0-9]*)(s|spb)$ ]]; then
+        coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $((match[1]*100)); printf "$REPLY"; done <$keyfilepath }
+        exec {streamfd}<&p
+    else
+        exec {streamfd}<$keyfilepath
+    fi
+    return 0
+}
 
 handoff="0"
 modestrnorm=""
@@ -579,6 +634,25 @@ function setmodestr {
         modestr=$modestrpos$modestrscript
     fi
 }
+
+if [[ -t 0 ]]; then
+    streamclosed="1"
+    streamfd=""
+    if [[ $keyfilearg != "" ]]; then
+        if keyfilefeed "$keyfilearg"; then
+            streamclosed="0"
+        else
+            printf "E: -k can either be passed a file name under\n      $bindir/../share/arttime/keypoems\n   or full path to a file that has keys for arttime.\n"
+            exit 1
+        fi
+    fi
+else
+    unset streamfd
+    exec {streamfd}>&0
+    exec 0>&-
+    exec 0>&1
+    streamclosed="0"
+fi
 setmodestr
 
 inputstr=""
@@ -1324,7 +1398,7 @@ function printtime {
             shiftwidth=$((termwidth-1))
             printf "$tput_sc\n%${shiftwidth}s$tchar$belowstr$modestr$tput_rc" " "
         fi
-        handoff=""
+        handoff="0"
     else
         #printprogressbar
         if [[ $printprogressbarflag = "1" ]]; then
@@ -1432,15 +1506,18 @@ function askforconfirmation {
 #setopt menu_complete
 #zmodload -i zsh/complist
 function artselector {
+    local restoredir=$PWD
+    cd $artdir
     local curcontext=artselector:::
-    printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
+    printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter artname:"
     readstr "" $modestr
+    cd $restoredir
 }
 function _artselector {
     _files -W $artdir
 }
-zstyle ':completion:artselector:*:' completer _artselector
+zstyle ':completion:artselector:*:' insert-tab false completer _artselector
 #zstyle ':completion:::*:default' completer _artselector menu no select
 
 function artselector2 {
@@ -1449,7 +1526,6 @@ function artselector2 {
     local tmpaart=$(getaart)
     local aartheight=$(wc -l "${tmpaart}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]][[:space:]]*.*$/\1/p')
     artnametemp=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
-    cd $restoredir
     local curcontext=artselector2:::
     if command -v column &>/dev/null; then
         echo $artnametemp  | tr ' ' '\n' | column -c$(echoti cols)
@@ -1461,11 +1537,26 @@ function artselector2 {
     fi
     promptstr="Enter artname:"
     readstr "" $modestr
+    cd $restoredir
 }
 function _artselector2 {
     _describe 'possible b-art' artnametemp
 }
-zstyle ':completion:artselector2:*:' completer _artselector2
+zstyle ':completion:artselector2:*:' insert-tab false completer _artselector2
+
+function keyfileselector {
+    local restoredir=$PWD
+    cd $bindir/../share/arttime/keypoems/ 2>/dev/null
+    local curcontext=keyfileselector:::
+    printf "Select a file to load keystrokes from into arttime.\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all possible files/directory paths.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
+    promptstr="Enter file:"
+    readstr "" $modestr
+    cd $restoredir
+}
+function _keyfileselector {
+    _files -W $bindir/../share/arttime/keypoems/
+}
+zstyle ':completion:keyfileselector:*:' insert-tab false completer _keyfileselector
 
 function zoneselector {
     local restorepwd=$PWD
@@ -1478,7 +1569,7 @@ function zoneselector {
     else
         promptstrpost="\n"
     fi        
-    printf "Press tab key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
+    printf "Press tab or Ctrl-d key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
     local modestrlocal=$modestr
     while [[ ! -f /usr/share/zoneinfo/$inputstr && ! -z $inputstr && $inputstr != "./orig" && $inputstr != "orig" ]]; do
         if [[ $inputstr =~ ^[./]+$ ]]; then
@@ -1585,7 +1676,7 @@ function usr1input_handler {
             if [[ $commandkey = "a" ]]; then
                 artselector
             else
-                printf "Set b-art, finding art that matches height of a-art ($artname)...\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
+                printf "Set b-art, finding art that matches height of a-art ($artname)...\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
                 artselector2
             fi
             sttyset
@@ -1607,14 +1698,14 @@ function usr1input_handler {
             fi
             prevartname=""
             if ! setartstring; then
-                printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                 if [[ $commandkey = "b" ]]; then
+                    printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                     artname="$initialartname"
                     flipartname="$initialflipartname"
                     setartstring
+                    readchar 5
+                    slurp
                 fi
-                readchar 5
-                slurp
             else
                 if [[ $inputstr = "" || ! -f "$artdir/$inputstr" ]]; then
                     if [[ $helpactive = "1" ]]; then
@@ -2157,6 +2248,26 @@ EOF
 #HERE
             slurp
             ;;
+        "k")
+            if [[ $streamclosed == "1" ]]; then
+                sttyresetint
+                printf "$tput_smcup"
+                printf "$tput_clear$modestr$tput_cup00"
+                keyfileselector
+                if [[ $inputstr != "" ]]; then
+                    if ! keyfilefeed "$inputstr"; then
+                        printf "E: No file found $keyfilepath.\nPress any key to continue..."
+                        readchar 3
+                        slurp
+                    else
+                        streamclosed="0"
+                        setmodestr
+                    fi
+                fi
+                sttyset
+                tputset
+            fi
+            ;;
         "l")
             if [[ $goaltime != "" || $pausegoals = "1" ]]; then
                 sttyresetint
@@ -2309,7 +2420,7 @@ EOF
             ;;
         *)
             commandkeyint=$(printf '%d' "'$commandkey")
-            if [[ $streamclosed == "1" ]] || ((commandkeyint != 10 && commandkeyint != 13)); then
+            if [[ $streamclosed == "1" ]] || ((commandkeyint != 10 && commandkeyint != 13 && commandkeyint != 45)); then
                     echo "Press 'h' to see which keys do what"
                     zselect -t 200
                     slurp
