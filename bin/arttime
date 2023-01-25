@@ -106,18 +106,20 @@ Description:
 
     Artscript: Arttime can be "scripted" by feeding keystrokes into it
     from a pipe, file, or string. It understands the language of it's
-    keystrokes ("artlang"). Simplest artscripts are called keypoems. 
+    keystrokes ("artlang"). Simplest form of artscript is called "keypoem". 
     A keypoem is a file containing keystrokes that arttime understands.
-    Some keypoems come with your installation. For instance run,
+    Some keypoems come with your installation. For instance, run
         $ arttime -k welcome_8b
-    to see a welcome keypoem. Artscripts and keypoems save you time by typing
-    the keystrokes for you, and creating a visually appealing effect.
-    Save your most used sequences as your keypoems!
+    to see a welcome keypoem. Keypoems can be used to save time and effort
+    needed to change arttime's state, even while arttime is already running.
+    They can also be used to create a storyboard-style sequence of art and
+    messages to tell a story. To load and run a keypoem while arttime is
+    running, press 'k' and enter a keypoem file.
     
-    SCRIPT mode: When keystrokes are being fed from a pipe, file, or string;
-    arttime runs in "SCRIPT" mode. Any keys pressed in this mode by
-    the user are ignored. To immediately quit SCRIPT mode and transfer
-    control back to your keyboard, signalling interrupt to arttime. That
+    SCRIPT mode: When keystrokes are being fed from a pipe, file or string,
+    arttime runs in "SCRIPT" mode. Any keys pressed by the user while arttime
+    is in this mode are ignored. To immediately quit SCRIPT mode and transfer
+    control back to the keyboard, signall interrupt to arttime. That
     can be achieved by pressing Ctrl-c on most terminals.
 
     Call for artists: Much good ascii art was created during web 1.0, 
@@ -196,21 +198,21 @@ Options:
     styling, setting a timer or pattern of timers, etc. 
     arttime looks for text art files in a directory relative to
     its own location (let's call it artdir):
-        artdir="<dir_of_arttime>/../share/arttime/textart/*"
+        artdir="<dir_of_arttime>/../share/arttime/textart/"
 
-    -a          a-art art file name in artdir
+    -a <name>   a-art art file name in artdir
                 (default: butterfly)
-    -b          b-art art file name in artdir
+    -b <name>   b-art art file name in artdir
                 (no default)
-    -t          title message placed under art (default: line 1 in artfiles)
-    --random [all|tarot|notarot]
+    -t <str>    title message placed under art (default: line 1 in artfiles)
+    --random <all|tarot|notarot>
                 select and display a random art from arttime's collection
                 Meaning of value passed:
                     all     : select from pool of all art files
                     tarot   : select from only tarot art files
                     notarot : select from all art except tarot
                 When passed, user should not pass option -a or -b
-    -g          goal time. arttime calls alarm/countdown time as "goal time"
+    -g <str>    goal time. arttime calls alarm/countdown time as "goal time"
                 The reason it's both alarm/countdown time is either format
                 can be specified. Goal can be 1) "10s" from current time, or 
                 2) "May 3 1:15PM IST" (IST stands for Indian Standard Time).
@@ -223,25 +225,28 @@ Options:
     --hours     start with 12 or 24 hour format. Value passed must be
                 either 24 or 12 (default: 12)
 
-    --ac        art color*, value between [1,15]
-    --tc        title color*, value between [1,15]
-    --theme     when given it overrides above color options [light,dark]
+    --ac <num>  art color*, value between [1,15]
+    --tc <num>  title color*, value between [1,15]
+    --theme <name>
+                when given it overrides above color options [light,dark]
 
-    --style     process title and subtitle strings to certain "styles"
+    --style <num>
+                process title and subtitle strings to certain "styles"
                 For instance, value of 0 (--style 0) uses regular underline
                 value of 1 (--style 1) uses curly underlines, among other
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
 
-    -k          feed keystrokes from a keypoem file. The option accepts
+    -k, --keypoem <name|file>
+                feed keystrokes from a keypoem file. The option accepts
                 either name of a file under keypoemdir:
-                    keypoemdir="<dir_of_arttime>/../share/arttime/keypoems/*"
+                    keypoemdir="<dir_of_arttime>/../share/arttime/keypoems/"
                 or full path to a keypoem file. Example values are:
                 welcome_8b, batscovid_5b, pomodoro4_4b, pomodoro4
 
-    --pa        a-character to denote pending part of progress bar
-    --pa        b-character to denote complete part of progress bar
-    --pl        progress bar length
+    --pa <str>  a-character to denote pending part of progress bar
+    --pa <str>  b-character to denote complete part of progress bar
+    --pl <num>  progress bar length
                 Note: progressbar a/b "character" can be a multi-character
                 string, though both a/b "characters" should be same length.
 
@@ -642,7 +647,7 @@ if [[ -t 0 ]]; then
         if keyfilefeed "$keyfilearg"; then
             streamclosed="0"
         else
-            printf "E: -k can either be passed a file name under\n      $bindir/../share/arttime/keypoems\n   or full path to a file that has keys for arttime.\n"
+            printf "E: -k/--keypoem can either be passed a file name under\n      $bindir/../share/arttime/keypoems/\n   or full path to a file that has keystrokes for arttime.\n"
             exit 1
         fi
     fi
@@ -2513,6 +2518,7 @@ function arttime_blocking {
                     trap "trapint_blocking" INT
                     ;;
             esac
+            [[ $tmpusrinput == '-' ]] && retstatus="1"
         fi
         if [[ $retstatus = "0" ]]; then
             trapusr1_both "$tmpusrinput"
