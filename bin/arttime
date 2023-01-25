@@ -44,6 +44,7 @@ $(printf "$zparseoptscmd") \
    t:=title_arg \
    g:=goal_arg \
    k:=keyfile_arg \
+   -keypoem:=keyfile_arg \
    h=help_arg \
    -theme:=theme_arg \
    -tc:=titlecolor_arg \
