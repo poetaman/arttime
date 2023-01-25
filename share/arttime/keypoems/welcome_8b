@@ -1,14 +1,22 @@
 ----------
-mWelcome aboard arttime, the most Unix text-art viewer and timer
+mWelcome aboard arttime, the most Unix text art viewer and timer!
 ----------
-mSee what happens when key 'h' is pressed twice
+mSit back and rest your hands off the keyboard for a minute :)
+----------
+mFirst, see what happens as I press 'h' twice
 ----------
 h
 ----------
 h
 ----------
-mNext, let's set a 20 second timer for you
+mNext, see how text art is set to 'spacetravel' after I press 'a'
+----------
+aspacetravel
+----------
+mLastly, let's set a 20 second timer for you by pressing 'g'
+----------
 ----------
 g20s
 ----------
-mNow the power is with you, enjoy!
+----------
+mNow the power is with you. Press 'h' to dive deeper, enjoy!
