@@ -363,15 +363,16 @@ function getbart {
 
 function notetimezone {
     if [[ -z $TZ ]]; then
-        if [[ -L /etc/localtime ]]; then
-            tzlong=$(readlink /etc/localtime | sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p')
+        local etclocaltime="/etc/localtime"
+        if [[ -L $etclocaltime ]]; then
+            tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<"${etclocaltime:A}")
         else
-            echo "W: make /etc/localtime a symlink for faster load time" >/dev/stderr
-            tzlong=$(find /usr/share/zoneinfo/* -type f | while read fname; do cmp -s /etc/localtime "$fname" && sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p'<<<"$fname" && break; done)
+            echo "W: make $etclocaltime a symlink for faster load time" >/dev/stderr
+            tzlong=$(find /usr/share/zoneinfo/* -type f | while read fname; do cmp -s "$etclocaltime" "$fname" && sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p'<<<"$fname" && break; done)
         fi
     else
         if [[ -f $TZ ]]; then
-            tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${TZ:a})
+            tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${TZ:A})
         else
             tzlong=$TZ
         fi
@@ -1595,7 +1596,7 @@ function zoneselector {
     if [[ $inputstr = "./orig" || $inputstr = "orig" ]]; then
         inputstr=$tzlonginit
     fi
-    inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${inputstr:a})
+    inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${inputstr:A})
     cd $restorepwd
 }
 function _zoneselector {
