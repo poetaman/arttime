@@ -1080,11 +1080,17 @@ belowstr=""
 artht=""
 flipartht=""
 function setartstring {
+    local localtitle=""
+    if [[ ! -z $title ]]; then
+        localtitle=$title
+    else
+        read -r localtitle <$artdir/$artname
+    fi
     local maxartstringht=$((termheight-2))
     ((maxartstringht<0)) && maxartstringht="0"
-    artstring=$($bindir/artprint -a "$artname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style"| tail -n $maxartstringht)
+    artstring=$($bindir/artprint -a "$artname" -t "$localtitle" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style"| tail -n $maxartstringht)
     if [[ ! -z $flipartname ]]; then
-        flipartstring=$($bindir/artprint -a "$flipartname" -t "$title" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style" | tail -n $maxartstringht)
+        flipartstring=$($bindir/artprint -a "$flipartname" -t "$localtitle" --ac "$artcolor" --tc "$titlecolor" --theme "$theme" $debugopt --width "$termwidth" --height "$termheight" --style "$style" | tail -n $maxartstringht)
     fi
     if [[ $artname != $prevartname ]]; then
         #echo "here, $artname, $prevartname"
