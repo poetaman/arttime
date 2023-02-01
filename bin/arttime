@@ -2279,6 +2279,22 @@ EOF
                 fi
                 sttyset
                 tputset
+            else
+                sttyresetint
+                if askforconfirmation "exit SCRIPT mode"; then
+                    trap "" INT
+                    while read -r -s -k1 -t0 inputchar ; do : ; done
+                    streamclosed="1"
+                    exec {streamfd}>&-
+                    unset streamfd
+                    exec {streamfd}>&1
+                    sttyset
+                    setmodestr
+                    handoff="1"
+                    trap "trapint_blocking" INT
+                fi
+                sttyset
+                echoti civis
             fi
             ;;
         "l")
