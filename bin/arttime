@@ -238,11 +238,11 @@ Options:
                 things. Not all terminal emulators support curly underlines.
                 Possible values: [0,1] (default: 0)
 
-    -k, --keypoem <name|file>
-                feed keystrokes from a keypoem file. The option accepts
-                either name of a file under keypoemdir:
+    -k, --keypoem <name|file|fifo>
+                feed keystrokes from a keypoem file/fifo. The option accepts
+                either name of a file/fifo under keypoemdir:
                     keypoemdir="<dir_of_arttime>/../share/arttime/keypoems/"
-                or full path to a keypoem file. Example values are:
+                or full path to a keypoem file/fifo. Example values are:
                 welcome_8b, batscovid_5b, pomodoro4_4b, pomodoro4
 
     --pa <str>  a-character to denote pending part of progress bar
@@ -604,28 +604,46 @@ fi
 
 function keyfilefeed {
     local keyfilepath="$1"
-    if [[ -f $bindir/../share/arttime/keypoems/$keyfilepath ]]; then
+    if [[ -e $bindir/../share/arttime/keypoems/$keyfilepath ]]; then
         keyfilepath=$bindir/../share/arttime/keypoems/$keyfilepath
-    elif [[ -f "${keyfilepath/#\~/$HOME}" ]]; then
+    elif [[ -e "${keyfilepath/#\~/$HOME}" ]]; then
         keyfilepath="${keyfilepath/#\~/$HOME}"
-    elif [[ -f "${keyfilepath/\$HOME/$HOME}" ]]; then
+    elif [[ -e "${keyfilepath/\$HOME/$HOME}" ]]; then
         keyfilepath="${keyfilepath/\$HOME/$HOME}"
     else
-        keyfilepath=""
         return 1
     fi
-    [[ ! -z $streamfd ]] && { exec {streamfd}>&-; unset streamfd; }
-    if [[ $keyfilepath =~ ^.*_([1-9][0-9]*)(b|bps)$ ]]; then
-        coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $((100/match[1])); printf "$REPLY"; done <$keyfilepath }
-        exec {streamfd}<&p
-    elif [[ $keyfilepath =~ ^.*_([1-9][0-9]+)(ms|mspb)$ ]]; then
-        coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $((match[1]/10)); printf "$REPLY"; done <$keyfilepath }
-        exec {streamfd}<&p
-    elif [[ $keyfilepath =~ ^.*_([1-9][0-9]*)(s|spb)$ ]]; then
-        coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $((match[1]*100)); printf "$REPLY"; done <$keyfilepath }
-        exec {streamfd}<&p
+    if [[ -p $keyfilepath ]]; then
+        local fileispipe="1"
+    elif [[ -f $keyfilepath ]]; then
+        local fileispipe="0"
     else
-        exec {streamfd}<$keyfilepath
+        return 2
+    fi
+    if [[ $keyfilepath =~ ^.*_([1-9][0-9]*)(b|bps)$ ]]; then
+        local centidelay=$((100/match[1]))
+    elif [[ $keyfilepath =~ ^.*_([1-9][0-9]+)(ms|mspb)$ ]]; then
+        local centidelay=$((match[1]/10))
+    elif [[ $keyfilepath =~ ^.*_([1-9][0-9]*)(s|spb)$ ]]; then
+        local centidelay=$((match[1]*100))
+    else
+        local centidelay="0"
+    fi
+    [[ ! -z $streamfd ]] && { exec {streamfd}>&-; unset streamfd; }
+    if [[ $centidelay == "0" ]]; then
+        if [[ $fileispipe == "1" ]]; then
+            exec {streamfd}<>$keyfilepath
+        else
+            exec {streamfd}<$keyfilepath
+        fi            
+    else
+        if [[ $fileispipe == "1" ]]; then
+            coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $centidelay; printf "$REPLY"; done <>$keyfilepath }
+            exec {streamfd}<&p
+        else
+            coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $centidelay; printf "$REPLY"; done <$keyfilepath }
+            exec {streamfd}<&p
+        fi
     fi
     return 0
 }
@@ -649,7 +667,7 @@ if [[ -t 0 ]]; then
         if keyfilefeed "$keyfilearg"; then
             streamclosed="0"
         else
-            printf "E: -k/--keypoem can either be passed a file name under\n      $bindir/../share/arttime/keypoems/\n   or full path to a file that has keystrokes for arttime.\n"
+            printf "E: -k/--keypoem can either be passed a file/fifo name under\n      $bindir/../share/arttime/keypoems/\n   or full path to a file/fifo that has keystrokes for arttime.\n"
             exit 1
         fi
     fi
@@ -723,6 +741,7 @@ function readchar {
                 ;;
             *)
                 trap "" INT
+                kill -s INT -$$ &>/dev/null
                 while read -r -s -k1 -t0 inputchar ; do : ; done
                 inputchar=""
                 streamclosed="1"
@@ -1561,7 +1580,7 @@ function keyfileselector {
     local restoredir=$PWD
     cd $bindir/../share/arttime/keypoems/ 2>/dev/null
     local curcontext=keyfileselector:::
-    printf "Select a file to load keystrokes from into arttime.\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all possible files/directory paths.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
+    printf "Select a file or fifo to load keystrokes from.\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all possible files/directory paths.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter file:"
     readstr "" $modestr
     cd $restoredir
@@ -1699,7 +1718,7 @@ function usr1input_handler {
                     flipartname=""
                 fi
             elif [[ ! -f "$artdir/$inputstr" ]]; then
-                printf "E: No file found for art: $inputstr.\nPress any key to continue..."
+                printf "E: No file found for art: $inputstr\nPress any key to continue..."
                 readchar 3
                 slurp
             else
@@ -1763,7 +1782,7 @@ function usr1input_handler {
             tputset
             if [[ $artnametemp = "" ]]; then
             elif [[ ! -f "$artdir/$artnametemp" ]]; then
-                printf "${tput_cup00}E: No file found for art: $artnametemp.\nPress any key to continue..."
+                printf "${tput_cup00}E: No file found for art: $artnametemp\nPress any key to continue..."
                 readchar 3
                 slurp
             else
@@ -2268,8 +2287,14 @@ EOF
                 printf "$tput_clear$modestr$tput_cup00"
                 keyfileselector
                 if [[ $inputstr != "" ]]; then
-                    if ! keyfilefeed "$inputstr"; then
-                        printf "E: No file found $keyfilepath.\nPress any key to continue..."
+                    keyfilefeed "$inputstr"
+                    local returnval="$?"
+                    if [[ $returnval != "0" ]]; then
+                        if [[ $returnval == "1" ]]; then
+                            printf "E: File not found $inputstr\nPress any key to continue..."
+                        else
+                            printf "E: File is neither regular nor fifo $inputstr\nPress any key to continue..."
+                        fi
                         readchar 3
                         slurp
                     else
@@ -2283,6 +2308,7 @@ EOF
                 sttyresetint
                 if askforconfirmation "exit SCRIPT mode"; then
                     trap "" INT
+                    kill -s INT -$$ &>/dev/null
                     while read -r -s -k1 -t0 inputchar ; do : ; done
                     streamclosed="1"
                     exec {streamfd}>&-
@@ -2531,6 +2557,7 @@ function arttime_blocking {
                     ;;
                 *)
                     trap "" INT
+                    kill -s INT -$$ &>/dev/null
                     while read -r -s -k1 -t0 inputchar ; do : ; done
                     streamclosed="1"
                     exec {streamfd}>&-
