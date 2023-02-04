@@ -120,8 +120,9 @@ Description:
     SCRIPT mode: When keystrokes are being fed from a pipe, file or string,
     arttime runs in "SCRIPT" mode. Any keys pressed by the user while arttime
     is in this mode are ignored. To immediately quit SCRIPT mode and transfer
-    control back to the keyboard, signall interrupt to arttime. That
-    can be achieved by pressing Ctrl-c on most terminals.
+    control back to the keyboard, signal interrupt to arttime. That
+    can be achieved by pressing Ctrl-c on most terminals. You can also
+    pause and unpause artscript in SCRIPT mode by pressing 'p'.
 
     Call for artists: Much good ascii art was created during web 1.0, 
     but the artform declined after that. arttime intends to be a 
@@ -687,7 +688,7 @@ function readstr {
     if [[ $streamclosed == "1" ]] && [[ -z $2 ]]; then
         vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
     else
-        while read -r -s -k1 -t0 inputchar ; do : ; done
+        while read -r -s -k1 -t0 tempttychar && [[ $tempttychar != "p" ]] ; do : ; done
         printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
         local inputchard=""
         local inputcharint=0
@@ -738,6 +739,19 @@ function readchar {
         case "$retstatus" in
             "0"|"4")
                 retstatus=0
+                [[ $tempttychar != "p" ]] && read -r -s -k1 -t0 tempttychar
+                if [[ $tempttychar == "p" ]]; then
+                    tempttychar=""
+                    printf "$tput_sc$modestrpos$(echoti cub 6)PAUSED$tput_rc"
+                    trap "" TSTP CONT
+                    kill -TSTP -$$
+                    while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
+                    printf "$tput_sc$modestr$tput_rc"
+                    kill -CONT -$$
+                    trap "trapstop_blocking" TSTP
+                    trap "trapcont_blocking" CONT
+                    tempttychar=""
+                fi
                 ;;
             *)
                 trap "" INT
@@ -758,10 +772,11 @@ function readchar {
     return $retstatus
 }
 function slurp {
+    local slurpchar
     if [[ $streamclosed == "1" ]]; then
-        while read -r -s -k1 -t0 inputchar ; do : ; done 
+        while read -r -s -k1 -t0 slurpchar ; do : ; done 
     else
-        while sysread -s1 -c1 -t0 -i$streamfd inputchar ; do : ; done
+        while sysread -s1 -c1 -t0 -i$streamfd slurpchar ; do : ; done
     fi
 }
 
@@ -1465,6 +1480,7 @@ function trapint_blocking {
         while read -r -s -k1 -t0 inputchar ; do : ; done
         inputchar=""
         inputstr=""
+        tempttychar=""
         streamclosed="1"
         exec {streamfd}>&-
         unset streamfd
@@ -1475,6 +1491,8 @@ function trapint_blocking {
         winchdetected="1"
         termwidth=""
         ignorewinch="0"
+        trap "trapstop_blocking" TSTP
+        trap "trapcont_blocking" CONT
     fi
 }
 
@@ -1522,7 +1540,7 @@ function trapcont_nonblocking {
 
 function askforconfirmation {
     if ! [[ $streamclosed == "1" ]]; then
-        while read -r -s -k1 -t0 inputchar ; do : ; done
+        while read -r -s -k1 -t0 tempttychar && [[ $tempttychar != "p" ]] ; do : ; done
     fi
     printf "Do you really want to $1? [y/n]:  ${tput_cub1}${tput_cnorm}"
     readchar
@@ -2554,6 +2572,19 @@ function arttime_blocking {
             sysread -s1 -c1 -t $timetoepoch -i$streamfd tmpusrinput; retstatus=$?; reterrno=$ERRNO
             case "$retstatus" in
                 "0"|"4")
+                    [[ $tempttychar != "p" ]] && read -r -s -k1 -t0 tempttychar
+                    if [[ $tempttychar == "p" ]]; then
+                        tempttychar=""
+                        printf "$tput_sc$modestrpos$(echoti cub 6)PAUSED$tput_rc"
+                        trap "" TSTP CONT
+                        kill -TSTP -$$
+                        while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
+                        printf "$tput_sc$modestr$tput_rc"
+                        kill -CONT -$$
+                        trap "trapstop_blocking" TSTP
+                        trap "trapcont_blocking" CONT
+                        tempttychar=""
+                    fi
                     ;;
                 *)
                     trap "" INT
