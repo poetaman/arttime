@@ -1520,7 +1520,7 @@ function trapstop_nonblocking {
 function trapcont_blocking {
     trap "trapstop_blocking" TSTP;
     #killdone="0"; 
-    sttyget
+    #sttyget
     sttyset
     tputset
     printart
@@ -1530,7 +1530,7 @@ function trapcont_blocking {
 function trapcont_nonblocking {
     trap "trapstop_nonblocking" TSTP;
     #killdone="0"; 
-    sttyget
+    #sttyget
     sttyset
     tputset
     printart
