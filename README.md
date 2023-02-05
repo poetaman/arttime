@@ -82,22 +82,14 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 6. Multiple timers, repeating time management program like [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique). a) From the commandline, run: ``arttime --nolearn -a magic -b magic2 -g "25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop2"`` or b) From within application, run: ``arttime --nolearn -a magic -b magic2``, then press ``g`` and enter ``25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop2``. Change ``loop2`` to ``loop4`` or ``sprint4`` for approximately 10 hour work day. Progressbar shows that we are 20% done with our program.
 <img width="1015" alt="Screen Shot 2022-07-05 at 10 01 43 PM" src="https://user-images.githubusercontent.com/71736629/177472467-34c93118-65f3-434a-bbe2-306fe1e5e4ac.png">
 
-7. Activism and 24-bit ANSI color example ``$ arttime --nolearn -a ukraine1_40 -t "Support peace, support Ukraine"``. Note: terminal emulator must support 24-bit RGB colors.
-<img width="1019" alt="Screen Shot 2022-05-22 at 12 05 56 AM" src="https://user-images.githubusercontent.com/71736629/169683276-ec44c366-b570-4dd1-a334-ed5b052f03fd.png">
-
-8. Another 24-bit ANSI color (from image) example ``$ arttime --nolearn -a obama2 -t "Yes we can, yes we can drink better teas"``.  Note: terminal emulator must support 24-bit RGB colors.
+7. A 24-bit color art example ``$ arttime --nolearn -a obama2 -t "Yes we can, yes we can drink better teas"``.  Note: terminal emulator must support 24-bit RGB colors.
 <img width="1019" alt="Screen Shot 2022-05-22 at 12 14 22 AM" src="https://user-images.githubusercontent.com/71736629/169683524-a63a5a9c-aa66-4ecd-a036-97b8bfa0f243.png">
 
 9. Random art selection. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (Note: following video playback works in Safari on macOS, but for some reason not in Safari on iPhone 8, perhaps because of a github.com bug?).
 
 https://user-images.githubusercontent.com/71736629/206934934-25b4632f-ee56-421a-a120-1c44bcf64ac4.mp4
 
-10. Pick random tarot art. ``$ arttime --nolearn -a tarot -t "Only tarot can help in debugging undocumented code..."`` then press and hold ``o`` for a few seconds. After some time arttime will settle on some randomly selected tarot card. Press ``y`` to select it, or ``c`` to cancel. Tarot art was done by text artist [littlebitspace](https://littlebitspace.com). It requires your font to have Unicode block [Symbols for legacy computing](https://en.wikipedia.org/wiki/Symbols_for_Legacy_Computing), ideally viewed in a squarish Commodore 64 font like [C64 Pro Mono](https://style64.org/c64-truetype).
-
-<img width="1012" alt="Screenshot 2022-12-05 at 8 20 55 PM" src="https://user-images.githubusercontent.com/71736629/205813373-d7e79acf-10d6-440e-90bf-3904bf0e3d76.png">
-
-
-11. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
+10. And more... For more information read help documentation ``$ arttime -h``, and start in learn mode (default) to understand keybindings ``$ arttime``.
 
 # Installation
 
