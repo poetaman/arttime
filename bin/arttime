@@ -743,11 +743,16 @@ function readchar {
                 if [[ $tempttychar == "p" ]]; then
                     tempttychar=""
                     printf "$tput_sc$modestrpos$(echoti cub 6)PAUSED$tput_rc"
-                    trap "" TSTP CONT
+                    trap "trapdone=1" TSTP CONT
+                    trapdone="0"
                     kill -TSTP -$$
+                    while [[ $trapdone == "0" ]]; do zselect -t 10; done
                     while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                     printf "$tput_sc$modestr$tput_rc"
+                    trapdone="0"
                     kill -CONT -$$
+                    while [[ $trapdone == "0" ]]; do zselect -t 10; done
+                    unset trapdone
                     trap "trapstop_blocking" TSTP
                     trap "trapcont_blocking" CONT
                     tempttychar=""
@@ -1491,8 +1496,6 @@ function trapint_blocking {
         winchdetected="1"
         termwidth=""
         ignorewinch="0"
-        trap "trapstop_blocking" TSTP
-        trap "trapcont_blocking" CONT
     fi
 }
 
@@ -2576,11 +2579,16 @@ function arttime_blocking {
                     if [[ $tempttychar == "p" ]]; then
                         tempttychar=""
                         printf "$tput_sc$modestrpos$(echoti cub 6)PAUSED$tput_rc"
-                        trap "" TSTP CONT
+                        trap "trapdone=1" TSTP CONT
+                        trapdone="0"
                         kill -TSTP -$$
+                        while [[ $trapdone == "0" ]]; do zselect -t 10; done
                         while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                         printf "$tput_sc$modestr$tput_rc"
+                        trapdone="0"
                         kill -CONT -$$
+                        while [[ $trapdone == "0" ]]; do zselect -t 10; done
+                        unset trapdone
                         trap "trapstop_blocking" TSTP
                         trap "trapcont_blocking" CONT
                         tempttychar=""
