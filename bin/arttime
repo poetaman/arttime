@@ -743,24 +743,29 @@ function readchar {
                 if [[ $tempttychar == "p" ]]; then
                     tempttychar=""
                     printf "$tput_sc$modestrpos$(echoti cub 6)PAUSED$tput_rc"
-                    trap "trapdone=1" TSTP CONT
-                    trapdone="0"
+                    trap "tstpdone=1" TSTP
+                    trap "contdone=1" CONT
+                    tstpdone="0"
                     kill -TSTP -$$
-                    while [[ $trapdone == "0" ]]; do zselect -t 10; done
+                    while [[ $tstpdone == "0" ]]; do zselect -t 10; done
+                    unset tstpdone
                     while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                     printf "$tput_sc$modestr$tput_rc"
-                    trapdone="0"
+                    contdone="0"
                     kill -CONT -$$
-                    while [[ $trapdone == "0" ]]; do zselect -t 10; done
-                    unset trapdone
+                    while [[ $contdone == "0" ]]; do zselect -t 10; done
+                    unset contdone
                     trap "trapstop_blocking" TSTP
                     trap "trapcont_blocking" CONT
                     tempttychar=""
                 fi
                 ;;
             *)
-                trap "" INT
+                trap "intdone=1" INT
+                intdone="0"
                 kill -s INT -$$ &>/dev/null
+                while [[ $intdone == "0" ]]; do zselect -t 10; done
+                unset intdone
                 while read -r -s -k1 -t0 inputchar ; do : ; done
                 inputchar=""
                 streamclosed="1"
@@ -2328,8 +2333,11 @@ EOF
             else
                 sttyresetint
                 if askforconfirmation "exit SCRIPT mode"; then
-                    trap "" INT
+                    trap "intdone=1" INT
+                    intdone="0"
                     kill -s INT -$$ &>/dev/null
+                    while [[ $intdone == "0" ]]; do zselect -t 10; done
+                    unset intdone
                     while read -r -s -k1 -t0 inputchar ; do : ; done
                     streamclosed="1"
                     exec {streamfd}>&-
@@ -2579,24 +2587,29 @@ function arttime_blocking {
                     if [[ $tempttychar == "p" ]]; then
                         tempttychar=""
                         printf "$tput_sc$modestrpos$(echoti cub 6)PAUSED$tput_rc"
-                        trap "trapdone=1" TSTP CONT
-                        trapdone="0"
+                        trap "tstpdone=1" TSTP
+                        trap "contdone=1" CONT
+                        tstpdone="0"
                         kill -TSTP -$$
-                        while [[ $trapdone == "0" ]]; do zselect -t 10; done
+                        while [[ $tstpdone == "0" ]]; do zselect -t 10; done
+                        unset tstpdone
                         while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                         printf "$tput_sc$modestr$tput_rc"
-                        trapdone="0"
+                        contdone="0"
                         kill -CONT -$$
-                        while [[ $trapdone == "0" ]]; do zselect -t 10; done
-                        unset trapdone
+                        while [[ $contdone == "0" ]]; do zselect -t 10; done
+                        unset contdone
                         trap "trapstop_blocking" TSTP
                         trap "trapcont_blocking" CONT
                         tempttychar=""
                     fi
                     ;;
                 *)
-                    trap "" INT
+                    trap "intdone=1" INT
+                    intdone="0"
                     kill -s INT -$$ &>/dev/null
+                    while [[ $intdone == "0" ]]; do zselect -t 10; done
+                    unset intdone
                     while read -r -s -k1 -t0 inputchar ; do : ; done
                     streamclosed="1"
                     exec {streamfd}>&-
