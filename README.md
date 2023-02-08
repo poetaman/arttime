@@ -25,34 +25,30 @@ Beauty of text-art meets functionality of a feature-rich clock / timer / pattern
 Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a file, pipe, or string instead of just typing them; control gets cleanly transferred to your keyboard when the respective file, pipe, or string ends. This also makes it scriptable in any programming language of your choice.
 
 ## Purpose/features
-- Bring curated text/ascii art to artless terminals, currently 500+ high-quality text art to choose from
+- Bring curated text/ascii art to artless terminals, currently 500+ high-quality ASCII, ANSI, PETSCII, Unicode text art to choose from
 - Provide a feature-rich alarm timer/time manager for commandline.
   - Set multiple timers, supports specifying delta in time (like ``1h 30m`` from now) or absoulte time (like ``Dec 22 2:45PM EST``).
   - Configurable pattern-based time management: Set a repeating pattern of times to get notifications at. This makes [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) just one of billions of patterns possible for time management, and makes you set a pattern that works for you. Entire time management program can be paused+delayed and un-paused by pressing a key (``p``). Note: for now even absolute goals like ``1PM`` get delayed, in future users will be able to override that. 
   - Or just loop forever or N number of times over a set of timers. Example: get a notification every day at 8AM; 12PM; 5PM.
-  - Shows time passed since a timer expired or times pending to for every timer (press ``i`` after setting multiple goals)
-  - Always shows some delta in time which is hard to track: 1) time since arttime started, 2) time pending for next timer, 3) time passed since last timer expired.
+  - Show deltas in time which are hard to track: 1) time since arttime started, 2) time pending for upcoming timer (press "i" to see all timers), 3) time passed since last timer expired.
   - Interactively switch time zones.
-  - A configurable text-based progress bar shows what percentage of the timer is complete/pending. Example: >>>>------ (--style 0) ■■■■□□□□□□ (--style 1)
+  - Fully configurable text-based progress bar shows what percentage of the timer is complete/pending
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
-- Provide users with 1 line of text under art to share their mind, display their activism
+- Provide users with 1 line of text under art to share their mind, like on a thought board
 - Support animated text art: flip-flop between two related ascii arts every second
-- Support 24-bit RGB text art produced from jpeg, etc stickers/images/photographs
 - Support productivity: mindful suspension (``Ctrl-z``) and continuation (``fg``). Doesn't occupy terminal screen or consume power while suspended, but still shows correct elapsed time when continued.
-- Random art selection makes it a fun game.
-- Provide a publishing platform for text/ascii art artists (text art is meant for terminals, not museums)
-- Works on macOS out of the box. No need to install homebrew, developer tools. Zero dependencies
+- Provide a publishing platform for text artists (text art is meant for terminals, not museums)
+- Works on macOS out of the box. No need to install homebrew, developer tools. Zero dependencies!
 - Works on other Unixes like Linux/BSD with only zsh as the dependency
-- Starts in an intuitive learn/help mode by default (turn that off with ``--nolearn``)
 - For consistent art & message display in multiple applications, a script ``artprint`` is also available in the same directory as ``arttime``.
-- Multiple ways to select text art: random, by name (with completion hints), via [fzf](https://github.com/junegunn/fzf) if it is installed (it is not required though)
-- Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping!
+- Multiple ways to select text art: 1) random; 2) by name (with completion hints); 3) via [fzf](https://github.com/junegunn/fzf), if it is installed (not required though)
+- Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping.
 - Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/poetaman/arttime/blob/main/LICENSE_ADDENDUM_CFLA), please be mindful.
 - Scriptable: Want to script/control arttime programmatically or even remotely? You can feed/pipe keystrokes from a string, file or another program (coded in any language of your choice), making it the most Unix-friendly interactive application in it's category. More details in [arttime wiki: scriptable](https://github.com/poetaman/arttime/wiki#scriptable).
 - Best for privacy: Unlike commercial apps that connect to internet, track your activity and send/sell your data, arttime runs solely on your computer. It does not connect to internet, does not look at or track your data, and does not send any data outside your computer. Unlike binaries, arttime is a human-readable text file that can always be reviewed.
 - Secure: Unlike most other interactive software projects which rely on multiple 3rd-party packages that are hard to audit, this project relies solely on what comes pre-installed on Unix-style operating systems like macOS/Linux, and no 3rd-party packages. This makes it much more secure compared to other software out there.
 
-Note: arttime is tuned to consume less power and memory. It uses only about ~0.3% of CPU time while running, and only around 6MB of RAM in steady state on my machine.
+Note: arttime is tuned to consume less power and memory. It uses only about ~0.1% of CPU time while running, and only around 6MB of RAM in steady state on my machine.
 
 # Call for artists
 Much good ascii art was created during web 1.0, but the artform declined after that. arttime intends to be a platform/repository for hosting/displaying ascii/ansi art, as ascii/ansi does have its natural home on a terminal (instead of a wall of an arts museum). In doing so it also encourages sharing art, a not so common drift with the arrival of NFTs (where monkey stickers are being priced at hundreds of thousands of US dollars). The repository already provides a curated library of good ascii art (mixed at times with computer-generated text version of digital images). If you are a text artist, or find a treasure trove of libre ascii/text art, please feel free to leave a link to the work in [arttime discussions](https://github.com/poetaman/arttime/discussions).
