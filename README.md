@@ -30,7 +30,7 @@ Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a
   - Set multiple timers, supports specifying delta in time (like ``1h 30m`` from now) or absoulte time (like ``Dec 22 2:45PM EST``).
   - Configurable pattern-based time management: Set a repeating pattern of times to get notifications at. This makes [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) just one of billions of patterns possible for time management, and makes you set a pattern that works for you. Entire time management program can be paused+delayed and un-paused by pressing a key (``p``). Note: for now even absolute goals like ``1PM`` get delayed, in future users will be able to override that. 
   - Or just loop forever or N number of times over a set of timers. Example: get a notification every day at 8AM; 12PM; 5PM.
-  - Show deltas in time which are hard to track: 1) time since arttime started, 2) time pending for upcoming timer (press "i" to see all timers), 3) time passed since last timer expired.
+  - Show deltas in time which are hard to track: 1) time since arttime started, 2) time pending for upcoming timer (press ``i`` to see all timers), 3) time passed since last timer expired.
   - Interactively switch time zones.
   - Fully configurable text-based progress bar shows what percentage of the timer is complete/pending
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
