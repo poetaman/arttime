@@ -61,7 +61,7 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 
 # Screenshots
 1. Default start page. ``$ arttime``
-<img width="1012" alt="Screen Shot 2022-10-01 at 5 26 19 PM" src="https://user-images.githubusercontent.com/71736629/193432966-e95c3f84-b910-4cf6-b33a-855d0539596d.png">
+<img width="1016" alt="Screenshot 2023-02-09 at 1 19 25 PM" src="https://user-images.githubusercontent.com/71736629/217941620-4fd18160-4364-4f08-aa8d-936bb2bf7743.png">
 
 2. Default art. ``$ arttime`` then press ``h``, or ``arttime --nolearn``
 <img width="1019" alt="Screen Shot 2022-05-21 at 10 17 59 PM" src="https://user-images.githubusercontent.com/71736629/169680963-0cd5027d-5e21-4d3e-8eda-c21939f5d89d.png">
