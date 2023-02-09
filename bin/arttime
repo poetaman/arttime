@@ -1606,7 +1606,7 @@ function keyfileselector {
     local restoredir=$PWD
     cd $bindir/../share/arttime/keypoems/ 2>/dev/null
     local curcontext=keyfileselector:::
-    printf "Select a file or fifo to load keystrokes from.\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all possible files/directory paths.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
+    printf "Select a file or fifo to load keystrokes from (examples pre-installed).\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all files.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter file:"
     readstr "" $modestr
     cd $restoredir
