@@ -22,7 +22,7 @@ Contents
 # arttime
 Beauty of text-art meets functionality of a feature-rich clock / timer / pattern-based time manager in terminal. In addition to its functional/productivity features, ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal. It is a cross-platform application with native notifications/sounds that runs well on macOS, Linux, and BSD Unixes.
 
-Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a file, pipe, or string instead of just typing them; control gets cleanly transferred to your keyboard when the respective file, pipe, or string ends. This also makes it scriptable in any programming language of your choice.
+Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a file, pipe, string or unrelated process instead of just typing them; control gets cleanly transferred to your keyboard when the respective file, pipe, or string ends.
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 500+ high-quality ASCII, ANSI, PETSCII, Unicode text art to choose from
@@ -44,7 +44,7 @@ Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a
 - Multiple ways to select text art: 1) random; 2) by name (with completion hints); 3) via [fzf](https://github.com/junegunn/fzf), if it is installed (not required though)
 - Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping.
 - Personalize: easily create new art files (just add one to ``share/arttime/textart`` directory), and/or change the default message that is shown under one of the existing art files (message is picked from first line of every file). Art has a power to inspire, putting hate messages would be violation of [CFLA](https://github.com/poetaman/arttime/blob/main/LICENSE_ADDENDUM_CFLA), please be mindful.
-- Scriptable: Want to script/control arttime programmatically or even remotely? You can feed/pipe keystrokes from a string, file or another program (coded in any language of your choice), making it the most Unix-friendly interactive application in it's category. More details in [arttime wiki: scriptable](https://github.com/poetaman/arttime/wiki#scriptable).
+- Universal keystroke source: Unlike most interactive Unix applications, arttime provides first-class support for feeding keys from all imaginable Unix sources: string, file, pipe, or unrelated process. More details in [arttime wiki: feed keys from anywhere](https://github.com/poetaman/arttime/wiki#feed-keystrokes-from-anywhere).
 - Best for privacy: Unlike commercial apps that connect to internet, track your activity and send/sell your data, arttime runs solely on your computer. It does not connect to internet, does not look at or track your data, and does not send any data outside your computer. Unlike binaries, arttime is a human-readable text file that can always be reviewed.
 - Secure: Unlike most other interactive software projects which rely on multiple 3rd-party packages that are hard to audit, this project relies solely on what comes pre-installed on Unix-style operating systems like macOS/Linux, and no 3rd-party packages. This makes it much more secure compared to other software out there.
 
