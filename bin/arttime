@@ -110,7 +110,7 @@ Description:
     keystrokes ("artlang"). Simplest form of artscript is called "keypoem". 
     A keypoem is a file containing keystrokes that arttime understands.
     Some keypoems come with your installation. For instance, run
-        $ arttime -k welcome_8b
+        $ arttime -k learn.welcome_8b
     to see a welcome keypoem. Keypoems can be used to save time and effort
     needed to change arttime's state, even while arttime is already running.
     They can also be used to create a storyboard-style sequence of art and
@@ -244,7 +244,7 @@ Options:
                 either name of a file/fifo under keypoemdir:
                     keypoemdir="<dir_of_arttime>/../share/arttime/keypoems/"
                 or full path to a keypoem file/fifo. Example values are:
-                welcome_8b, batscovid_5b, pomodoro4_4b, pomodoro4
+                learn.welcome_8b, story.batscovid_8b, timer.pomodoro4learn_8b
 
     --pa <str>  a-character to denote pending part of progress bar
     --pa <str>  b-character to denote complete part of progress bar
@@ -285,9 +285,9 @@ Examples:
         set a 10 second timer, set message under art to "Hello World",
         and toggle help page to show text art (default is a butterfly)
         Note: Don't escape backslash of newline character \\n.
-    $ arttime -k welcome_8b
+    $ arttime -k learn.welcome_8b
         starts arttime in SCRIPT mode. Keystrokes are read from
-        keypoem "welcome_8b" in keypoemdir ('_8b' denotes 8 bytes/second)
+        keypoem "learn.welcome_8b" in keypoemdir ('_8b' denotes 8 bytes/sec)
         till the file ends or user signals interrupt (mostly Ctrl-c),
         and then control is transferred to keyboard
     $ arttime --nolearn -t "Hello World - Butterfly" --ac 2 --style 1
