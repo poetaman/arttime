@@ -17,8 +17,14 @@ zmodload zsh/zutil
 zmodload zsh/datetime
 zmodload zsh/terminfo
 zmodload zsh/system
+zmodload zsh/complist
+autoload -U compinit; compinit
 setopt extendedglob
 setopt globcomplete
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
+#zstyle ':completion:*' menu select
+#zstyle ':completion:*:*:*:*:default' list-colors ${(s.:.)LSCOLORS}
+#zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
 
 # NOTE: enable minute/nonblocking mode if/when its functional,
 # or remove it completely as sample rate is a waste now that
@@ -1665,9 +1671,6 @@ function _zoneselector {
     _files -W /usr/share/zoneinfo
 }
 zstyle ':completion:zoneselector:*:' completer _zoneselector
-
-zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
-autoload -Uz compinit && compinit
 
 function formattimedelta {
     if [[ ! $1 -gt 0 ]]; then
