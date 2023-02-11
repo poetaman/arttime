@@ -321,6 +321,15 @@ esac
 bindir="${0:a:h}"
 artdir="$bindir/../share/arttime/textart"
 
+function trimwhitespace {
+    local var="$*"
+    # remove leading whitespace characters
+    var="${var#"${var%%[![:space:]]*}"}"
+    # remove trailing whitespace characters
+    var="${var%"${var##*[![:space:]]}"}"
+    printf '%s' "$var"
+}
+
 if [[ $machine = "Linux" ]]; then
     datecmd="date"
     dateisgnu="1"
@@ -604,7 +613,7 @@ elif ! [[ $titlecolorarg =~ ^([0-9]|1[0-5])$ ]]; then
 fi
 
 function keyfilefeed {
-    local keyfilepath="$1"
+    local keyfilepath=$(trimwhitespace "$1")
     if [[ -e $bindir/../share/arttime/keypoems/$keyfilepath ]]; then
         keyfilepath=$bindir/../share/arttime/keypoems/$keyfilepath
     elif [[ -e "${keyfilepath/#\~/$HOME}" ]]; then
@@ -1642,6 +1651,7 @@ function zoneselector {
             inputstr="./"
             readstr $inputstr $modestrlocal || break
         fi
+        inputstr=$(trimwhitespace "$inputstr")
     done
     promptstrpost=""
     if [[ $inputstr = "./orig" || $inputstr = "orig" ]]; then
@@ -1739,6 +1749,7 @@ function usr1input_handler {
             fi
             sttyset
             tputset
+            inputstr=$(trimwhitespace "$inputstr")
             if [[ $inputstr = "" ]]; then
                 if [[ $commandkey = "b" ]]; then
                     flipartname=""
@@ -1806,6 +1817,7 @@ function usr1input_handler {
             fi
             sttyset
             tputset
+            artnametemp=$(trimwhitespace "$artnametemp")
             if [[ $artnametemp = "" ]]; then
             elif [[ ! -f "$artdir/$artnametemp" ]]; then
                 printf "${tput_cup00}E: No file found for art: $artnametemp\nPress any key to continue..."
