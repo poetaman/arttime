@@ -18,6 +18,7 @@ zmodload zsh/datetime
 zmodload zsh/terminfo
 zmodload zsh/system
 setopt extendedglob
+setopt globcomplete
 
 # NOTE: enable minute/nonblocking mode if/when its functional,
 # or remove it completely as sample rate is a waste now that
