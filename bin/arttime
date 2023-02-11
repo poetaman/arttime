@@ -18,7 +18,7 @@ zmodload zsh/datetime
 zmodload zsh/terminfo
 zmodload zsh/system
 zmodload zsh/complist
-autoload -U compinit; compinit
+autoload -Uz compinit; compinit
 setopt extendedglob
 setopt globcomplete
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
