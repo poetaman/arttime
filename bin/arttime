@@ -702,7 +702,7 @@ promptstrpost=""
 function readstr {
     inputstr="$1"
     if [[ $streamclosed == "1" ]] && [[ -z $2 ]]; then
-        vared -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
+        vared -M emacs -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
     else
         while read -r -s -k1 -t0 tempttychar && [[ $tempttychar != "p" ]] ; do : ; done
         printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
@@ -1986,7 +1986,7 @@ function usr1input_handler {
                 promptstr="Enter goal ('help' to learn):"
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
-                    vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
+                    vared -M emacs -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
                 else
                     promptstr="$tput_cup00$promptstr"
                     readstr "" $modestr
@@ -2395,7 +2395,7 @@ EOF
                 promptstr="Enter title message ('orig' to reset):"
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
-                    vared -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
+                    vared -M emacs -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
                 else
                     promptstr="$tput_cup00$promptstr"
                     readstr "" $modestr
