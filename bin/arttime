@@ -22,6 +22,13 @@ autoload -Uz compinit; compinit
 setopt extendedglob
 setopt globcomplete
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
+setopt histignorespace
+setopt histignorealldups
+fc -p
+
+bindkey -e
+bindkey "^R" history-incremental-pattern-search-backward
+bindkey "^F" history-incremental-pattern-search-forward
 #zstyle ':completion:*' menu select
 #zstyle ':completion:*:*:*:*:default' list-colors ${(s.:.)LSCOLORS}
 #zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
@@ -702,7 +709,8 @@ promptstrpost=""
 function readstr {
     inputstr="$1"
     if [[ $streamclosed == "1" ]] && [[ -z $2 ]]; then
-        vared -M emacs -t $TTY -p "$promptstr${tput_cnorm} " -c inputstr; retstatus="$?"
+        vared -h -t $TTY -p "$promptstr%{$tput_cnorm%} " -c inputstr; retstatus="$?"
+        ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -s "$inputstr" &>/dev/null
     else
         while read -r -s -k1 -t0 tempttychar && [[ $tempttychar != "p" ]] ; do : ; done
         printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
@@ -1986,7 +1994,8 @@ function usr1input_handler {
                 promptstr="Enter goal ('help' to learn):"
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
-                    vared -M emacs -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
+                    vared -h -t $TTY -i zlelineprompt -p "%{$tput_cup00$tput_el%}$promptstr " -c inputstr; retstatus="$?"
+                    ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -s "$inputstr" &>/dev/null
                 else
                     promptstr="$tput_cup00$promptstr"
                     readstr "" $modestr
@@ -2395,7 +2404,8 @@ EOF
                 promptstr="Enter title message ('orig' to reset):"
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
-                    vared -M emacs -t $TTY -i zlelineprompt -p "$tput_cup00$tput_el$promptstr " -c inputstr; retstatus="$?"
+                    vared -h -t $TTY -i zlelineprompt -p "%{$tput_cup00$tput_el%}$promptstr " -c inputstr; retstatus="$?"
+                    ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -s "$inputstr" &>/dev/null
                 else
                     promptstr="$tput_cup00$promptstr"
                     readstr "" $modestr
