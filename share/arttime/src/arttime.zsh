@@ -1648,7 +1648,24 @@ function keyfileselector {
     local curcontext=keyfileselector:::
     printf "Select a file or fifo to load keystrokes from (examples pre-installed).\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all files.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter file:"
-    readstr "" $modestr
+    local modestrlocal=$modestr
+    readstr "" $modestrlocal || { cd $restoredir; return }
+    local inputstrexpanded=${inputstr/#\~/$HOME}
+    while [[ ! -f $bindir/../share/arttime/keypoems/$inputstr && ! -p $bindir/../share/arttime/keypoems/$inputstr && ! -f $inputstrexpanded && ! -p $inputstrexpanded && ! -z $inputstr ]]; do
+        if [[ -d $inputstrexpanded ]]; then
+            if [[ $inputstr[-1] != "/" ]]; then
+                inputstr=$inputstr'/'
+            fi
+            readstr $inputstr $modestrlocal || break
+        else
+            readstr $inputstr $modestrlocal || break
+        fi
+        inputstr=$(trimwhitespace "$inputstr")
+        if [[ $inputstr == "" ]]; then
+            break
+        fi
+        inputstrexpanded=${inputstr/#\~/$HOME}
+    done
     cd $restoredir
 }
 function _keyfileselector {
