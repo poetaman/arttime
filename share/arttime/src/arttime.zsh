@@ -36,6 +36,7 @@ setopt menucomplete
 setopt histignorespace
 setopt histignorealldups
 setopt alwayslastprompt
+setopt listrowsfirst
 #zstyle ':completion:*:default' list-prompt   '%S%m%s'
 zstyle ':completion:*:default' select-prompt '%S%m%s'
 fc -p
