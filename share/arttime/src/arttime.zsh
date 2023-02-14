@@ -33,12 +33,27 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 setopt nobeep
 setopt menucomplete
 #setopt badpattern
-setopt histignorespace
-setopt histignorealldups
 setopt alwayslastprompt
 setopt listrowsfirst
 #zstyle ':completion:*:default' list-prompt   '%S%m%s'
 zstyle ':completion:*:default' select-prompt '%S%m%s'
+setopt histignorespace
+setopt histignorealldups
+setopt sharehistory
+setopt noincappendhistory
+setopt appendhistory
+statedir=$HOME/.local/state/arttime
+if [[ ! -d  $statedir/hist ]]; then
+    if ! mkdir -p $statedir/hist; then
+        print "E: Could not create $statedir/hist"
+        exit 1
+    fi
+fi
+if [[ ! -w $statedir/hist ]]; then
+    print "E: Directory $statedir/hist is not writable, please change it's write permission before proceeding."
+    exit 1
+fi
+histcmd="fc -pa"
 fc -p
 
 bindkey -e
@@ -727,7 +742,6 @@ function readstr {
     inputstr="$1"
     if [[ $streamclosed == "1" ]] && [[ -z $2 ]]; then
         vared -h -t $TTY -p "$promptstr%{$tput_cnorm%} " -c inputstr; retstatus="$?"
-        ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -s "$inputstr" &>/dev/null
     else
         while read -r -s -k1 -t0 tempttychar && [[ $tempttychar != "p" ]] ; do : ; done
         printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
@@ -1678,15 +1692,15 @@ function zoneselector {
     local restorepwd=$PWD
     cd /usr/share/zoneinfo
     local curcontext=zoneselector:::
-    inputstr="./"
     promptstr="Enter zonename (press tab):"
     if [[ $streamclosed == "1" ]]; then
         promptstrpost=""
     else
         promptstrpost="\n"
-    fi        
+    fi
     printf "Press tab or Ctrl-d key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
     local modestrlocal=$modestr
+    readstr "" $modestrlocal || { promptstrpost=""; cd $restoredir; return }
     while [[ ! -f /usr/share/zoneinfo/$inputstr && ! -z $inputstr && $inputstr != "./orig" && $inputstr != "orig" ]]; do
         if [[ $inputstr =~ ^[./]+$ ]]; then
             inputstr="./"
@@ -1697,22 +1711,21 @@ function zoneselector {
             fi
             readstr $inputstr $modestrlocal || break
         else
-            inputstr="./"
             readstr $inputstr $modestrlocal || break
         fi
         inputstr=$(trimwhitespace "$inputstr")
     done
-    promptstrpost=""
-    if [[ $inputstr = "./orig" || $inputstr = "orig" ]]; then
+    if [[ $inputstr == "./orig" || $inputstr == "orig" ]]; then
         inputstr=$tzlonginit
     fi
-    inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${inputstr:A})
+    inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<"${inputstr:A}")
+    promptstrpost=""
     cd $restorepwd
 }
 function _zoneselector {
     _files -W /usr/share/zoneinfo
 }
-zstyle ':completion:zoneselector:*:' completer _zoneselector
+zstyle ':completion:zoneselector:*:' insert-tab false completer _zoneselector
 
 function formattimedelta {
     if [[ ! $1 -gt 0 ]]; then
@@ -1775,6 +1788,9 @@ function usr1input_handler {
             "y") commandkey="b";;
               *) ;;
         esac
+        local streamclosedinit="0"
+    else
+        local streamclosedinit="1"
     fi
     case "$commandkey" in
         "a"|"b")
@@ -1788,15 +1804,18 @@ function usr1input_handler {
             printf "$tput_smcup"
             printf "$tput_clear$modestr$tput_cup00"
             if [[ $commandkey = "a" ]]; then
+                $(printf $histcmd) $statedir/hist/aart.hist 1000 1000
                 artselector
             else
-                printf "Set b-art, finding art that matches height of a-art ($artname)...\nPress 'Enter' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
+                $(printf $histcmd) $statedir/hist/bart.hist 1000 1000
+                printf "Set b-art, finding art that matches height of a-art ($artname)...\nEnter '-' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
                 artselector2
             fi
             sttyset
             tputset
             inputstr=$(trimwhitespace "$inputstr")
-            if [[ $inputstr = "" ]]; then
+            if [[ $inputstr == "" ]]; then
+            elif [[ $inputstr == "-" ]]; then
                 if [[ $commandkey = "b" ]]; then
                     flipartname=""
                 fi
@@ -1820,6 +1839,9 @@ function usr1input_handler {
                     setartstring
                     readchar 5
                     slurp
+                else
+                    helpactive="0"
+                    [[ $streamclosedinit == "1" ]] && ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 fi
             else
                 if [[ $inputstr = "" || ! -f "$artdir/$inputstr" ]]; then
@@ -1830,6 +1852,7 @@ function usr1input_handler {
                     fi
                 else
                     helpactive="0"
+                    [[ $streamclosedinit == "1" ]] && ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 fi
             fi
             #printart
@@ -1852,8 +1875,10 @@ function usr1input_handler {
             tputreset
             sttyresetext
             if [[ $commandkey = "x" ]]; then
+                $(printf $histcmd) $statedir/hist/aart.hist 1000 1000
                 artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor  --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
             else
+                $(printf $histcmd) $statedir/hist/bart.hist 1000 1000
                 local restoredir=$PWD
                 cd $artdir
                 local tmpaart=$(getaart)
@@ -1895,6 +1920,7 @@ function usr1input_handler {
                     fi
                 else
                     helpactive="0"
+                    [[ $streamclosedinit == "1" ]] && ! [[ $artnametemp == "" || $artnametemp =~ ^[[:space:]]*$ ]] && print -rs -- ${artnametemp} &>/dev/null
                 fi
             fi
             #printart
@@ -2028,8 +2054,9 @@ function usr1input_handler {
                 promptstr="Enter goal ('help' to learn):"
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
+                    $(printf $histcmd) $statedir/hist/goal.hist 1000 1000
                     vared -h -t $TTY -i zlelineprompt -p "%{$tput_cup00$tput_el%}$promptstr " -c inputstr; retstatus="$?"
-                    ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -s "$inputstr" &>/dev/null
+                    ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 else
                     promptstr="$tput_cup00$promptstr"
                     readstr "" $modestr
@@ -2370,6 +2397,7 @@ EOF
                 sttyresetint
                 printf "$tput_smcup"
                 printf "$tput_clear$modestr$tput_cup00"
+                $(printf $histcmd) $statedir/hist/keypoem.hist 1000 1000
                 keyfileselector
                 if [[ $inputstr != "" ]]; then
                     keyfilefeed "$inputstr"
@@ -2383,6 +2411,7 @@ EOF
                         readchar 3
                         slurp
                     else
+                        [[ $streamclosedinit == "1" ]] && ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                         streamclosed="0"
                         setmodestr
                     fi
@@ -2438,8 +2467,9 @@ EOF
                 promptstr="Enter title message ('orig' to reset):"
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
+                    $(printf $histcmd) $statedir/hist/message.hist 1000 1000
                     vared -h -t $TTY -i zlelineprompt -p "%{$tput_cup00$tput_el%}$promptstr " -c inputstr; retstatus="$?"
-                    ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -s "$inputstr" &>/dev/null
+                    ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 else
                     promptstr="$tput_cup00$promptstr"
                     readstr "" $modestr
@@ -2528,13 +2558,14 @@ EOF
             ;;
         "z")
             sttyresetint
+            $(printf $histcmd) $statedir/hist/zone.hist 1000 1000
             printf "$tput_smcup"
-            echoti cnorm
             printf "$tput_clear$modestr$tput_cup00"
             zoneselector
             sttyset
             tputset
             if [[ ! -z $inputstr ]]; then
+                [[ $streamclosedinit == "1" ]] && ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 TZ=$inputstr
                 notetimezone
                 tzlongcurrent="$tzlong"
