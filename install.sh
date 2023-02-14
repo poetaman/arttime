@@ -105,6 +105,7 @@ fi
 bindir="$installdir/bin"
 artdir="$installdir/share/arttime/textart"
 keypoemdir="$installdir/share/arttime/keypoems"
+srcdir="$installdir/share/arttime/src"
 
 function checkdir {
     if [[ -d $1 ]]; then
@@ -147,11 +148,13 @@ installdircode=$(checkdir $installdir)
 bindircode=$(checkdir $bindir)
 artdircode=$(checkdir $artdir)
 keypoemdircode=$(checkdir $keypoemdir)
+srcdircode=$(checkdir $srcdir)
 
 printdirerror $installdircode $installdir
 printdirerror $bindircode $bindir
 printdirerror $artdircode $artdir
 printdirerror $keypoemdircode $keypoemdir
+printdirerror $srcdircode $srcdir
 
 if [[ ! ${#direrrorarray[@]} -eq 0 ]]; then
     for i ("$direrrorarray[@]"); do
@@ -168,6 +171,11 @@ echo "Copying executables under $bindir"
 cd $installerdir/bin
 cp arttime $bindir/arttime
 cp artprint $bindir/artprint
+
+# Copy sources
+echo "Copying sources under $srcdir"
+cd $installerdir/share/arttime/src
+cp * $srcdir/
 
 # Copy keypoems
 echo "Copying keypoems under $keypoemdir"
