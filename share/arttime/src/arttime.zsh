@@ -1812,7 +1812,6 @@ function usr1input_handler {
                 cd $artdir
                 local aartheight=$(wc -l "${artname}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]][[:space:]]*.*$/\1/p')
                 bartarray=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
-                cd $restoredir
                 if [[ ${#bartarray[@]} -gt 1 ]]; then
                     sttyresetint
                     printf "$tput_smcup"
@@ -1826,6 +1825,7 @@ function usr1input_handler {
                     readchar 2
                     slurp
                 fi
+                cd $restoredir
                 bartarray=()
             fi
             inputstr=$(trimwhitespace "$inputstr")
