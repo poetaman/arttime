@@ -133,7 +133,8 @@ docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
   apt update
   apt install -y curl less
   curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/8487de3cf4cf4a7feff5d3a0d97defad95164eb3/arttime_online_installer.sh | TERM=xterm-256color zsh
-  TERM=xterm-256color ~/.local/bin/arttime;'
+  TERM=xterm-256color ~/.local/bin/arttime
+  echo "Check more at https://github.com/poetaman/arttime"'
 ```
 
 # Troubleshooting
