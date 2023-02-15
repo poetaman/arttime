@@ -801,13 +801,13 @@ function readchar {
                     trap "tstpdone=1" TSTP
                     trap "contdone=1" CONT
                     tstpdone="0"
-                    kill -TSTP -$$
+                    kill -TSTP 0 &>/dev/null
                     while [[ $tstpdone == "0" ]]; do zselect -t 10; done
                     unset tstpdone
                     while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                     printf "$tput_sc$modestr$tput_rc"
                     contdone="0"
-                    kill -CONT -$$
+                    kill -CONT 0 &>/dev/null
                     while [[ $contdone == "0" ]]; do zselect -t 10; done
                     unset contdone
                     trap "trapstop_blocking" TSTP
@@ -818,7 +818,7 @@ function readchar {
             *)
                 trap "intdone=1" INT
                 intdone="0"
-                kill -s INT -$$ &>/dev/null
+                kill -s INT 0 &>/dev/null
                 while [[ $intdone == "0" ]]; do zselect -t 10; done
                 unset intdone
                 while read -r -s -k1 -t0 inputchar ; do : ; done
@@ -2438,7 +2438,7 @@ EOF
                 if askforconfirmation "exit SCRIPT mode"; then
                     trap "intdone=1" INT
                     intdone="0"
-                    kill -s INT -$$ &>/dev/null
+                    kill -s INT 0 &>/dev/null
                     while [[ $intdone == "0" ]]; do zselect -t 10; done
                     unset intdone
                     while read -r -s -k1 -t0 inputchar ; do : ; done
@@ -2696,13 +2696,13 @@ function arttime_blocking {
                         trap "tstpdone=1" TSTP
                         trap "contdone=1" CONT
                         tstpdone="0"
-                        kill -TSTP -$$
+                        kill -TSTP 0 &>/dev/null
                         while [[ $tstpdone == "0" ]]; do zselect -t 10; done
                         unset tstpdone
                         while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                         printf "$tput_sc$modestr$tput_rc"
                         contdone="0"
-                        kill -CONT -$$
+                        kill -CONT 0 &>/dev/null
                         while [[ $contdone == "0" ]]; do zselect -t 10; done
                         unset contdone
                         trap "trapstop_blocking" TSTP
@@ -2713,7 +2713,7 @@ function arttime_blocking {
                 *)
                     trap "intdone=1" INT
                     intdone="0"
-                    kill -s INT -$$ &>/dev/null
+                    kill -s INT 0 &>/dev/null
                     while [[ $intdone == "0" ]]; do zselect -t 10; done
                     unset intdone
                     while read -r -s -k1 -t0 inputchar ; do : ; done
