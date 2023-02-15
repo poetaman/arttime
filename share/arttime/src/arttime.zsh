@@ -1633,27 +1633,25 @@ function _artselector {
 zstyle ':completion:artselector:*:' insert-tab false completer _artselector
 #zstyle ':completion:::*:default' completer _artselector menu no select
 
+typeset -a bartarray
 function artselector2 {
-    local restoredir=$PWD
-    cd $artdir
-    local tmpaart=$(getaart)
-    local aartheight=$(wc -l "${tmpaart}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]][[:space:]]*.*$/\1/p')
-    artnametemp=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
     local curcontext=artselector2:::
+    printf "Set b-art. Finding art that matches height of a-art ($artname)...\nEnter '-' to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives (based on height):\n";
     if command -v column &>/dev/null; then
-        echo $artnametemp  | tr ' ' '\n' | column -c$(echoti cols)
+        echo $bartarray  | tr ' ' '\n' | column -c$(echoti cols)
         printf '\n'
     else
         echoti smam
-        printf '%s  ' $artnametemp
+        printf '%s  ' $bartarray
         printf '\n\n'
     fi
     promptstr="Enter artname:"
+    compdef _artselector2 -vared-
     readstr "" $modestr
-    cd $restoredir
+    compdef -d _artselector2 -vared-
 }
 function _artselector2 {
-    _describe 'possible b-art' artnametemp
+    _describe 'possible b-art' bartarray
 }
 zstyle ':completion:artselector2:*:' insert-tab false completer _artselector2
 
@@ -1800,19 +1798,36 @@ function usr1input_handler {
                 artname="$restoreartname"
                 flipartname="$restoreflipartname"
             fi
-            sttyresetint
-            printf "$tput_smcup"
-            printf "$tput_clear$modestr$tput_cup00"
             if [[ $commandkey = "a" ]]; then
+                sttyresetint
+                printf "$tput_smcup"
+                printf "$tput_clear$modestr$tput_cup00"
                 $(printf $histcmd) $statedir/hist/aart.hist 1000 1000
                 artselector
+                sttyset
+                tputset
             else
                 $(printf $histcmd) $statedir/hist/bart.hist 1000 1000
-                printf "Set b-art, finding art that matches height of a-art ($artname)...\nEnter '-' without typing anything to [31mCLEAR[0m b-art.\nPress a letter, followed by tab key to see possible artnames.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n\nAlternatives:\n";
-                artselector2
+                local restoredir=$PWD
+                cd $artdir
+                local aartheight=$(wc -l "${artname}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]][[:space:]]*.*$/\1/p')
+                bartarray=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
+                cd $restoredir
+                if [[ ${#bartarray[@]} -gt 1 ]]; then
+                    sttyresetint
+                    printf "$tput_smcup"
+                    printf "$tput_clear$modestr$tput_cup00"
+                    artselector2
+                    sttyset
+                    tputset
+                else
+                    printf "${tput_cup00}No other art matches height of a-art '$artname'"
+                    inputstr=""
+                    readchar 2
+                    slurp
+                fi
+                bartarray=()
             fi
-            sttyset
-            tputset
             inputstr=$(trimwhitespace "$inputstr")
             if [[ $inputstr == "" ]]; then
             elif [[ $inputstr == "-" ]]; then
