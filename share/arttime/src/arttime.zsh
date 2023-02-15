@@ -801,13 +801,13 @@ function readchar {
                     trap "tstpdone=1" TSTP
                     trap "contdone=1" CONT
                     tstpdone="0"
-                    kill -TSTP -$$ &>/dev/null
+                    kill -TSTP 0 &>/dev/null
                     while [[ $tstpdone == "0" ]]; do zselect -t 10; done
                     unset tstpdone
                     while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                     printf "$tput_sc$modestr$tput_rc"
                     contdone="0"
-                    kill -CONT -$$ &>/dev/null
+                    kill -CONT 0 &>/dev/null
                     while [[ $contdone == "0" ]]; do zselect -t 10; done
                     unset contdone
                     trap "trapstop_blocking" TSTP
@@ -2696,13 +2696,13 @@ function arttime_blocking {
                         trap "tstpdone=1" TSTP
                         trap "contdone=1" CONT
                         tstpdone="0"
-                        kill -TSTP -$$ &>/dev/null
+                        kill -TSTP 0 &>/dev/null
                         while [[ $tstpdone == "0" ]]; do zselect -t 10; done
                         unset tstpdone
                         while [[ $tempttychar != "p" ]]; do read -r -s -k1 tempttychar; done
                         printf "$tput_sc$modestr$tput_rc"
                         contdone="0"
-                        kill -CONT -$$ &>/dev/null
+                        kill -CONT 0 &>/dev/null
                         while [[ $contdone == "0" ]]; do zselect -t 10; done
                         unset contdone
                         trap "trapstop_blocking" TSTP
