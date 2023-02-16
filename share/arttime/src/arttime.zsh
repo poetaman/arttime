@@ -59,6 +59,14 @@ fc -p
 bindkey -e
 bindkey "^R" history-incremental-pattern-search-backward
 bindkey "^F" history-incremental-pattern-search-forward
+autoload -Uz history-beginning-search-menu
+zle -N history-beginning-search-menu
+bindkey '^L' history-beginning-search-menu
+autoload -Uz history-pattern-search
+zle -N history-pattern-search-backward history-pattern-search
+zle -N history-pattern-search-forward history-pattern-search
+bindkey '^K' history-pattern-search-backward
+bindkey '^J' history-pattern-search-forward
 zstyle ':completion:*' menu select
 bindkey -M menuselect '^M' .accept-line
 #setopt AUTO_LIST
@@ -1624,14 +1632,22 @@ function artselector {
     local curcontext=artselector:::
     printf "Select a-art. Press 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all possible artnames.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter artname:"
+    compdef _artselector -vared-
     readstr "" $modestr
+    compdef -d _artselector -vared-
     cd $restoredir
 }
 function _artselector {
-    _files -W $artdir
+    case $CURRENT in
+        1)
+            _files -W $artdir
+            ;;
+        *)
+            ;;
+    esac
 }
-zstyle ':completion:artselector:*:' insert-tab false completer _artselector
-#zstyle ':completion:::*:default' completer _artselector menu no select
+zstyle ':completion:artselector:*:' insert-tab false
+#zstyle ':completion:::*:default' menu no select
 
 typeset -a bartarray
 function artselector2 {
@@ -1651,9 +1667,15 @@ function artselector2 {
     compdef -d _artselector2 -vared-
 }
 function _artselector2 {
-    _describe 'possible b-art' bartarray
+    case $CURRENT in
+        1)
+            _describe 'possible b-art' bartarray
+            ;;
+        *)
+            ;;
+    esac
 }
-zstyle ':completion:artselector2:*:' insert-tab false completer _artselector2
+zstyle ':completion:artselector2:*:' insert-tab false
 
 function keyfileselector {
     local restoredir=$PWD
@@ -1662,7 +1684,8 @@ function keyfileselector {
     printf "Select a file or fifo to load keystrokes from (examples pre-installed).\nPress 'Enter' without typing anything to cancel.\nPress tab for completion or Ctrl-d to see all files.\nUse shell path semantics (like '~/') to get file from non-default location.\nAnswer statements ending in '?' with pressing 'y' or 'n'.\n";
     promptstr="Enter file:"
     local modestrlocal=$modestr
-    readstr "" $modestrlocal || { cd $restoredir; return }
+    compdef _keyfileselector -vared-
+    readstr "" $modestrlocal || { compdef -d _keyfileselector -vared-; cd $restoredir; return }
     local inputstrexpanded=${inputstr/#\~/$HOME}
     while [[ ! -f $bindir/../share/arttime/keypoems/$inputstr && ! -p $bindir/../share/arttime/keypoems/$inputstr && ! -f $inputstrexpanded && ! -p $inputstrexpanded && ! -z $inputstr ]]; do
         if [[ -d $inputstrexpanded ]]; then
@@ -1679,12 +1702,19 @@ function keyfileselector {
         fi
         inputstrexpanded=${inputstr/#\~/$HOME}
     done
+    compdef -d _keyfileselector -vared-
     cd $restoredir
 }
 function _keyfileselector {
-    _files -W $bindir/../share/arttime/keypoems/
+    case $CURRENT in
+        1)
+            _files -W $bindir/../share/arttime/keypoems/
+            ;;
+        *)
+            ;;
+    esac
 }
-zstyle ':completion:keyfileselector:*:' insert-tab false completer _keyfileselector
+zstyle ':completion:keyfileselector:*:' insert-tab false
 
 function zoneselector {
     local restorepwd=$PWD
@@ -1698,7 +1728,8 @@ function zoneselector {
     fi
     printf "Press tab or Ctrl-d key to see possible zonename completions.\nExamples: US/Hawaii, America/Indiana/Knox, Asia/Kolkata, Europe/Athens\nAnswer statements ending in '?' with pressing 'y' or 'n'.\nEnter 'orig' to reset timezone\n";
     local modestrlocal=$modestr
-    readstr "" $modestrlocal || { promptstrpost=""; cd $restoredir; return }
+    compdef _zoneselector -vared-
+    readstr "" $modestrlocal || { compdef -d _zoneselector -vared-; promptstrpost=""; cd $restoredir; return }
     while [[ ! -f /usr/share/zoneinfo/$inputstr && ! -z $inputstr && $inputstr != "./orig" && $inputstr != "orig" ]]; do
         if [[ $inputstr =~ ^[./]+$ ]]; then
             inputstr="./"
@@ -1718,12 +1749,24 @@ function zoneselector {
     fi
     inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<"${inputstr:A}")
     promptstrpost=""
+    compdef -d _zoneselector -vared-
     cd $restorepwd
 }
 function _zoneselector {
-    _files -W /usr/share/zoneinfo
+    case $CURRENT in
+        1)
+            _files -W /usr/share/zoneinfo/
+            ;;
+        *)
+            ;;
+    esac
 }
-zstyle ':completion:zoneselector:*:' insert-tab false completer _zoneselector
+zstyle ':completion:zoneselector:*:' insert-tab false
+
+function _emptyselector {
+    return
+}
+zstyle ':completion:emptyselector:*:' insert-tab true
 
 function formattimedelta {
     if [[ ! $1 -gt 0 ]]; then
@@ -2070,7 +2113,10 @@ function usr1input_handler {
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
                     $(printf $histcmd) $statedir/hist/goal.hist 1000 1000
+                    local curcontext=emptyselector:::
+                    compdef _emptyselector -vared-
                     vared -h -t $TTY -i zlelineprompt -p "%{$tput_cup00$tput_el%}$promptstr " -c inputstr; retstatus="$?"
+                    compdef -d _emptyselector -vared-
                     ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 else
                     promptstr="$tput_cup00$promptstr"
@@ -2483,7 +2529,10 @@ EOF
                 if [[ $streamclosed == "1" ]]; then
                     echoti cup $LINES 0
                     $(printf $histcmd) $statedir/hist/message.hist 1000 1000
+                    local curcontext=emptyselector:::
+                    compdef _emptyselector -vared-
                     vared -h -t $TTY -i zlelineprompt -p "%{$tput_cup00$tput_el%}$promptstr " -c inputstr; retstatus="$?"
+                    compdef -d _emptyselector -vared-
                     ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 else
                     promptstr="$tput_cup00$promptstr"
