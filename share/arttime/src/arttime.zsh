@@ -281,13 +281,13 @@ Options:
     --hours     start with 12 or 24 hour format. Value passed must be
                 either 24 or 12 (default: 12)
 
-    --ac <num>  art color*, value between [1,15]
-    --tc <num>  title color*, value between [1,15]
+    --ac <num>  art color*, value between 0-15, default 1
+    --tc <num>  title color*, value between 0-15, default 2
     --theme <name>
                 when given it overrides above color options [light,dark]
 
     --style <num>
-                process title and subtitle strings to certain "styles"
+                style for title message and progressbar strings
                 For instance, value of 0 (--style 0) uses regular underline
                 value of 1 (--style 1) uses curly underlines, among other
                 things. Not all terminal emulators support curly underlines.
@@ -300,11 +300,11 @@ Options:
                 or full path to a keypoem file/fifo. Example values are:
                 learn.welcome_8b, story.batscovid_8b, timer.pomodoro4learn_8b
 
-    --pa <str>  a-character to denote pending part of progress bar
-    --pa <str>  b-character to denote complete part of progress bar
+    --pa <str>  char/str to denote pending part of progress bar
+    --pb <str>  char/str to denote complete part of progress bar
     --pl <num>  progress bar length
-                Note: progressbar a/b "character" can be a multi-character
-                string, though both a/b "characters" should be same length.
+                Note: progressbar pa/pb strings can be a multi character
+                long, though both pa/pb strings should be of same length.
 
     --nolearn   By default arttime displays a keybinding help/learn art
                 page upon launch instead of showing some beautiful art.
