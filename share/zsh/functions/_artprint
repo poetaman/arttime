@@ -56,11 +56,11 @@ _artprint() {
                 '15:bright white'
             )
             if [[ $prevword == "--ac" ]]; then
-                _describe "art color" cgacolors
+                _describe "art color" cgacolors -o nosort
             elif [[ $prevword == "--tc" ]]; then
-                _describe "title color" cgacolors
+                _describe "title color" cgacolors -o nosort
             else
-                _describe "subtitle color" cgacolors
+                _describe "subtitle color" cgacolors -o nosort
             fi
             ;;
         "--theme")
