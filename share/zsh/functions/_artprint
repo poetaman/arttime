@@ -1,0 +1,92 @@
+#compdef artprint
+
+_artprint() {
+    local bindir=$(command -v artprint)
+    bindir=${bindir:a:h}
+    local -a allopts
+    allopts=(
+        '-a:name of art file (default:trex)'
+        '-t:title message under art (default:first line of art file)'
+        '-s:subtitle message under art (default:none)'
+        '--random:set randomly selected art [all|tarot|notarot]'
+        '--ac:art color, value between 0-15, default 1 (red)'
+        '--tc:title color, value between 0-15, default 2 (green)'
+        '--sc:subtitle color, value between 0-15, default 4 (blue)'
+        '--theme:prebuilt themes [light,dark], default dark'
+        '--height:height of output (default: tty height)'
+        '--width:width of output (default: tty width)'
+        '--style:prebuilt styles for title/subtitle strings, default:0'
+        '--version:print version number of arttime and exit'
+        '-h:print artprint help and exit'
+        '--help:print artprint help and exit'
+    )
+    if [[ $words[-1] =~ ^-.*$ ]]; then
+        _describe 'options' allopts
+        return
+    fi
+    local prevword="$words[-2]"
+    case $prevword in
+        "-a")
+            _files -W $bindir/../share/arttime/textart/
+            echo "$((CURRENT-1)) is -a" >>~/trap.log
+            ;;
+        "--random")
+            local -a randomopts
+            randomopts=(all tarot notarot)
+            _describe "hour format" randomopts
+            ;;
+        "--ac"|"--tc"|"--sc")
+            local -a cgacolors
+            cgacolors=(
+                '0:black'
+                '1:red'
+                '2:green'
+                '3:yellow'
+                '4:blue'
+                '5:magenta'
+                '6:cyan'
+                '7:white'
+                '8:bright black'
+                '9:bright red'
+                '10:bright green'
+                '11:bright yellow'
+                '12:bright blue'
+                '13:bright magenta'
+                '14:bright cyan'
+                '15:bright white'
+            )
+            if [[ $prevword == "--ac" ]]; then
+                _describe "art color" cgacolors
+            elif [[ $prevword == "--tc" ]]; then
+                _describe "title color" cgacolors
+            else
+                _describe "subtitle color" cgacolors
+            fi
+            ;;
+        "--theme")
+            local -a themes
+            themes=(
+                'light: no use of colors unless overridden by --ac/--tc/--sc'
+                'dark: default colors: red (1) for art, green (2) for title, blue (4) for subtitle'
+            )
+            _describe "theme (more will be added in future)" themes
+            ;;
+        "--style")
+            local -a styles
+            styles=(
+                '0: ASCII terminal friendly'
+                '1: Unicode quotes (might change in future)'
+            )
+            _describe "theme (more will be added in future)" styles
+            ;;
+        "-t"|"-s"|"-h"|"--help"|"--width"|"--height"|"--version")
+            return
+            ;;
+           *)
+            #show all options
+            _describe 'options' allopts
+            ;;
+    esac
+}
+
+compdef _artprint artprint

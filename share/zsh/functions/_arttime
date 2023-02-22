@@ -1,0 +1,147 @@
+#compdef arttime
+
+_arttime() {
+    local unamestr="$(uname -s)"
+    local machine=""
+    case "${unamestr}" in
+        Linux*)     machine=Linux;;
+        Darwin*)    machine=Darwin;;
+        CYGWIN*)    machine=Cygwin;;
+        MINGW*)     machine=MinGw;;
+        *BSD)       machine=BSD;;
+        *)          machine="UNKNOWN:${unamestr}"
+    esac
+    if [[ $machine = "Linux" ]]; then
+        local dateisgnu="1"
+    else
+        if command -v gdate &> /dev/null; then
+            local dateisgnu="1"
+        else
+            if date -d '0' '+%s' &>/dev/null; then
+                local dateisgnu="1"
+            else
+                local dateisgnu="0"
+            fi
+        fi
+    fi
+    if [[ $dateisgnu == "1" ]]; then
+        local gnuex=", 10AM, '4:30PM IST', 'next monday 1PM', etc"
+    else
+        local gnuex=""
+    fi
+    local bindir=$(command -v arttime)
+    bindir=${bindir:a:h}
+    local -a allopts
+    allopts=(
+        '-a:name of a art file (default:butterfly)'
+        '-b:name of b art file (default:none)'
+        "-g:goal time (example: 1h30m${gnuex})"
+        '-t:message under art (default:first line of art file)'
+        '-k:name or path to a file or fifo to read keystrokes from'
+        '--keypoem:name or path to a file or fifo to read keystrokes from'
+        '--hours:start with 12 or 24 hour format (default:12)'
+        '--random:set randomly selected art <all|tarot|notarot>'
+        '--nolearn:do not show help page upon launch'
+        '--ac:art color, value between 0-15, default 1 (red)'
+        '--tc:title color, value between 0-15, default 2 (green)'
+        '--theme:prebuilt themes [light,dark], default dark'
+        '--style:prebuilt styles for title and progressbar [0,1], default:0'
+        '--pa:char/str to denote pending part of progress bar'
+        '--pb:char/str to denote complete part of progress bar'
+        '--pl:progressbar length (integer) in chunks of pa/pb strings'
+        '--version:print version number of arttime and exit'
+        '-h:print arttime help and exit'
+        '--help:print arttime help and exit'
+    )
+    if [[ $words[-1] =~ ^-.*$ ]]; then
+        _describe 'options' allopts
+        return
+    fi
+    local prevword="$words[-2]"
+    case $prevword in
+        "-a")
+            _files -W $bindir/../share/arttime/textart/
+            echo "$((CURRENT-1)) is -a" >>~/trap.log
+            ;;
+        "-b")
+            local aindex=$words[(I)-a]
+            if (((aindex+1)<CURRENT && aindex != 0)); then
+                local artname=$words[$((aindex+1))]
+            else
+                return
+            fi
+            local restoredir=$PWD
+            cd $bindir/../share/arttime/textart
+            local aartheight=$(wc -l "${artname}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]][[:space:]]*.*$/\1/p')
+            bartarray=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
+            cd $restoredir
+            _describe 'possible b-art' bartarray
+            echo "$((CURRENT-1)) is -b" >>~/trap.log
+            ;;
+        "-k"|"--keypoem")
+            _files -W $bindir/../share/arttime/keypoems/
+            echo "$((CURRENT-1)) is -k" >>~/trap.log
+            ;;
+        "--hours")
+            local -a hoursopts
+            hoursopts=(12 24)
+            _describe "hour format" hoursopts
+            ;;
+        "--random")
+            local -a randomopts
+            randomopts=(all tarot notarot)
+            _describe "hour format" randomopts
+            ;;
+        "--ac"|"--tc")
+            local -a cgacolors
+            cgacolors=(
+                '0:black'
+                '1:red'
+                '2:green'
+                '3:yellow'
+                '4:blue'
+                '5:magenta'
+                '6:cyan'
+                '7:white'
+                '8:bright black'
+                '9:bright red'
+                '10:bright green'
+                '11:bright yellow'
+                '12:bright blue'
+                '13:bright magenta'
+                '14:bright cyan'
+                '15:bright white'
+            )
+            if [[ $prevword == "--ac" ]]; then
+                _describe "art color" cgacolors
+            else
+                _describe "title color" cgacolors
+            fi
+            ;;
+        "--theme")
+            local -a themes
+            themes=(
+                'light: black: art color, red: delta time, blue: time strings'
+                'dark: default and --ac/--tc override colors in it'
+            )
+            _describe "theme (more will be added in future)" themes
+            ;;
+        "--style")
+            local -a styles
+            styles=(
+                '0: ASCII terminal friendly progressbar, underline, quotes'
+                '1: Unicode progressbar and quotes, curly underline (if terminal supports)'
+            )
+            _describe "theme (more will be added in future)" styles
+            ;;
+        "-t"|"-g"|"--pl"|"--pa"|"--pb"|"-h"|"--help"|"--version")
+            return
+            ;;
+           *)
+            #show all options
+            _describe 'options' allopts
+            ;;
+    esac
+}
+
+compdef _arttime arttime
