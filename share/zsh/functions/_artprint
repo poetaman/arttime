@@ -1,14 +1,5 @@
 #compdef artprint
 
-# NOTE: Copy this file in an appropriate location in one of the directories
-# in your shell variable $fpath and run compinit again. At the moment
-# artprint installer does not put this automatically as the user's zsh
-# completion directory can vary across frameworks...
-#       $ cp _arttime /some/dir/in/fpath
-#       $ cp _artprint /some/dir/in/fpath
-#       $ rm -f ~/.zcompdump
-#       $ compinit
-
 _artprint() {
     local bindir=$(command -v artprint)
     bindir=${bindir:a:h}
@@ -99,4 +90,3 @@ _artprint() {
 }
 
 compdef _artprint artprint
-
