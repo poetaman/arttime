@@ -26,6 +26,7 @@ $(printf "$zparseoptscmd") \
     -global=global_arg_array \
     p:=prefix_arg_array \
     -prefix:=prefix_arg_array \
+    -zcompdir:=zcompdir_arg_array \
     h=help_arg_array \
     -help=help_arg_array \
     || return
@@ -41,6 +42,7 @@ local_arg="$local_arg_array[-1]"
 global_arg="$global_arg_array[-1]"
 prefix_arg="$prefix_arg_array[-1]"
 help_arg="$help_arg_array[-1]"
+zcompdir_arg="$zcompdir_arg_array[-1]"
 machine="$(uname -s)"
 
 function printhelp {
@@ -69,6 +71,15 @@ Options:
                         
     -p --prefix PREFIX  Install arttime executables in PREFIX/bin
                         and art files in PREFIX/share/arttime/textart
+
+    -zcompdir DIRECTORY Install arttime's zsh completions in DIRECTORY/
+                        instead of default ~/.local/share/zsh/functions/
+                        If passed - then don't install completions.
+                        Note: Make sure to append that path to your zshrc's
+                        fpath array before deleting completion caches and
+                        calling compinit again. If you are using a zsh plugin
+                        system, check what is the best place to add to fpath
+                        (mostly in your .zshrc before invoking plugin manager)
 
     -h --help           Print this help string for arttime installer, and exit
 EOF
@@ -106,6 +117,13 @@ bindir="$installdir/bin"
 artdir="$installdir/share/arttime/textart"
 keypoemdir="$installdir/share/arttime/keypoems"
 srcdir="$installdir/share/arttime/src"
+if [[ -z $zcompdir_arg ]]; then
+    zcompdir="$HOME/.local/share/zsh/functions"
+elif [[ $zcompdir_arg == "-" ]]; then
+    zcompdir=""
+else
+    zcompdir="$zcompdir_arg"
+fi
 
 function checkdir {
     if [[ -d $1 ]]; then
@@ -149,12 +167,14 @@ bindircode=$(checkdir $bindir)
 artdircode=$(checkdir $artdir)
 keypoemdircode=$(checkdir $keypoemdir)
 srcdircode=$(checkdir $srcdir)
+[[ ! -z $zcompdir ]] && zcompdircode=$(checkdir $zcompdir)
 
 printdirerror $installdircode $installdir
 printdirerror $bindircode $bindir
 printdirerror $artdircode $artdir
 printdirerror $keypoemdircode $keypoemdir
 printdirerror $srcdircode $srcdir
+[[ ! -z $zcompdir ]] && printdirerror $zcompdircode $zcompdir
 
 if [[ ! ${#direrrorarray[@]} -eq 0 ]]; then
     for i ("$direrrorarray[@]"); do
@@ -182,9 +202,17 @@ echo "Copying keypoems under $keypoemdir"
 cd $installerdir/share/arttime/keypoems
 cp * $keypoemdir/
 
+if [[ ! -z $zcompdir ]]; then
+    # Copy zsh completion files
+    echo "Copying zsh completion files under $zcompdir"
+    cd $installerdir/share/zsh/functions
+    cp * $zcompdir/
+fi
+
 # Copy art files
 echo "Copying artfiles under $artdir"
 cd $installerdir/share/arttime/textart
+
 
 artfilearray=()
 artfilearray=(*(.))
@@ -213,6 +241,9 @@ for ((i = 1; i <= $artfilearraysize; i++)); do
 done
 printf "\n"
 
+if [[ ! -z $zcompdir && $fpath[(I)$zcompdir] -eq 0 ]]; then
+    echo "[4mNote[0m: If you want zsh shell completion for arttime, add\n         $zcompdir\n      to your fpath, remove completion cache, and rerun compinit"
+fi
 if ! command -v less &>/dev/null; then
     echo "[4mDEPENDS[0m: Command 'less' not found, arttime will default to 'more'.\n         Though installing 'less' is recommended for better experience."
 fi
