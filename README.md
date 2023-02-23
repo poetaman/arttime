@@ -79,7 +79,11 @@ Much good ascii art was created during web 1.0, but the artform declined after t
 6. Multiple timers, repeating time management program like [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique). a) From the commandline, run: ``arttime --nolearn -a magic -b magic2 -g "25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop2"`` or b) From within application, run: ``arttime --nolearn -a magic -b magic2``, then press ``g`` and enter ``25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop2``. Change ``loop2`` to ``loop4`` or ``sprint4`` for approximately 10 hour work day. Progressbar shows that we are 20% done with our program.
 <img width="1015" alt="Screen Shot 2022-07-05 at 10 01 43 PM" src="https://user-images.githubusercontent.com/71736629/177472467-34c93118-65f3-434a-bbe2-306fe1e5e4ac.png">
 
-7. A 24-bit color art example ``$ arttime --nolearn -a obama2 -t "Yes we can, yes we can drink better teas"``.  Note: terminal emulator must support 24-bit RGB colors.
+7. Expressive timers: The following GIF shows some preinstalled expressive timers. Insipired from [pomodoro](https://en.wikipedia.org/wiki/Pomodoro_Technique) (tomato) technique, they are named after other fruits. It's very simple to create your own expressive timers or time management programs. Start arttime, press ``k``, type ``t`` followed by ``Tab`` to see all the preinstalled timers.
+
+![arttime_expressivetimers5](https://user-images.githubusercontent.com/71736629/220801403-027556fa-00ba-44ac-bbd5-977a678c8aba.gif)
+
+8. A 24-bit color art example ``$ arttime --nolearn -a obama2 -t "Yes we can, yes we can drink better teas"``.  Note: terminal emulator must support 24-bit RGB colors.
 <img width="1019" alt="Screen Shot 2022-05-22 at 12 14 22 AM" src="https://user-images.githubusercontent.com/71736629/169683524-a63a5a9c-aa66-4ecd-a036-97b8bfa0f243.png">
 
 9. Random art selection. ``$ arttime --nolearn`` then press and hold ``j`` for a few seconds. After some time arttime will settle on some randomly selected art. Press ``y`` to select it, or ``c`` to cancel. Click on mp4 video below to play it (Note: following video playback works in Safari on macOS, but for some reason not in Safari on iPhone 8, perhaps because of a github.com bug?).
