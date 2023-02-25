@@ -33,6 +33,7 @@ Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a
   - Show deltas in time which are hard to track: 1) time since arttime started, 2) time pending for upcoming timer (press ``i`` to see all timers), 3) time passed since last timer expired.
   - Interactively switch time zones.
   - Fully configurable text-based progress bar shows what percentage of the timer is complete/pending
+  - History saves last 1000 timers/time management programs
 - Native desktop notifications for timer, notification identifies the instance of arttime it came from
 - Provide users with 1 line of text under art to share their mind, like on a thought board
 - Support animated text art: flip-flop between two related ascii arts every second
@@ -45,6 +46,7 @@ Artime is rooted in Unix philosophy. You can also feed keystrokes into it from a
 - Away timer: start arttime or reset (press ``r``) arttime's timers before putting computer to sleep or moving away from screen. Be greeted by a beautiful text art, and know how much time you spent away from computer when you get back to computer again. And no, it doesn't consume power when computer is sleeping.
 - Feed keystrokes from anywhere: Unlike most interactive applications, arttime provides first-class support for feeding keystrokes from all imaginable sources: string, file, pipe, or unrelated process. This enables many exciting features. To begin, press ``k`` from within arttime to see many pre-installed examples, and read more details in [arttime wiki: feed keys from anywhere](https://github.com/poetaman/arttime/wiki#feed-keystrokes-from-anywhere).
 - Expressive timers: Associate different art, color, and message with your timers. This makes your timers more expressive, and personalized. To check preinstalled examples: press ``k``, type ``timer`` and press ``Tab``.
+- History, completion, globbing, search: All prompts store 1000 unique previous values in history, just press ``Up``/``Down`` arrows on the prompt to scroll history. More keybindings listed in arttime wiki: [Modes and keybindings](https://github.com/poetaman/arttime/wiki#modes-and-keybindings)
 - Storyboards: Quickly create an art [storyboard](https://en.wikipedia.org/wiki/Storyboard) by sequencing art from arttime's collection. To check preinstalled examples: press ``k``, type ``story`` (or ``learn``) and press ``Tab``.
 - Best for privacy: Unlike commercial apps that connect to internet, track your activity and send/sell your data, arttime runs solely on your computer. It does not connect to internet, does not look at or track your data, and does not send any data outside your computer. Unlike binaries, arttime is a human-readable text file that can always be reviewed.
 - Secure: Unlike most other interactive software projects which rely on multiple 3rd-party packages that are hard to audit, this project relies solely on what comes pre-installed on Unix-style operating systems like macOS/Linux, and no 3rd-party packages. This makes it much more secure compared to other software out there.
