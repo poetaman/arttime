@@ -72,7 +72,8 @@ Options:
     -p --prefix PREFIX  Install arttime executables in PREFIX/bin
                         and art files in PREFIX/share/arttime/textart
 
-    -zcompdir DIRECTORY Install arttime's zsh completions in DIRECTORY/
+    --zcompdir DIRECTORY
+                        Install arttime's zsh completions in DIRECTORY/
                         instead of default ~/.local/share/zsh/functions/
                         If passed - then don't install completions.
                         Note: Make sure to append that path to your zshrc's
