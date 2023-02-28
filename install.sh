@@ -27,6 +27,7 @@ $(printf "$zparseoptscmd") \
     p:=prefix_arg_array \
     -prefix:=prefix_arg_array \
     -zcompdir:=zcompdir_arg_array \
+    -noupdaterc=noupdaterc_arg_array \
     h=help_arg_array \
     -help=help_arg_array \
     || return
@@ -43,6 +44,7 @@ global_arg="$global_arg_array[-1]"
 prefix_arg="$prefix_arg_array[-1]"
 help_arg="$help_arg_array[-1]"
 zcompdir_arg="$zcompdir_arg_array[-1]"
+noupdaterc_arg="$noupdaterc_arg_array[-1]"
 machine="$(uname -s)"
 
 function printhelp {
@@ -81,6 +83,12 @@ Options:
                         calling compinit again. If you are using a zsh plugin
                         system, check what is the best place to add to fpath
                         (mostly in your .zshrc before invoking plugin manager)
+
+    --noupdaterc        By default arttime installer would append a line
+                        at the end of user's ~/.zshrc or ~/.bashrc
+                        if the effective installation path is not on $PATH
+                        Providing this switch disables that, which is
+                        especially valuable for package managers
 
     -h --help           Print this help string for arttime installer, and exit
 EOF
@@ -294,7 +302,9 @@ else
     else
         profile=''
     fi
-    if [[ ! -z $profile ]]; then
+    if [[ $noupdaterc_arg != "" ]]; then
+        echo "Installation complete! Type 'arttime' and press Enter to start arttime.\nIf arttime command is not found, try one of following:\n    1) source your *rc file or restart terminal,\n    2) add install directory to PATH in your *rc file and try 1) again."
+    elif [[ $profile != "" ]]; then
         echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
         echo 'export PATH='"$bindir"':$PATH' >>$HOME/$profile
         echo 'Note: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
