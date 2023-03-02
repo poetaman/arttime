@@ -227,7 +227,9 @@ artfilearray=()
 artfilearray=(*(.))
 artfilearraysize="${#artfilearray}"
 tput_cuu1=$(echoti cuu1)
-echoti civis
+tput_civis=$(echoti civis)
+tput_cnorm=$(echoti cnorm)
+printf "$tput_civis"
 for ((i = 1; i <= $artfilearraysize; i++)); do
     file="$artfilearray[i]"
     if [[ -f "$artdir/$file" ]]; then
@@ -313,4 +315,4 @@ else
         echo "Installation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter.\nTo run it right away from this shell, execute arttime by specifying its full path:\n       $bindir/arttime"
     fi
 fi
-echoti cnorm
+printf "$tput_cnorm"
