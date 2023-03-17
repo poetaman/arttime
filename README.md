@@ -1,3 +1,5 @@
+![](https://img.shields.io/badge/Coded%20By%20Human-100%25-green)
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/71736629/193433608-82c23055-3556-40e4-b98f-ab4c47c9460c.png">
   <img alt="Representative screenshot of arttime" src="https://user-images.githubusercontent.com/71736629/193433617-c3c683ff-ea4a-4cc2-91f6-e8ffeea18ac5.png">
