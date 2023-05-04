@@ -401,6 +401,123 @@ else
     fi
 fi
 
+datehelpstr=""
+function setdatehelpstr {
+    if [[ $dateisgnu = "1" ]]; then
+read -r -d '' datehelpstr <<-'EOF'
+You reached this help page because you entered an [31mincorrect[0m
+value for goal time or used an [31munrecognized[0m format or entered 'help'.
+
+arttime supports two types of time formats: 1) Native, 2) External.
+External formats are enabled by GNU date, which is [32mINSTALLED[0m on your
+system, and should be preferred (as they can be very expressive).
+
+One can set multiple goals, and even sprint (loop) over a pattern of goals
+multiple times. Multiple goals or a pattern of goals can be specified by
+separating them with a semi-colon (;). Goals can be repeated by specifying
+the last goal as 'loop'/'sprint' (to sprint forever) or 'loopN'/'sprintN'
+(to sprint N number of times). See section 3) below to learn how to set
+multiple goals, and/or a pattern of goals to repeat.
+
+1) Native (simple, relative) formats:
+    1m (1 minute from now)
+    30s (30 seconds from now)
+    48h (48 hours from now)
+    2d 10s (2 days 10 seconds from now)
+    1h 1m 1s (1 hour 1 minute 1 seconds from now)
+    500m (500 minutes from now)
+    400m 100s (400 minutes and 100 seconds from now)
+    etc...
+
+Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
+
+2) External (simple/complex, absolute/relative, very expressive) formats:
+    10AM (upcoming 10AM, local timezone unless specified)
+    10:30AM IST (upcoming 10:30AM Indian Standard Time)
+    May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
+        Note: there is no comma after date 'May 26'
+    next friday (upcoming friday)
+    1min, +1min, 1 min, +1 minute, +1 minutes (1 minute from now)
+    1min 30sec, 1min 30sec (1 minute 30 sec from now)
+    next friday +4 hours (4AM on next friday in local time zone)
+    next monday 1PM (1PM on next monday in local time zone)
+    next monday 1PM IST (1PM on next monday in Indian Standard Time)
+    and much more...
+    
+For detailed documentation on External date/time formats please refer:
+    Web:      https://www.gnu.org/software/coreutils/date 
+    Locally:  $ info '(coreutils) date invocation'
+and jump directly to the section on "Date input formats".
+
+3) Multiple and/or pattern of repeating goals:
+    10s;20s (10 seconds and 20 seconds from now)
+    10s;20s;1PM (10 seconds and 20 seconds from now, at 1PM in local time zone)
+    10s;loop, 10s;sprint (every 10 seconds, repeat forever)
+    10s;loop4, 10s;sprint4 (after 10 seconds, sprint 4 times)
+    10s;1m;loop2 (after 10 seconds and 1m from now, sprint 2 times)
+    5m;1PM;2PM;3PM;4PM;loop (after 5m from now and at 1-4 PM, repeat forever)
+    25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop (pattern of Pomodoro Technique)
+EOF
+    else
+read -r -d '' datehelpstr <<-'EOF'
+You reached this help page because you entered an [31mincorrect[0m
+value for goal time or used an [31munrecognized[0m format or entered 'help'.
+
+arttime supports two types of time formats: 1) Native, 2) External.
+External formats are enabled by GNU date, which is [31mNOT INSTALLED[0m on your
+please search the web to find if/how to install GNU date on your system.
+If installed, it will open up the possibility of being very expressive in
+specifying goal date/time. After installing GNU date, restart arttime.
+
+One can set multiple goals, and even sprint (loop) over a pattern of goals
+multiple times. Multiple goals or a pattern of goals can be specified by
+separating them with a semi-colon (;). Goals can be repeated by specifying
+the last goal as 'loop'/'sprint' (to sprint forever) or 'loopN'/'sprintN'
+(to sprint N number of times). See section 3) below to learn how to set
+multiple goals, and/or a pattern of goals to repeat.
+
+1) Native (simple, relative, should work on your system) formats:
+    1m (1 minute from now)
+    30s (30 seconds from now)
+    48h (48 hours from now)
+    2d 10s (2 days 10 seconds from now)
+    1h 1m 1s (1 hour 1 minute 1 seconds from now)
+    500m (500 minutes from now)
+    400m 100s (400 minutes and 100 seconds from now)
+    etc...
+
+Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
+
+2) External (very expressive, though won't work on your system) formats:
+    10AM (upcoming 10AM, local timezone unless specified)
+    10:30AM IST (upcoming 10:30AM Indian Standard Time)
+    May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
+        Note: there is no comma after date 'May 26'
+    next friday (upcoming friday)
+    1min, +1min, 1 min, +1 minute, +1 minutes (1 minute from now)
+    1min 30sec, 1min 30sec (1 minute 30 sec from now)
+    next friday +4 hours (4AM on next friday in local time zone)
+    next monday 1PM (1PM on next monday in local time zone)
+    next monday 1PM IST (1PM on next monday in Indian Standard Time)
+    and much more...
+    
+For detailed documentation on External date/time formats please refer:
+    Web:      https://www.gnu.org/software/coreutils/date 
+    Locally:  $ info '(coreutils) date invocation'
+and jump directly to the section on "Date input formats".
+
+3) Multiple and/or pattern of repeating goals:
+    10s;20s (10 seconds and 20 seconds from now)
+    10s;20s;1PM (10 seconds and 20 seconds from now, at 1PM in local time zone)
+    10s;loop, 10s;sprint (every 10 seconds, repeat forever)
+    10s;loop4, 10s;sprint4 (after 10 seconds, sprint 4 times)
+    10s;1m;loop2 (after 10 seconds and 1m from now, sprint 2 times)
+    5m;1PM;2PM;3PM;4PM;loop (after 5m from now and at 1-4 PM, repeat forever)
+    25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop (pattern of Pomodoro Technique)
+EOF
+    fi
+}
+
 function getaart {
     if [[ $helpactive = "1" ]]; then
         echo $restoreartname
@@ -2135,119 +2252,7 @@ function usr1input_handler {
                 setgoals $sprintstarttime
                 if [[ -z $goaltime ]]; then
                     if [[ -z $datehelpstr ]]; then
-                        if [[ $dateisgnu = "1" ]]; then
-read -r -d '' datehelpstr <<-'EOF'
-You reached this help page because you entered an [31mincorrect[0m
-value for goal time or used an [31munrecognized[0m format or entered 'help'.
-
-arttime supports two types of time formats: 1) Native, 2) External.
-External formats are enabled by GNU date, which is [32mINSTALLED[0m on your
-system, and should be preferred (as they can be very expressive).
-
-One can set multiple goals, and even sprint (loop) over a pattern of goals
-multiple times. Multiple goals or a pattern of goals can be specified by
-separating them with a semi-colon (;). Goals can be repeated by specifying
-the last goal as 'loop'/'sprint' (to sprint forever) or 'loopN'/'sprintN'
-(to sprint N number of times). See section 3) below to learn how to set
-multiple goals, and/or a pattern of goals to repeat.
-
-1) Native (simple, relative) formats:
-    1m (1 minute from now)
-    30s (30 seconds from now)
-    48h (48 hours from now)
-    2d 10s (2 days 10 seconds from now)
-    1h 1m 1s (1 hour 1 minute 1 seconds from now)
-    500m (500 minutes from now)
-    400m 100s (400 minutes and 100 seconds from now)
-    etc...
-
-Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
-
-2) External (simple/complex, absolute/relative, very expressive) formats:
-    10AM (upcoming 10AM, local timezone unless specified)
-    10:30AM IST (upcoming 10:30AM Indian Standard Time)
-    May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
-        Note: there is no comma after date 'May 26'
-    next friday (upcoming friday)
-    1min, +1min, 1 min, +1 minute, +1 minutes (1 minute from now)
-    1min 30sec, 1min 30sec (1 minute 30 sec from now)
-    next friday +4 hours (4AM on next friday in local time zone)
-    next monday 1PM (1PM on next monday in local time zone)
-    next monday 1PM IST (1PM on next monday in Indian Standard Time)
-    and much more...
-    
-For detailed documentation on External date/time formats please refer:
-    Web:      https://www.gnu.org/software/coreutils/date 
-    Locally:  $ info '(coreutils) date invocation'
-and jump directly to the section on "Date input formats".
-
-3) Multiple and/or pattern of repeating goals:
-    10s;20s (10 seconds and 20 seconds from now)
-    10s;20s;1PM (10 seconds and 20 seconds from now, at 1PM in local time zone)
-    10s;loop, 10s;sprint (every 10 seconds, repeat forever)
-    10s;loop4, 10s;sprint4 (after 10 seconds, sprint 4 times)
-    10s;1m;loop2 (after 10 seconds and 1m from now, sprint 2 times)
-    5m;1PM;2PM;3PM;4PM;loop (after 5m from now and at 1-4 PM, repeat forever)
-    25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop (pattern of Pomodoro Technique)
-EOF
-                    else
-read -r -d '' datehelpstr <<-'EOF'
-You reached this help page because you entered an [31mincorrect[0m
-value for goal time or used an [31munrecognized[0m format or entered 'help'.
-
-arttime supports two types of time formats: 1) Native, 2) External.
-External formats are enabled by GNU date, which is [31mNOT INSTALLED[0m on your
-please search the web to find if/how to install GNU date on your system.
-If installed, it will open up the possibility of being very expressive in
-specifying goal date/time. After installing GNU date, restart arttime.
-
-One can set multiple goals, and even sprint (loop) over a pattern of goals
-multiple times. Multiple goals or a pattern of goals can be specified by
-separating them with a semi-colon (;). Goals can be repeated by specifying
-the last goal as 'loop'/'sprint' (to sprint forever) or 'loopN'/'sprintN'
-(to sprint N number of times). See section 3) below to learn how to set
-multiple goals, and/or a pattern of goals to repeat.
-
-1) Native (simple, relative, should work on your system) formats:
-    1m (1 minute from now)
-    30s (30 seconds from now)
-    48h (48 hours from now)
-    2d 10s (2 days 10 seconds from now)
-    1h 1m 1s (1 hour 1 minute 1 seconds from now)
-    500m (500 minutes from now)
-    400m 100s (400 minutes and 100 seconds from now)
-    etc...
-
-Native format can have any of: Ad Bh Cm Ds, where A/B/C/D are numbers.
-
-2) External (very expressive, though won't work on your system) formats:
-    10AM (upcoming 10AM, local timezone unless specified)
-    10:30AM IST (upcoming 10:30AM Indian Standard Time)
-    May 26 10:30AM IST (10:30AM on May 26 in Indian Standard Time)
-        Note: there is no comma after date 'May 26'
-    next friday (upcoming friday)
-    1min, +1min, 1 min, +1 minute, +1 minutes (1 minute from now)
-    1min 30sec, 1min 30sec (1 minute 30 sec from now)
-    next friday +4 hours (4AM on next friday in local time zone)
-    next monday 1PM (1PM on next monday in local time zone)
-    next monday 1PM IST (1PM on next monday in Indian Standard Time)
-    and much more...
-    
-For detailed documentation on External date/time formats please refer:
-    Web:      https://www.gnu.org/software/coreutils/date 
-    Locally:  $ info '(coreutils) date invocation'
-and jump directly to the section on "Date input formats".
-
-3) Multiple and/or pattern of repeating goals:
-    10s;20s (10 seconds and 20 seconds from now)
-    10s;20s;1PM (10 seconds and 20 seconds from now, at 1PM in local time zone)
-    10s;loop, 10s;sprint (every 10 seconds, repeat forever)
-    10s;loop4, 10s;sprint4 (after 10 seconds, sprint 4 times)
-    10s;1m;loop2 (after 10 seconds and 1m from now, sprint 2 times)
-    5m;1PM;2PM;3PM;4PM;loop (after 5m from now and at 1-4 PM, repeat forever)
-    25m;30m;55m;1h;1h25m;1h30m;1h55m;2h25m;loop (pattern of Pomodoro Technique)
-EOF
-                        fi
+                        setdatehelpstr
                     fi
                     if command -v less &>/dev/null; then
                         pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
