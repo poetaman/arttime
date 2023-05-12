@@ -361,14 +361,18 @@ elif [[ ! -z $version_arg[-1] ]]; then
     exit 0
 fi
 
-unamestr="$(uname -s)"
+unamestr="$(uname -a)"
 case "${unamestr}" in
-    Linux*)     machine=Linux;;
-    Darwin*)    machine=Darwin;;
-    CYGWIN*)    machine=Cygwin;;
-    MINGW*)     machine=MinGw;;
-    *BSD)       machine=BSD;;
-    *)          machine="UNKNOWN:${unamestr}"
+    Linux*)
+        if [[ "$unamestr" =~ ^.*[Mm]icrosoft.*$ ]]; then
+                machine="WSL"
+        else
+                machine="Linux"
+        fi
+        ;;
+    Darwin*)    machine="Darwin";;
+    *BSD*)      machine="BSD";;
+    *)          machine="UNKNOWN:${unamestr}";;
 esac
 
 # directories
@@ -573,6 +577,7 @@ tzshortcurrent="$tzshort"
 function notifydesktop {
     local notifytitle="ARTTIME"
     local notifysubtitle=$(strftime "%a %b %d, %Y $hms %Z")
+    local CR=$'\r'
     if [[ $printsprints = "1" ]]; then
         if [[ $goalmaxsprint != "-" ]]; then
             local notifymessage="sprint-$goalsprint/$goalmaxsprint "
@@ -589,11 +594,11 @@ function notifydesktop {
     fi
     notifymessage+="goal$goalptrofmaxstr: $goalstr"
     if bart=$(getbart); then
-        notifymessage+="\rarts: $(getaart), $(getbart)"
+        notifymessage+="${CR}arts: $(getaart), $(getbart)"
     else
-        notifymessage+="\rart: $(getaart)"
+        notifymessage+="${CR}art: $(getaart)"
     fi
-    notifymessage+="\rID: $$"
+    notifymessage+="${CR}ID: $$"
     if [[ $machine = "Darwin" ]]; then
         local notifystr="display notification \"$notifymessage\" with title \"$notifytitle\" subtitle \"$notifysubtitle\" sound name \"Blow\""
         osascript -e $notifystr 2>/dev/null
@@ -608,7 +613,9 @@ function notifydesktop {
             soundcommand="ogg123"
         fi
         [[ -n $freedesk_message_sound && -e $freedesk_message_sound ]] && $soundcommand $freedesk_message_sound &>/dev/null &
-        notify-send -u critical $notifytitle "$notifysubtitle\r$notifymessage" &>/dev/null
+        notify-send -u critical $notifytitle "$notifysubtitle${CR}$notifymessage" &>/dev/null
+    elif [[ $machine == "WSL" ]]; then
+        wsl-notify-send.exe --category "$notifytitle" "$notifysubtitle${CR}$notifymessage" &>/dev/null
     fi
 }
 
