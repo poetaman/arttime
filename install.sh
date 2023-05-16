@@ -45,7 +45,19 @@ prefix_arg="$prefix_arg_array[-1]"
 help_arg="$help_arg_array[-1]"
 zcompdir_arg="$zcompdir_arg_array[-1]"
 noupdaterc_arg="$noupdaterc_arg_array[-1]"
-machine="$(uname -s)"
+unamestr="$(uname -a)"
+case "${unamestr}" in
+    Linux*)
+        if [[ "$unamestr" =~ ^.*[Mm]icrosoft.*$ ]]; then
+                machine="WSL"
+        else
+                machine="Linux"
+        fi
+        ;;
+    Darwin*)    machine="Darwin";;
+    *BSD*)      machine="BSD";;
+    *)          machine="UNKNOWN:${unamestr}";;
+esac
 
 function printhelp {
 read -r -d '' VAR <<-'EOF'
@@ -259,33 +271,42 @@ if ! command -v less &>/dev/null; then
     echo "[4mDEPENDS[0m: Command 'less' not found, arttime will default to 'more'.\n         Though installing 'less' is recommended for better experience."
 fi
 
-if [[ $machine =~ ^.*(Linux|BSD).*$ ]]; then
-    if ! command -v notify-send &>/dev/null; then
-        echo "[4mDEPENDS[0m: If you want desktop notifications, you need notify-send."
-    fi
-    if command -v paplay &>/dev/null; then
-        if pulseaudio --check &>/dev/null; then
-            pulserunning="1"
-        else
-            pulserunning="0"
+case "${machine}" in
+    "Linux"|"BSD")
+        if ! command -v notify-send &>/dev/null; then
+            echo "[4mDEPENDS[0m: If you want desktop notifications, you need notify-send."
         fi
-    fi
-    if command -v pw-play &>/dev/null; then
-        if {pactl info 2>/dev/null | grep "Server Name" 2>/dev/null | grep "PipeWire" &>/dev/null}; then
-            piperunning="1"
-        else
-            piperunning="0"
+        if command -v paplay &>/dev/null; then
+            if pulseaudio --check &>/dev/null; then
+                pulserunning="1"
+            else
+                pulserunning="0"
+            fi
         fi
-    fi
-    if command -v ogg123 &>/dev/null; then
-        vorbisinstalled="1"
-    fi
-    if [[ $pulserunning != "1" && $piperunning != "1" && $vorbisinstalled != "1" ]]; then
-        echo "[4mDEPENDS[0m: If you want desktop sounds, you need one of: 1) pulseaudio daemon\n         running, or 2) pipewire daemon running, or 3) vorbis-tools."
-    fi
-elif [[ $machine =~ ^Darwin.*$ ]]; then
-    echo "[4mNote[0m: Notification settings on macOS are not fully in control of an application.\n      To check if you have desired notification settings, open following link.\n      https://github.com/poetaman/arttime/issues/11"
-fi
+        if command -v pw-play &>/dev/null; then
+            if {pactl info 2>/dev/null | grep "Server Name" 2>/dev/null | grep "PipeWire" &>/dev/null}; then
+                piperunning="1"
+            else
+                piperunning="0"
+            fi
+        fi
+        if command -v ogg123 &>/dev/null; then
+            vorbisinstalled="1"
+        fi
+        if [[ $pulserunning != "1" && $piperunning != "1" && $vorbisinstalled != "1" ]]; then
+            echo "[4mDEPENDS[0m: If you want desktop sounds, you need one of: 1) pulseaudio daemon\n         running, or 2) pipewire daemon running, or 3) vorbis-tools."
+        fi
+        ;;
+    "Darwin")
+        echo "[4mNote[0m: Notification settings on macOS are not fully in control of an application.\n      To check if you have desired notification settings, open following link.\n      https://github.com/poetaman/arttime/issues/11"
+        ;;
+    "WSL")
+        if ! command -v wsl-notify-send.exe &>/dev/null; then
+            echo "[4mDEPENDS[0m: If you want desktop notifications, you need wsl-notify-send.exe\n         Install it from https://github.com/stuartleeks/wsl-notify-send"
+        fi
+        ;;
+    *) ;;
+esac
 
 # Check if path to arttime excutable is on user's $PATH
 if [[ ":$PATH:" == *":$bindir:"* ]]; then
