@@ -15,7 +15,7 @@ if ! is-at-least "5.7"; then
     exit 1
 fi
 
-arttime_version="2.0.0"
+arttime_version="2.1.0"
 
 zmodload zsh/zselect
 zmodload zsh/zutil
