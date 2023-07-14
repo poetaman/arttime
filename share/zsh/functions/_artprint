@@ -28,7 +28,7 @@ _artprint() {
     case $prevword in
         "-a")
             _files -W $bindir/../share/arttime/textart/
-            echo "$((CURRENT-1)) is -a" >>~/trap.log
+            #echo "$((CURRENT-1)) is -a" >>~/debug.log
             ;;
         "--random")
             local -a randomopts

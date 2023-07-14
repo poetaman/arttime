@@ -61,7 +61,7 @@ _arttime() {
     case $prevword in
         "-a")
             _files -W $bindir/../share/arttime/textart/
-            echo "$((CURRENT-1)) is -a" >>~/trap.log
+            #echo "$((CURRENT-1)) is -a" >>~/debug.log
             ;;
         "-b")
             local aindex=$words[(I)-a]
@@ -76,11 +76,11 @@ _arttime() {
             bartarray=($(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p'))
             cd $restoredir
             _describe 'possible b-art' bartarray
-            echo "$((CURRENT-1)) is -b" >>~/trap.log
+            #echo "$((CURRENT-1)) is -b" >>~/debug.log
             ;;
         "-k"|"--keypoem")
             _files -W $bindir/../share/arttime/keypoems/
-            echo "$((CURRENT-1)) is -k" >>~/trap.log
+            #echo "$((CURRENT-1)) is -k" >>~/debug.log
             ;;
         "--hours")
             local -a hoursopts
