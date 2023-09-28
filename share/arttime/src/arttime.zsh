@@ -550,14 +550,14 @@ function notetimezone {
     if [[ -z $TZ ]]; then
         local etclocaltime="/etc/localtime"
         if [[ -L $etclocaltime ]]; then
-            tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<"${etclocaltime:A}")
+            tzlong=$(sed -n 's/^.*zoneinfo[^/]*\/\(.*\)$/\1/p' <<<"${etclocaltime:A}")
         else
             echo "W: make $etclocaltime a symlink for faster load time" >/dev/stderr
-            tzlong=$(find /usr/share/zoneinfo/* -type f | while read fname; do cmp -s "$etclocaltime" "$fname" && sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p'<<<"$fname" && break; done)
+            tzlong=$(find /usr/share/zoneinfo/* -type f | while read fname; do cmp -s "$etclocaltime" "$fname" && sed -n 's/^.*zoneinfo[^/]*\/\(.*\)$/\1/p'<<<"$fname" && break; done)
         fi
     else
-        if [[ -f $TZ ]]; then
-            tzlong=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<${TZ:A})
+        if [[ -f $TZ && $TZ =~ ^.*zoneinfo[^/]*/.*$ ]]; then
+            tzlong=$(sed -n 's/^.*zoneinfo[^/]*\/\(.*\)$/\1/p' <<<${TZ:A})
         else
             tzlong=$TZ
         fi
@@ -978,9 +978,9 @@ function slurp {
 }
 
 
-tputset_str=$(echoti smcup; echoti civis; echoti rmam)
+tputset_str=$(echoti rmam; echoti civis; echoti smcup)
 function tputset { printf "$tputset_str"; }
-tputreset_str=$(echoti smam; echoti cnorm; echoti rmcup)
+tputreset_str=$(echoti rmcup; echoti smam; echoti cnorm)
 function tputreset { printf "$tputreset_str"; }
 
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
@@ -1871,7 +1871,6 @@ function zoneselector {
     if [[ $inputstr == "./orig" || $inputstr == "orig" ]]; then
         inputstr=$tzlonginit
     fi
-    inputstr=$(sed -n 's/^.*zoneinfo\/\(.*\)$/\1/p' <<<"${inputstr:A}")
     promptstrpost=""
     compdef -d _zoneselector -vared-
     cd $restorepwd
