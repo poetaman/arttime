@@ -1,6 +1,6 @@
 #compdef artprint
 local bindir=$(command -v artprint)
-bindir=${bindir:a:h}
+bindir=${bindir:A:h}
 local -a allopts
 allopts=(
     '-a:name of art file (default:trex)'

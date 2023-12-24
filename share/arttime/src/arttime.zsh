@@ -376,7 +376,7 @@ case "${unamestr}" in
 esac
 
 # directories
-bindir="${0:a:h}/../../../bin"
+bindir="${0:A:h}/../../../bin"
 artdir="$bindir/../share/arttime/textart"
 
 function trimwhitespace {

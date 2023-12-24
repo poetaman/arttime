@@ -171,7 +171,7 @@ if [[ $randomarg != "" && $randomarg != "all" && $randomarg != "tarot" && $rando
 fi
 
 # directories
-bindir="${0:a:h}"
+bindir="${0:A:h}"
 artdir="$bindir/../share/arttime/textart"
 
 if [[ ! -z $debug ]]; then

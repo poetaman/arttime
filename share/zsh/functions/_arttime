@@ -28,7 +28,7 @@ else
     local gnuex=""
 fi
 local bindir=$(command -v arttime)
-bindir=${bindir:a:h}
+bindir=${bindir:A:h}
 local -a allopts
 allopts=(
     '-a:name of a art file (default:butterfly)'

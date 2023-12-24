@@ -205,7 +205,7 @@ if [[ ! ${#direrrorarray[@]} -eq 0 ]]; then
 fi
 
 # If we are here, we can successfully install
-installerdir="${0:a:h}"
+installerdir="${0:A:h}"
 
 # Copy bin files
 echo "Copying executables under $bindir"

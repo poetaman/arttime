@@ -3,4 +3,4 @@
 # Check ../LICENSE_CODE, ../LICENSE_ART, and ../LICENSE_ADDENDUM_CFLA
 # files to know the terms of license
 # License files are also on github: https://github.com/poetaman/arttime
-exec zsh -fi ${0:a:h}/../share/arttime/src/arttime.zsh "$@"
+exec zsh -fi ${0:A:h}/../share/arttime/src/arttime.zsh "$@"
