@@ -2262,11 +2262,14 @@ function usr1input_handler {
                     fi
                     if command -v less &>/dev/null; then
                         pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
-                        pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
                         if [[ $streamclosed == "1" ]]; then
+                            pagerprintstr="$pagernavstr\n$datehelpstr\n[7m(END)[0m\n"
+                            pagerprintstr+=$(printf "~%$((termwidth-2)).s$tchar\n" " " {0..$LINES})
+                            pagerprintstr=$(printf "$pagerprintstr")
                             printf "$tput_clear"
-                            less -R <<<"$pagerprintstr" 2>/dev/null
+                            LESS="" less -R <<<"$pagerprintstr" 2>/dev/null
                         else
+                            pagerprintstr=$(printf "$pagernavstr\n$datehelpstr")
                             printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestr}"
                             inputchar=""
                             while readchar && [[ $inputchar != "q" ]]; do :; done
@@ -2426,11 +2429,14 @@ function usr1input_handler {
             if [[ $commandkey = "I" ]] || (((termheight <= (goalmaxptr+4)) && goaldone==0 )); then
                 if command -v less &>/dev/null; then
                     pagernavstr="Press 'q' key to quit this page, scroll keys to scroll till you see [7m(END)[0m."
-                    pagerprintstr=$(printf "$pagernavstr\n$infostring")
                     if [[ $streamclosed == "1" ]]; then
+                        pagerprintstr="$pagernavstr\n$infostring\n[7m(END)[0m\n"
+                        pagerprintstr+=$(printf "~%$((termwidth-2)).s$tchar\n" " " {0..$LINES})
+                        pagerprintstr=$(printf "$pagerprintstr")
                         printf "$tput_clear"
-                        less -R <<<"$pagerprintstr" 2>/dev/null
+                        LESS="" less -R <<<"$pagerprintstr" 2>/dev/null
                     else
+                        pagerprintstr=$(printf "$pagernavstr\n$infostring")
                         printf "${tput_clear}${pagerprintstr}\n[7m(END)[0m${modestr}"
                         inputchar=""
                         while readchar && [[ $inputchar != "q" ]]; do :; done
