@@ -876,7 +876,7 @@ function readstr {
         vared -h -t $TTY -p "$promptstr%{$tput_cnorm%} " -c inputstr; retstatus="$?"
     else
         while read -r -s -k1 -t0 tempttychar && [[ $tempttychar != "p" ]] ; do : ; done
-        printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
+        [[ ! -z $2 ]] && printf "${tput_el}${promptstr}${tput_cnorm} ${inputstr}"
         local inputchard=""
         local inputcharint=0
         local inputchardint=0
@@ -886,19 +886,19 @@ function readstr {
             inputcharint=$(printf '%d' "'$inputchar")
             if ((inputcharint == 10 || inputcharint == 13 )); then
                 retstatus="0"
-                printf "$promptstrpost"
+                [[ ! -z $2 ]] && printf "$promptstrpost"
                 break
             elif ((inputchardint == 92 && inputcharint == 110)); then
                 inputstr="${inputstr:0:-1}"
                 retstatus="0"
-                printf "$tput_cub1 $tput_cub1$promptstrpost"
+                [[ ! -z $2 ]] && printf "$tput_cub1 $tput_cub1$promptstrpost"
                 break
             else
                 if [[ ! -z $inputchar ]]; then
                     inputchard=$inputchar
                     inputchardint=$(printf '%d' "'$inputchar")
                     inputstr+=$inputchar
-                    printf $inputchar
+                    [[ ! -z $2 ]] && printf $inputchar
                 else
                     retstatus="1"
                     inputstr=""
@@ -1946,10 +1946,16 @@ zle -N zlelineprompt
 
 function usr1input_handler {
     local commandkey=$1
+    local pprint=true
     if ! [[ $streamclosed == "1" ]]; then
         case $commandkey; in
             "x") commandkey="a";;
             "y") commandkey="b";;
+            "M") commandkey="m"; pprint=false ;;
+            "A") commandkey="a"; pprint=false ;;
+            "B") commandkey="b"; pprint=false ;;
+            "G") commandkey="g"; pprint=false ;;
+            "Z") commandkey="z"; pprint=false ;;
               *) ;;
         esac
         local streamclosedinit="0"
@@ -1964,7 +1970,11 @@ function usr1input_handler {
                 artname="$restoreartname"
                 flipartname="$restoreflipartname"
             fi
-            if [[ $commandkey = "a" ]]; then
+            if [[ $pprint == false ]]; then
+                promptstr=""
+                readstr "" ""
+                retstatus="$?"
+            elif [[ $commandkey = "a" ]]; then
                 sttyresetint
                 printf "$tput_smcup"
                 printf "$tput_clear$modestr$tput_cup00"
@@ -2001,9 +2011,9 @@ function usr1input_handler {
                     flipartname=""
                 fi
             elif [[ ! -f "$artdir/$inputstr" ]]; then
-                printf "E: No file found for art: $inputstr\nPress any key to continue..."
-                readchar 3
-                slurp
+                $pprint && printf "E: No file found for art: $inputstr\nPress any key to continue..."
+                $pprint && readchar 3
+                $pprint && slurp
             else
                 if [[ $commandkey = "a" ]]; then
                     artname="$inputstr"
@@ -2014,12 +2024,12 @@ function usr1input_handler {
             prevartname=""
             if ! setartstring; then
                 if [[ $commandkey = "b" ]]; then
-                    printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
+                    $pprint && printf "W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                     artname="$initialartname"
                     flipartname="$initialflipartname"
                     setartstring
-                    readchar 5
-                    slurp
+                    $pprint && readchar 5
+                    $pprint && slurp
                 else
                     helpactive="0"
                     [[ $streamclosedinit == "1" ]] && ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
@@ -2225,8 +2235,12 @@ function usr1input_handler {
             ;;
         "g")
             inputstr=""
-            sttyresetint
-            if [[ $usereadline == "1" ]]; then
+            $pprint && sttyresetint
+            if [[ $pprint == false ]]; then
+                promptstr=""
+                readstr "" ""
+                retstatus="$?"
+            elif [[ $usereadline == "1" ]]; then
                 printf "${tput_cup00}${tput_el}${tput_cnorm}"
                 inputstr=$(bash -c 'read -e -p "Enter goal (\"help\" to learn): " retvar; echo $retvar');
                 retstatus="0"
@@ -2247,8 +2261,8 @@ function usr1input_handler {
                     retstatus="$?"
                 fi
             fi
-            printf "$tput_civis"
-            sttyset
+            $pprint && printf "$tput_civis"
+            $pprint && sttyset
             if [[ ! -z $inputstr ]]; then
                 goal="$inputstr"
                 goalsprint="1"
@@ -2535,8 +2549,12 @@ function usr1input_handler {
             ;;
         "m")
             inputstr=""
-            sttyresetint
-            if [[ $usereadline == "1" ]]; then
+            $pprint && sttyresetint
+            if [[ $pprint == false ]]; then
+                promptstr=""
+                readstr "" ""
+                retstatus="$?"
+            elif [[ $usereadline == "1" ]]; then
                 printf "${tput_cup00}${tput_el}${tput_cnorm}"
                 inputstr=$(bash -c 'read -e -p "Enter title message (\"orig\" to reset): " retvar; echo $retvar');
                 retstatus="0"
@@ -2557,8 +2575,8 @@ function usr1input_handler {
                     retstatus="$?"
                 fi
             fi
-            printf "$tput_civis"
-            sttyset
+            $pprint && printf "$tput_civis"
+            $pprint && sttyset
             if [[ $inputstr = "" || $retstatus != "0" ]]; then
             elif [[ $inputstr = "-" ]]; then
                 title=' - '
@@ -2638,13 +2656,24 @@ function usr1input_handler {
             #printart
             ;;
         "z")
-            sttyresetint
-            $(printf $histcmd) $statedir/hist/zone.hist 1000 1000
-            printf "$tput_smcup"
-            printf "$tput_clear$modestr$tput_cup00"
-            zoneselector
-            sttyset
-            tputset
+            if [[ $pprint == false ]]; then
+                promptstr=""
+                readstr "" ""
+                retstatus="$?"
+                if [[ $inputstr == "./orig" || $inputstr == "orig" ]]; then
+                    inputstr=$tzlonginit
+                elif [[ ! -f /usr/share/zoneinfo/$inputstr ]]; then
+                    inputstr=""
+                fi
+            else
+                sttyresetint
+                $(printf $histcmd) $statedir/hist/zone.hist 1000 1000
+                printf "$tput_smcup"
+                printf "$tput_clear$modestr$tput_cup00"
+                zoneselector
+                sttyset
+                tputset
+            fi
             if [[ ! -z $inputstr ]]; then
                 [[ $streamclosedinit == "1" ]] && ! [[ $inputstr == "" || $inputstr =~ ^[[:space:]]*$ ]] && print -rs -- ${inputstr} &>/dev/null
                 TZ=$inputstr
