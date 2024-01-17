@@ -6,7 +6,7 @@ allopts=(
     '-a:name of art file (default:trex)'
     '-t:title message under art (default:first line of art file)'
     '-s:subtitle message under art (default:none)'
-    '--random:set randomly selected art [all|tarot|notarot]'
+    '--random:select random art from collection'
     '--ac:art color, value between 0-15, default 1 (red)'
     '--tc:title color, value between 0-15, default 2 (green)'
     '--sc:subtitle color, value between 0-15, default 4 (blue)'
@@ -27,11 +27,6 @@ case $prevword in
     "-a")
         _files -W $bindir/../share/arttime/textart/
         #echo "$((CURRENT-1)) is -a" >>~/debug.log
-        ;;
-    "--random")
-        local -a randomopts
-        randomopts=(all tarot notarot)
-        _describe "hour format" randomopts
         ;;
     "--ac"|"--tc"|"--sc")
         local -a cgacolors
@@ -77,7 +72,7 @@ case $prevword in
         )
         _describe "theme (more will be added in future)" styles
         ;;
-    "-t"|"-s"|"-h"|"--help"|"--width"|"--height"|"--version")
+    "-t"|"-s"|"-h"|"--help"|"--width"|"--height"|"--version"|"--random")
         return
         ;;
     *)

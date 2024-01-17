@@ -26,7 +26,7 @@ $(printf "$zparseoptscmd") \
    t:=title_arg \
    s:=subtitle_arg \
    a:=artname_arg \
-   -random:=random_arg \
+   -random=random_arg \
    h=help_arg \
    -tc:=titlecolor_arg \
    -sc:=subtitlecolor_arg \
@@ -93,12 +93,7 @@ Options:
     -a          artfile in artdir (default: trex)
     -t          title message placed under art (default: line 1 in artfile)
     -s          subtitle message (default: none, not printed)
-    --random [all|tarot|notarot]
-                select and print a random art from arttime's collection
-                Meaning of value passed:
-                    all     : select from pool of all art files
-                    tarot   : select from only tarot art files
-                    notarot : select from all art except tarot
+    --random    select and print a random art from arttime's collection
                 When passed, user should not pass option -a
 
     --ac        art color*, value between [1,15]
@@ -128,8 +123,8 @@ Examples:
     $ artprint
         prints trex art with default title message from the file named trex
         in artdir
-    $ artprint --random all
-        prints a random art from entire arttime collection
+    $ artprint --random
+        prints a random art from arttime collection
     $ artprint -t "Hello World - Jurrasic"
         prints trex art with "Hello World - trex" under the trex ASCII art
     $ artprint -t "Hello World - Jurrasic" --ac 2
@@ -161,12 +156,7 @@ style="${style_arg[-1]}"
 debug="${debug_arg[-1]}"
 
 if [[ $artname != "" && $randomarg != "" ]]; then
-    echo "Error: options -a <artname> and --random [all|tarot|notarot] should not be passed together."
-    exit 1
-fi
-
-if [[ $randomarg != "" && $randomarg != "all" && $randomarg != "tarot" && $randomarg != "notarot" ]]; then
-    printf "E: --random was passed \"$randomarg\", it can only be passed vales \"all\" or \"tarot\" or \"notarot\" \n"
+    echo "Error: options -a <artname> and --random should not be passed together."
     exit 1
 fi
 
@@ -183,13 +173,7 @@ fi
 if [[ ! -z $randomarg ]]; then
     prevdir=$PWD
     cd $artdir
-    if [[ $randomarg == "all" ]]; then
-        defaultshuffle=(*(.Nnoe['REPLY=$RANDOM']))
-    elif [[ $randomarg == "tarot" ]]; then
-        defaultshuffle=(tarot-*(.Nnoe['REPLY=$RANDOM']))
-    else
-        defaultshuffle=(^tarot-*(.Nnoe['REPLY=$RANDOM']))
-    fi
+    defaultshuffle=(^tarot-*(.Nnoe['REPLY=$RANDOM']))
     cd $prevdir
     defaultart="$defaultshuffle[1]"
 else

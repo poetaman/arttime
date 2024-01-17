@@ -94,7 +94,7 @@ fi
 $(printf "$zparseoptscmd") \
    a:=artname_arg \
    b:=flipartname_arg \
-   -random:=random_arg \
+   -random=random_arg \
    t:=title_arg \
    g:=goal_arg \
    k:=keyfile_arg \
@@ -191,18 +191,6 @@ Description:
     Read LICENSE_ART for license of art files, and LICENSE_CODE for
     license of code in arttime's repository.
 
-    Another note: This application was created at the outskirts of
-    Silicon Valley which has a buzzing scene of tarot-card readers (for 
-    unknown reasons). This inspired the author to add a key-binding to
-    emulate tarot-card experience. Pressing and holding a key ('o')
-    on the keyboard for a couple seconds makes the application settle 
-    on a randomly selected tarot art (emulating a tarot-card picking).
-    Instead if one presses and holds 'j', the application settles
-    on a randomly selected text art which is not a tarot card. In this way
-    arttime can serve as a free source of "receving messages from the
-    universe" or just a laugh. The author takes no responsibility for
-    the meaning one derives from such activity of playing with The Random.
-
 Layout:
     The layout of arttime is simple. Text art with one line of message
     and one line for clock/timer is kept horizontally and vertically
@@ -261,12 +249,7 @@ Options:
     -b <name>   b-art art file name in artdir
                 (no default)
     -t <str>    title message placed under art (default: line 1 in artfiles)
-    --random <all|tarot|notarot>
-                select and display a random art from arttime's collection
-                Meaning of value passed:
-                    all     : select from pool of all art files
-                    tarot   : select from only tarot art files
-                    notarot : select from all art except tarot
+    --random    select and display a random art from arttime's collection
                 When passed, user should not pass option -a or -b
     -g <str>    goal time. arttime calls alarm/countdown time as "goal time"
                 The reason it's both alarm/countdown time is either format
@@ -326,7 +309,7 @@ Examples:
     $ arttime
         prints help/learn art on launch, pressing 'h' shows default a-art
         (butterfly)
-    $ arttime --nolearn --random all
+    $ arttime --nolearn --random
         selects and displays a random art from entire arttime collection
     $ arttime --nolearn -t "Hello World - Butterfly"
         prints butterfly art with "Hello World - Butterfly" under
@@ -688,12 +671,7 @@ if [[ -z $artname && ! -z $flipartname ]]; then
 fi
 
 if [[ ! -z $artname || ! -z $flipartname ]] && [[ ! -z $randomarg ]]; then
-    printf "E: if --random [all|tarot|notarot] is passed, a-art/b-art should not be passed\n"
-    exit 1
-fi
-
-if [[ $randomarg != "" && $randomarg != "all" && $randomarg != "tarot" && $randomarg != "notarot" ]]; then
-    printf "E: --random was passed \"$randomarg\", it can only be passed vales \"all\" or \"tarot\" or \"notarot\" \n"
+    printf "E: if --random is passed, a-art/b-art should not be\n"
     exit 1
 fi
 
@@ -740,13 +718,7 @@ if [[ ! -z $randomarg ]]; then
     prevdir=$PWD
     cd $artdir
     RANDOM="${EPOCHREALTIME#*.}"
-    if [[ $randomarg == "all" ]]; then
-        defaultshuffle=(*(.Nnoe['REPLY=$RANDOM']))
-    elif [[ $randomarg == "tarot" ]]; then
-        defaultshuffle=(tarot-*(.Nnoe['REPLY=$RANDOM']))
-    else
-        defaultshuffle=(^tarot-*(.Nnoe['REPLY=$RANDOM']))
-    fi
+    defaultshuffle=(^tarot-*(.Nnoe['REPLY=$RANDOM']))
     cd $prevdir
     defaultart="$defaultshuffle[1]"
 else
