@@ -826,10 +826,10 @@ function keyfilefeed {
         fi            
     else
         if [[ $fileispipe == "1" ]]; then
-            coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $centidelay; printf "$REPLY"; done <>$keyfilepath }
+            coproc { trap -; while sysread -s1 -i0; do zselect -t $centidelay; printf "$REPLY"; done <>$keyfilepath }
             exec {streamfd}<&p
         else
-            coproc { trap -; while sysread -s1 -c1 -i0; do zselect -t $centidelay; printf "$REPLY"; done <$keyfilepath }
+            coproc { trap -; while sysread -s1 -i0; do zselect -t $centidelay; printf "$REPLY"; done <$keyfilepath }
             exec {streamfd}<&p
         fi
     fi
@@ -922,7 +922,7 @@ function readchar {
         read -r -s $timeout -k1 inputchar; retstatus="$?"
     else
         ERRNO=0
-        sysread -s1 -c1 $timeout -i$streamfd inputchar; retstatus=$?; reterrno=$ERRNO
+        sysread -s1 $timeout -i$streamfd inputchar; retstatus=$?; reterrno=$ERRNO
         case "$retstatus" in
             "0"|"4")
                 retstatus=0
@@ -973,7 +973,7 @@ function slurp {
     if [[ $streamclosed == "1" ]]; then
         while read -r -s -k1 -t0 slurpchar ; do : ; done 
     else
-        while sysread -s1 -c1 -t0 -i$streamfd slurpchar ; do : ; done
+        while sysread -s1 -t0 -i$streamfd slurpchar ; do : ; done
     fi
 }
 
@@ -1673,7 +1673,7 @@ function trapint_nonblocking {
 
 function trapint_blocking {
     if ! [[ $streamclosed == "1" ]]; then
-        while sysread -s1 -c1 -t0 -i$streamfd inputchar ; do : ; done
+        while sysread -s1 -t0 -i$streamfd inputchar ; do : ; done
         while read -r -s -k1 -t0 inputchar ; do : ; done
         inputchar=""
         inputstr=""
@@ -2781,7 +2781,7 @@ function arttime_blocking {
             read -r -s -t $timetoepoch -k1 tmpusrinput; retstatus="$?"
         else
             ERRNO=0
-            sysread -s1 -c1 -t $timetoepoch -i$streamfd tmpusrinput; retstatus=$?; reterrno=$ERRNO
+            sysread -s1 -t $timetoepoch -i$streamfd tmpusrinput; retstatus=$?; reterrno=$ERRNO
             case "$retstatus" in
                 "0"|"4")
                     [[ $tempttychar != "p" ]] && read -r -s -k1 -t0 tempttychar
