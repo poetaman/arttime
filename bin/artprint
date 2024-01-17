@@ -101,8 +101,12 @@ Options:
     --sc        subttile color, value between [1,15]
     --theme     when given it overrides above color options [light,dark]
 
-    --width     width of output (default: tty width)
-    --height    height of output (default: tty height)
+    --width <num>
+                width of output (default: tty width, so art is centered)
+    --height <num>
+                height of output (default: 0, so there is no top padding)
+                also accepts a special string "term" to calculate
+                tty height in it's environment
     --style     process title and subtitle strings to certain "styles"
                 For instance, value of 0 (--style 0) uses regular underline
                 value of 1 (--style 1) uses curly underlines, among other
@@ -211,9 +215,13 @@ else
 fi
 
 if [[ ! -z $heightarg ]]; then
-    termheight=$heightarg
+    if [[ $heightarg ==  "term" ]]; then
+        termheight=$LINES
+    else
+        termheight=$heightarg
+    fi
 else
-    termheight=$LINES
+    termheight="0"
 fi
 
 if ! command -v ansifilter &> /dev/null; then
