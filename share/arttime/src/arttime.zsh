@@ -2039,14 +2039,14 @@ function usr1input_handler {
             sttyresetext
             if [[ $commandkey = "x" ]]; then
                 $(printf $histcmd) $statedir/hist/aart.hist 1000 1000
-                artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor --height term --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
+                artnametemp=$(ls $artdir | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac \"$artcolor\" --tc $titlecolor --height term --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
             else
                 $(printf $histcmd) $statedir/hist/bart.hist 1000 1000
                 local restoredir=$PWD
                 cd $artdir
                 local tmpaart=$(getaart)
                 local aartheight=$(wc -l "${tmpaart}" | sed -n 's/^[[:space:]]*\([0-9]*\)[[:space:]]*.*$/\1/p')
-                artnametemp=$(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p' | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac $artcolor --tc $titlecolor --height term --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
+                artnametemp=$(wc -l * | sed -n '$d;s/^[[:space:]]*'"${aartheight}"'[[:space:]][[:space:]]*\(.*\)$/\1/p' | fzf-tmux --ansi --preview="$bindir/artprint -a {}  --ac \"$artcolor\" --tc $titlecolor --height term --style $style --theme $theme" -p 80%,80%  --preview-window=right,85%)
                 cd $restoredir
             fi
             sttyset
