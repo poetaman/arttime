@@ -1,0 +1,138 @@
+ARTPRINT(1)                     Artprint Manual                    ARTPRINT(1)
+
+NAME
+       artprint - print text art from arttime's collection
+
+SYNOPSIS
+       artprint [OPTION]...
+
+DESCRIPTION
+       artprint prints text art with optional title/subtitle in center of
+       terminal screen, or indented according to page height/width passed as
+       optional arguments.
+
+       Why artprint? To provide a consistent display of text art in multiple
+       CLI applications. While artprint is a program in the arttime(1)
+       repository and used by arttime to print art on screen, it's use is not
+       limited to arttime. One can utilize artprint to bring the beauty of
+       text art to other aspects of development environment.
+
+       Future versions of artprint might have bigger interface changes than
+       arttime. If you do integrate artprint in your development environment,
+       please check that your integration works well after upgrading arttime.
+       While artprint can be used independent of arttime, it is shipped as
+       part of arttime's releases. Upgrading arttime to a newer version can
+       bring changes to artprint that break the way you were using it in past.
+
+OPTIONS
+       There are options to set art, titles, their colors, styling, and etc.
+       artprint looks for text art files in a directory (artdir) relative to
+       its own location. Directory path has name 'arttime' instead of
+       'artprint' as artprint is part of arttime(1) project.
+
+           artdir=<directory_of_arttime>/../share/arttime/textart/
+
+       -a <name>
+           name of a-art file from artdir (default: butterfly)
+
+       -t <str>
+           title message placed under art (default: line-1 from a-art file)
+
+       -s <str>
+           sub-title message (default: none, not printed unless specified)
+
+       --random
+           select and display a random art from arttime's collection. When
+           passed, user should not pass option -a.
+
+       --ac <num>
+           art color,[1] value between 0-15 (default 1 (red))
+
+       --tc <num>
+           title color,[1] value between 0-15 (default 2 (green))
+
+       --sc <num>
+           sub-title color,[1] value between 0-15 (default 6 (cyan))
+
+       --theme <light|dark>
+           when given it overrides above color options (default dark)
+
+       --style <num>
+           style for title and sub-title strings. For instance, value of 0
+           uses regular underline and value of 1 uses curly underlines. Style
+           1 uses more Unicode glyphs, and 0 is more ASCII friendly. Not all
+           terminal emulators support curly underlines. Possible values: [0,1]
+           (default: 0)
+
+       --width <num>
+           width of page (default: terminal width)
+
+       --height <num>|"term"
+           height of page. Also accepts a special string "term" to calculate
+           tty height in it's environment. (default: 0)
+
+       --version
+           Print version number of arttime(1), and exit. Artprint doesn't have
+           it's own version number.
+
+       -m, --man
+           Show artprint's manual, and exit
+
+       -h, --help
+           Print help string, and exit
+
+       [1] art and text can have colors embedded in them. Embedded colors
+       override those specified with options.
+
+EXIT STATUS
+       0
+           Success.
+
+       1
+           Failure (syntax or usage error; unexpected error).
+
+EXAMPLES
+           $ artprint
+               prints default art (butterfly). Title is set from
+               line-1 of art file.
+           $ artprint --random
+               prints a random art from arttime collection
+           $ artprint -a trex -t "Hello World"
+               prints "Hello World" under the trex ASCII art
+           $ artprint -a trex -t "Hello World" --ac 2
+               prints "Hello World" under the trex ASCII art
+               colored in green (number 2)
+
+RESOURCES
+       Man pages: arttime(1)
+
+       Main webpage: https://github.com/poetaman/arttime
+
+       Supplementary wiki: https://github.com/poetaman/arttime/wiki
+
+       Issue tracker: https://github.com/poetaman/arttime/issues
+
+       Discussion: https://github.com/poetaman/arttime/discussions
+
+HISTORY
+       .-----------jgs,  arttime is authored and maintained by Aman Mehra
+       |   .-""""-.   |  and has received contributions from others in
+       |  ////||\\\\  |  opensource community. The project was started in
+       |  |/    _ \|  |  2022 with the aim to revive ASCII art on modern
+       | (  e  (@)  ) |  terminal emulators while providing functionality
+       |  |   C    |  |  of a nifty timer and information feed projector.
+       |   \  ==  /   |  It should work on all POSIX systems with minimal
+       |    `|--|`    |  additional shell utilities. Currently tested to
+       `--------------'  work on Linux, macOS, FreeBSD, and Windows WSL2.
+                         You can reach out at github.com/poetaman/arttime
+                         or githubaman@gmail.com depending on context.
+
+LICENSE
+       Copyright (C) 2022-present Aman Mehra. All text art is a Copyright (C)
+       of individual artists. Usage of sources in arttime project and it's
+       derivates is bound by terms of CFLA. For usual development process,
+       code is available under GPL3. For more detailed information, please
+       refer the documents titled LICENSE_ART, LICENSE_CODE, and
+       LICENSE_ADDENDUM_CFLA at https://github.com/poetaman/arttime.
+
+Artprint 2.3.0                    2024-01-20                       ARTPRINT(1)

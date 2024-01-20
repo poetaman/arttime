@@ -71,7 +71,7 @@ Description:
     arttime is an application that runs in your terminal emulator. It blends
     beauty of text art with functionality of a feature-rich clock/timer
     /pattern-based time manager. For more information on arttime, run
-    ./bin/arttime -h and visit it's github page:
+    ./bin/arttime -m and visit it's github page:
     https://github.com/poetaman/arttime
 
 Options:
@@ -138,6 +138,8 @@ bindir="$installdir/bin"
 artdir="$installdir/share/arttime/textart"
 keypoemdir="$installdir/share/arttime/keypoems"
 srcdir="$installdir/share/arttime/src"
+docdir="$installdir/share/arttime/doc"
+mandir="$installdir/share/man/man1"
 if [[ -z $zcompdir_arg ]]; then
     zcompdir="$HOME/.local/share/zsh/functions"
 elif [[ $zcompdir_arg == "-" ]]; then
@@ -188,6 +190,8 @@ bindircode=$(checkdir $bindir)
 artdircode=$(checkdir $artdir)
 keypoemdircode=$(checkdir $keypoemdir)
 srcdircode=$(checkdir $srcdir)
+docdircode=$(checkdir $docdir)
+mandircode=$(checkdir $mandir)
 [[ ! -z $zcompdir ]] && zcompdircode=$(checkdir $zcompdir)
 
 printdirerror $installdircode $installdir
@@ -195,6 +199,8 @@ printdirerror $bindircode $bindir
 printdirerror $artdircode $artdir
 printdirerror $keypoemdircode $keypoemdir
 printdirerror $srcdircode $srcdir
+printdirerror $docdircode $docdir
+printdirerror $mandircode $mandir
 [[ ! -z $zcompdir ]] && printdirerror $zcompdircode $zcompdir
 
 if [[ ! ${#direrrorarray[@]} -eq 0 ]]; then
@@ -222,6 +228,13 @@ cp * $srcdir/
 echo "Copying keypoems under $keypoemdir"
 cd $installerdir/share/arttime/keypoems
 cp * $keypoemdir/
+
+# Copy man documents
+echo "Copying manual under $mandir"
+cd $installerdir/share/arttime/doc
+cp * $docdir/
+cd $installerdir/share/man/man1
+cp * $mandir/
 
 if [[ ! -z $zcompdir ]]; then
     # Copy zsh completion files
@@ -298,41 +311,57 @@ case "${machine}" in
         fi
         ;;
     "Darwin")
-        echo "[4mNote[0m: Notification settings on macOS are not fully in control of an application.\n      To check if you have desired notification settings, open following link.\n      https://github.com/poetaman/arttime/issues/11"
+        echo "[4mNote[0m: Notification settings on macOS are not fully in control of an application.\n      To check if you have desired notification settings, open following link:\n      https://github.com/poetaman/arttime/issues/11" >/dev/tty
         ;;
     "WSL")
         if ! command -v wsl-notify-send.exe &>/dev/null; then
-            echo "[4mDEPENDS[0m: If you want desktop notifications, you need wsl-notify-send.exe\n         Install it from https://github.com/stuartleeks/wsl-notify-send"
+            echo "[4mDEPENDS[0m: If you want desktop notifications, you need wsl-notify-send.exe\n         Install it from https://github.com/stuartleeks/wsl-notify-send" >/dev/tty
         fi
         ;;
     *) ;;
 esac
 
+loginshell=$(basename "${SHELL}")
+if [[ $loginshell == *zsh* ]]; then
+    profile='.zshrc'
+elif [[ $loginshell == *bash* ]]; then
+    #if [[ -e $HOME/.bash_profile ]]; then
+    #    profile='.bash_profile'
+    #else
+    #    profile='.profile'
+    #fi
+    profile=".bashrc"
+else
+    profile=''
+fi
+
+# Check if installed man page is on user's $MANPATH
+if [[ ":$MANPATH:" != *":$installdir/share/man:"* ]]; then
+    if [[ $noupdaterc_arg != "" ]]; then
+        echo "[4mNote[0m": Please add $installdir/share/man" to \$MANPATH"
+    elif [[ $profile != "" ]]; then
+        echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
+        echo 'export MANPATH='"$installdir/share/man"':$MANPATH' >>$HOME/$profile
+        echo "[4mNote[0m": Added $installdir/share/man" to \$MANPATH in $profile"
+    else
+        echo "[4mNote[0m": Please add $installdir/share/man" to \$MANPATH"
+    fi
+fi
+
 # Check if path to arttime excutable is on user's $PATH
 if [[ ":$PATH:" == *":$bindir:"* ]]; then
     echo "Installation complete!\nType 'arttime' and press Enter to start arttime."
 else
-    loginshell=$(basename "${SHELL}")
-    if [[ $loginshell == *zsh* ]]; then
-        profile='.zshrc'
-    elif [[ $loginshell == *bash* ]]; then
-        #if [[ -e $HOME/.bash_profile ]]; then
-        #    profile='.bash_profile'
-        #else
-        #    profile='.profile'
-        #fi
-        profile=".bashrc"
-    else
-        profile=''
-    fi
     if [[ $noupdaterc_arg != "" ]]; then
+        echo "[4mNote[0m": Please add $bindir" to \$PATH"
         echo "Installation complete! Type 'arttime' and press Enter to start arttime.\nIf arttime command is not found, try one of following:\n    1) source your *rc file or restart terminal,\n    2) add install directory to PATH in your *rc file and try 1) again."
     elif [[ $profile != "" ]]; then
         echo "\n# Following line was automatically added by arttime installer" >>$HOME/$profile
         echo 'export PATH='"$bindir"':$PATH' >>$HOME/$profile
-        echo 'Note: Added export PATH='"$bindir"':$PATH to ~/'"$profile"
+        echo "[4mNote[0m": Added $bindir" to \$PATH in $profile"
         echo "Installation complete!\nSource ~/$profile or restart terminal. Then type 'arttime' and press Enter to start arttime."
     else
+        echo "[4mNote[0m": Please add $bindir" to \$PATH"
         echo "Installation [31m*[0malmost[31m*[0m complete! To start using arttime, follow these steps:\n    1) Add $bindir to your PATH environment variable in appropriate file,\n    2) Open a new terminal session, type 'arttime' and press Enter.\nTo run it right away from this shell, execute arttime by specifying its full path:\n       $bindir/arttime"
     fi
 fi

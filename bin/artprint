@@ -10,7 +10,7 @@ if ! is-at-least "5.7"; then
     exit 1
 fi
 
-arttime_version="2.1.3"
+arttime_version="2.3.0"
 
 zmodload zsh/zutil
 zmodload zsh/terminfo
@@ -28,6 +28,7 @@ $(printf "$zparseoptscmd") \
    a:=artname_arg \
    -random=random_arg \
    h=help_arg \
+   m=man_arg \
    -tc:=titlecolor_arg \
    -sc:=subtitlecolor_arg \
    -ac:=artcolor_arg \
@@ -38,6 +39,7 @@ $(printf "$zparseoptscmd") \
    -debug=debug_arg \
    -version=version_arg \
    -help=help_arg \
+   -man=man_arg \
    || return
 
 if [[ "${#@}" != "0" ]]; then
@@ -49,98 +51,104 @@ fi
 
 function printhelp {
 read -r -d '' VAR <<-'EOF'
-Name:
-    artprint    print text art, part of arttime repository
+Usage:
+    artprint [OPTION]...
 
-Invocation:
-    artprint [OPTIONS]...
-
-Description:
-    artprint prints text art with optional title/subtitle in center of
-    terminal screen, or indented to height/width passed as optional 
-    arguments.
-    
-    Why artprint? To provide a consistent display of text art in multiple
-    applications. While artprint is a program in the arttime repository and
-    used by arttime to print art on screen, it is not tied or limited
-    to arttime. One can use artprint to bring the beauty of text art
-    to various aspects of their development environment, without having
-    to reinvent the wheel.
-
-    Call for artists (copied from arttime's help page $ arttime -h):
-    Much good ascii art was created during web 1.0,
-    but the artform declined after that. arttime intends to be a
-    platform/repository for hosting/displaying ascii/ansi art,
-    as ascii/ansi does have its natural home on a terminal (instead
-    of a wall of an arts museum). In doing so it also encourages sharing art,
-    a not so common drift with the arrival of NFTs (where monkey stickers
-    are being priced at hundreds of thousands of US dollars).
-    The repository already provides a curated library of good ascii art
-    (mixed at times with computer-generated text version of digital images).
-    
-    Read LICENSE_ART for license of art files, and LICENSE_CODE for
-    license of code in arttime's repository (which artprint is part of).
-
-Options:
-    There are options to specify what art to display, colors,
-    string styling, etc. artprint looks for text art files in a directory
-    relative to its own location (let's call it artdir):
-        artdir="<dir_of_artprint>/../share/arttime/textart/*"
-    Note: directory path has name 'arttime' instead of 'artprint' as artprint
-    is part of arttime repository, which intends to be a platform/repository
-    of text art.
-
-    -a          artfile in artdir (default: trex)
-    -t          title message placed under art (default: line 1 in artfile)
-    -s          subtitle message (default: none, not printed)
-    --random    select and print a random art from arttime's collection
-                When passed, user should not pass option -a
-
-    --ac        art color*, value between [1,15]
-    --tc        title color*, value between [1,15]
-    --sc        subttile color, value between [1,15]
-    --theme     when given it overrides above color options [light,dark]
-
+Option summary:
+    -a <name>
+        name of a-art file from artdir
+    -t <str>
+        title message placed under art
+    -s <str>
+        sub-title message
+    --random
+        select random art from arttime's collection
+    --ac <num>
+        art color, value between 0-15
+    --tc <num>
+        title color, value between 0-15
+    --sc <num>
+        sub-title color, value between 0-15
+    --theme <light|dark>
+        theme
+    --style <num>
+        style number
     --width <num>
-                width of output (default: tty width, so art is centered)
-    --height <num>
-                height of output (default: 0, so there is no top padding)
-                also accepts a special string "term" to calculate
-                tty height in it's environment
-    --style     process title and subtitle strings to certain "styles"
-                For instance, value of 0 (--style 0) uses regular underline
-                value of 1 (--style 1) uses curly underlines, among other
-                things. Not all terminal emulators support curly underlines.
-                Possible values: [0,1] (default: 0)
-    --version   Print version number of arttime it was shipped with, and exit
-                Note: artprint doesn't have it's own version number
-    -h, --help  Print this help string, and exit
+        page width
+    --height <num>|"term"
+        page height
+    --version
+        Print version number of *arttime*, and exit
+    -m, --man
+        Show artprint's manual, and exit
+    -h, --help
+        Print help string, and exit
 
-    *Note: artfile can have ANSI color sequences embedded in it.
-    In that case, those escape sequences and their location override how
-    art/title is colored. Also, ANSI escape sequences embedded in an art
-    file can exceed the capability of underlying terminal emulator, in
-    which case colors will not be displayed correctly. A future option can
-    filter ANSI escape sequences for such terminals.
-
-Examples:
-    $ artprint
-        prints trex art with default title message from the file named trex
-        in artdir
-    $ artprint --random
-        prints a random art from arttime collection
-    $ artprint -t "Hello World - Jurrasic"
-        prints trex art with "Hello World - trex" under the trex ASCII art
-    $ artprint -t "Hello World - Jurrasic" --ac 2
-        prints "Hello World - Jurrasic" under the trex ASCII art
-        colored in color 2 (green)
+For more information on artprint, try:
+    $ artprint -m
+    $ man artprint
 EOF
 echo $VAR
 }
 
+# directories
+bindir="${0:A:h}"
+artdir="$bindir/../share/arttime/textart"
+
 if [[ ! -z $help_arg[-1] ]]; then
     printhelp
     exit 0
+elif [[ ! -z $man_arg[-1] ]]; then
+    unamestr="$(uname -a)"
+    case "${unamestr}" in
+        Linux*)
+            if [[ "$unamestr" =~ ^.*[Mm]icrosoft.*$ ]]; then
+                machine="WSL"
+            else
+                machine="Linux"
+            fi
+            ;;
+        Darwin*)    machine="Darwin";;
+        *BSD*)      machine="BSD";;
+        *)          machine="UNKNOWN:${unamestr}";;
+    esac
+    docdir="$bindir/../share/arttime/doc"
+    mandir="$bindir/../share/man/man1"
+    if [[ -f $docdir/artprint.1.ans ]]; then
+        if command -v less &>/dev/null; then
+            LESS="" exec less -SRKP 'Press q to quit\. Use arrow keys, j/k, PageDown, PageUp to scroll\.' $docdir/artprint.1.ans
+        elif command -v most &>/dev/null; then
+            COLORTERM=16 exec most $docdir/artprint.1.ans
+        else
+            exec cat $docdir/artprint.1.ans
+        fi
+    fi
+    if command -v less &>/dev/null; then
+        export LESS=""
+        export LESS_TERMCAP_md=$(echoti setaf 4; echoti bold)
+        export LESS_TERMCAP_us=$(echoti setaf 5; echoti sitm)
+        export LESS_TERMCAP_ue=$(echoti sgr0)
+    fi
+    export MANWIDTH=80
+    export MANROFFOPT=""
+    export GROFF_SGR=1
+    if [[ -f $mandir/artprint.1.gz ]]; then
+        if [[ $machine == "Linux" ]]; then
+            export MANPAGER="less -SRK" 
+            export MANLESS="Press q to quit\. Use arrow keys, j/k, PageDown, PageUp to scroll\."
+            exec command man --nh --nj $mandir/artprint.1.gz
+        elif [[ $machine == "Darwin" ]] && command -v gman &>/dev/null; then
+            export MANPAGER="less -SRK" 
+            export MANLESS="Press q to quit\. Use arrow keys, j/k, PageDown, PageUp to scroll\."
+            exec command gman --nh --nj $mandir/artprint.1.gz
+        elif command -v man &>/dev/null; then
+            export MANPAGER="less -SRKP \"Press q to quit\. Use arrow keys, j/k, PageDown, PageUp to scroll\.\"" 
+            exec command man $mandir/artprint.1.gz
+        else
+            echo "E: command 'man' not found"
+            exit 1
+        fi
+    fi
 elif [[ ! -z $version_arg[-1] ]]; then
     echo "$arttime_version"
     exit 0
@@ -163,10 +171,6 @@ if [[ $artname != "" && $randomarg != "" ]]; then
     echo "Error: options -a <artname> and --random should not be passed together."
     exit 1
 fi
-
-# directories
-bindir="${0:A:h}"
-artdir="$bindir/../share/arttime/textart"
 
 if [[ ! -z $debug ]]; then
     tchar="|"

@@ -1,0 +1,550 @@
+ARTTIME(1)                      Arttime Manual                      ARTTIME(1)
+
+NAME
+       arttime - scriptable text art viewer with timer, clock and a free line
+
+SYNOPSIS
+       arttime [OPTION]...
+
+DESCRIPTION
+       arttime brings curated text art to otherwise artless terminals of
+       starving developers, and others who can use a terminal. While doing so,
+       it blends the display of text art with functionality of a timer,
+       time-manager and a clock. With arttime you can set, clear, pause, or
+       restart timer with a couple of keystrokes. It also provides a versatile
+       free line of text under art as a space to jot down thought of the day
+       or a functional message like "debug the failing build tonight".
+       Arttime's scriptable interface makes it possible to display dynamic
+       feed of information. Using a simple external feeder, one can show live
+       system metrics, clickable news feeds, stocks, weather data, and etc.
+       The design decision to unify art and functionality will become apparent
+       in next section.
+
+       Animation: Some great ascii artists of Web 1.0 era have produced pairs
+       of text art that creates an illusion of motion when displayed in
+       sequence. In it's normal mode, arttime can be set to display a
+       flip-flop animation that toggles between a pair of arts every second.
+       Arttime ships with multiple such animation pairs, one example pair is
+       shown in section CONTRIBUTING. With scripts, one can easily create long
+       text art animations and storyboards. The installation of arttime comes
+       with a storyboard titled "story.batscovid_8b".
+
+       To learn basics of arttime in a minute, run the following command. Next
+       section describes arttime's user interface with a diagram (Fig-1) that
+       would be handy to look at before or after the demo.
+
+           $ arttime -k learn.welcome_8b
+
+       Section ORCHESTRATING, that follows the next section, describes what
+       happens under the hood when you run the above command. Knowing that
+       would help you orchestrate arttime's user interface like a pro, or even
+       script it as a programmer to create custom animations, information
+       feeds, and etc. Following that, there are sections common to manpages.
+       A section CONTRIBUTING would be of interest for both artists and
+       programmers alike. Footnotes of a section are placed at the end of that
+       section, so you won't have to scroll much. And this document is
+       supplemented by online resources mentioned in section RESOURCES.
+
+USER INTERFACE
+       The user interface (UI) of arttime is simple. Fig-1 shows it's
+       annotated main page without any timers set. Salient to the UI is text
+       art that is kept centered on the screen. Message under art displays a
+       caption, quote, thought of the day, or dynamic information. Two most
+       interesting times, and their delta is shown on a dedicated line of
+       times. Everything is configurable, even while arttime is running. All
+       interactions with the application are performed with keyboard. Meaning
+       of keys can be accessed anytime by pressing 'h'  from the main page.
+
+       .------------------------------------------------------------------,
+       |                                                                  |
+       | ARTTIME USER                    .--------------------- ART       |
+       |    INTERFACE                    |                                |
+       |                                 |                                |
+       |                   _             |             _                  |
+       |                  / `._          |          _.' \                 |
+       |                 ( @ : `.                 .' : @ )                |
+       |                  \  `.  `.  ._     _.  .'  .'  /                 |
+       |                   \;' `.  `.  \   /  .'  .' `;/                  |
+       |                    \`.  `.  \  \_/  /  .'  .'/                   |
+       |                     ) :-._`. \ (:) / .'_.-: (                    |
+       |                     (`.....,`.\/:\/.',.....')                    |
+       |                      >------._|:::|_.------<                     |
+       |   MESSAGE ---,      / .'._>_.-|:::|-._<_.'. \                    |
+       |              |      |o _.-'_.-^|:|^-._`-._ o|                    |
+       |              |      |`'   ;_.-'|:|`-._;   `'|                    |
+       |              | jgs  ".o_.-' ;."|:|".; `-._o."                    |
+       |              |        ".__."   \:/   ".__."                      |
+       |              |                  ^                                |
+       |                                                                  |
+       |       "I live on a tree and drink quality tea" - Butterfly       |
+       |   Dec 30, 01:19PM | time elapsed 00h 01m 21s | Dec 30, 01:21PM   |
+       |       -------          -------     -------         -------       |
+       |          |                |           |               |          |
+       |          |                |           |               |          |
+       |     START TIME       DELTA KIND     DELTA        CURRENT TIME    |
+       |                                                                  |
+       `------------------------------------------------------------------'
+                   Fig-1 main screen of arttime's user interface
+
+       Times and time delta shown on the main screen change depending on
+       context. Following table shows various contexts and what gets shown
+       when arttime is in one of them. Earlier time is displayed to the left
+       of delta, and later time to it's right. This makes it easier to
+       associate two times with respect to difference between them.[1]
+       +--------------+--------------+------------------+--------------+
+       | goal context | left time    | delta kind       | right time   |
+       +--------------+--------------+------------------+--------------+
+       | cleared      | reset time   | time since reset | current time |
+       +--------------+--------------+------------------+--------------+
+       | pending      | current time | time to goal     | goal time    |
+       +--------------+--------------+------------------+--------------+
+       | paused       | pause time   | time since pause | current time |
+       +--------------+--------------+------------------+--------------+
+       | passed       | current time | time since goal  | goal time    |
+       +--------------+--------------+------------------+--------------+
+
+       Visual cues like color, underline, and reverse video are used to
+       distinguish between times. For instance, current time is always shown
+       with an underline (not shown in Fig-1). A progress bar appears under
+       the line of times when timers are set. When there is more than one
+       timer, a goal and/or sprint number is also displayed. Pressing 'i' or
+       'I' lists all timers, and time remaning for each of them.
+
+       For developers questioning how arttime could fit in the limited
+       real-estate-space on their computer screen, Fig-2 shows a possible
+       4-pane layout. First split the screen vertically in two halves. The
+       left pane 1 is dedicated for your text editor; figure shows start
+       screen of vim. Then split the right pane horizontally in two. Top-right
+       pane 2 is where arttime goes; figure shows arttime's main screen with
+       house art. Finally, pane 3 at bottom-right is for interactive shell.
+       Wait! these are just 3 panes, didn't I just call it a 4-pane layout?
+       That's because arttime provides functionality of at least two
+       applications (timer, art viewer) in space of one pane. Using two
+       different applications would either eat into the area for text editor
+       (pane 1) or interactive shell (pane 2). Both of those tradeoffs are
+       unacceptable. That should explain why arttime merges functionality of a
+       timer with that of an art viewer: to fit functionality of two
+       applications in the screen space for one. Feeding and displaying
+       dynamic information makes arttime a 3-in-1 application, thus utilizing
+       screen space even more judiciously. Next section discusses dynamic
+       information feeds.
+
+       .---------------------------------,---------------------------------,
+       |~                              1 |               `'::.           2 |
+       |~                                |          _________H ,%%&%,      |
+       |~                                |         /\     _   \%&&%%&%     |
+       |~                                |        /  \___/^\___\%&%%&&     |
+       |~                                |        |  | []   [] |%\Y&%'     |
+       |~                                |        |  |   .-.   | ||        |
+       |~       VIM - Vi IMproved        |  jgs ~~@._|@@_|||_@@|~||~~      |
+       |~         version 9.0.2          |            `""") )"""`          |
+       |~  Vim is open source and free   |                                 |
+       |~                                |  "Home is where your heart is"  |
+       |~      Help poor children!       |     9AM | elapsed 5h | 2PM      |
+       |~  info at :help iccf<Enter>     |---------------------------------|
+       |~                                |                               3 |
+       |~  quit    :q<Enter>             | $ pwd                           |
+       |~  help    :help<Enter>          | /home/self/github/arttime       |
+       |~  version :help version9<Enter> |                                 |
+       |~                                | $ ls                            |
+       |~                                | LICENSE_ART   LICENSE_ADD  /bin |
+       |~                                | LICENSE_CODE  README.md         |
+       |~                                | install.sh    /share            |
+       |~                                |                                 |
+       |~                                | $ _                             |
+       |                      0,0-1   All|                                 |
+       `---------------------------------'---------------------------------'
+                Fig-2 possible developer screen layout with arttime
+
+       [1] The only exception to this rule is for the "goal passed" context,
+       where an earlier time (passed goal time) is displayed to the right and
+       current time is displayed to the left of delta. They are still very
+       distinguishable as current time is underlined as always, and passed
+       goal time is highlighted in reverse video.
+
+ORCHESTRATING
+       This section has something for pro users, programmers as well as
+       interface (UI) designers, while still revolving around a central
+       concept of orchestrating arttime with pre-recorded keystrokes. Language
+       of arttime's keystrokes is all you need to operate it, write
+       configuration files, run macros, or script it from a remote process.
+       Other applications divide these features into four disparate
+       interfaces, each with it's own language: configuration files, command
+       options, macros, remote control API. In author's opinion, prevalent
+       style of disparate API stems either from the necessities of an era when
+       inter process communication (IPC) interfaces weren't stable or
+       misapplication of a norm set for non-interactive applications upon
+       interactive ones. Whatever be the reason, utilizing IPC can save both
+       development effort and greatly ease user experience for a range of
+       interactive applications.
+
+       .-----------------------------------------------------------------,
+       |                                                                 |
+       |   KEYS FOR EVERYTHING                                           |
+       |       (KFE) INTERFACE  .------------------------------------,   |
+       |                        |                `'::.               |   |
+       |                        |            _________H ,%%&%,       |   |
+       |                        |           /\     _   \%&&%%&%      |   |
+       |                        |          /  \___/^\___\%&%%&&      |   |
+       |         /  file        |          |  | []   [] |%\Y&%'      |   |
+       |         |  --------,   |          |  |   .-.   | ||         |   |
+       |         |  fifo    |   |    jgs ~~@._|@@_|||_@@|~||~~       |   |
+       |  SCRIPT |  --------|   |              `""") )"""`           |   |
+       |    MODE |  pipe    |   |                                    |   |
+       |         |  --------|   |  ASML +3% .. AAPL -1% .. TSLA +1%  |   |
+       |         |  stdin   |---|       9AM | elapsed 5h | 2PM       |   |
+       |         \  --------|   |                                    |   |
+       |                    |   |                              SCRIPT|   |
+       |                    |   `------------------------------------'   |
+       |            keyboard|                                            |
+       |            ________|_______              .----------------------|
+       |           /:::::::::':::'::\             | Features:            |
+       |          /::======::: .:.:::\            |  - configuration     |
+       |      jgs `""""""""""""""""""`            |  - macros            |
+       |                                          |  - animation         |
+       |                                          |  - information feeds |
+       `-----------------------------------------------------------------'
+           Fig-3 multiple sources for keystrokes and resulting features
+                 Shows live stock market feed from a remote program
+
+       Fig-3 shows that in addition to computer's keyboard, keystrokes can be
+       fed into arttime from a file, fifo, pipe, or standard input.[2] Arttime
+       understands a language of it's keystrokes called artlang. A file or
+       feed written in artlang is referred as keypoem in arttime's user
+       interface. Some keypoems come with installation, the file
+       learn.welcome_8b mentioned in first section is one among them. The
+       listing below shows how arttime can be connected to read keystrokes
+       from different sources at launchtime. Such examples are shown with GIFs
+       on arttime's webpages that are mentioned in section RESOURCES.
+
+           $ printf 'mhello world\njjjjjjjjy' | arttime
+               pipe keystrokes into arttime
+           $ arttime -k /path/to/config4
+               read keystrokes from a file named config4
+           $ arttime -k /path/to/weatherfeeder-fifo
+               listen at the read-end of a fifo for weather data
+
+       Acting as macros, keypoems save time and effort needed to change
+       arttime's state. Instead of typing long sequences of keys, one can load
+       them from files. It is simple to make arttime read keys from a file or
+       fifo at runtime, just press 'k' and let the interface guide you. When
+       keystrokes are being fed from a source other than keyboard, arttime
+       runs in SCRIPT mode. Most keys pressed by the user on the keyboard are
+       ignored while arttime is in that mode. To immediately quit from SCRIPT
+       mode and transfer the control back to computer's keyboard, one can
+       signal interrupt. That is achieved by pressing Ctrl-c on most
+       terminals. You can also pause and unpause a feed by pressing 'p'.
+
+       The inbuilt ability to feed keystrokes from a fifo allows one to
+       temporarily connect arttime to a remote program for more innovative
+       use. For instance, one can write feeders to display clickable news
+       feeds, tweets, stock market feed, weather data, system metrics, and
+       etc. in arttime. As a boon to developers, such feeder programs can be
+       written in any programming language of choice. The interface is also
+       secure, as most states of feeder and arttime are hermetically sealed
+       from each other. For instance, if feeder crashes, arttime still
+       continues functioning well. The interface also gives a clean license
+       boundary as two codebases don't overlap. Given the enormous matrix of
+       feeder applications and the languages they can be coded in, it makes
+       sense to keep them out of arttime project. In a way, one can think of
+       arttime as a projector with a HDMI port. Devices you can connect and
+       contents you can project are too varied to be part of the projector
+       box. More information on writing and contributing feeders is mentioned
+       in section CONTRIBUTING.
+
+       [2] While this might not sound new to Unix users, none of the
+       interactive applications tried by the author at the time of writing
+       give first-class and native support for feeding keys from different
+       sources while also doing a clean handoff between them. Application
+       writers have traditionally relied on non-native approaches to let users
+       connect their application to a source of choice. Though all such
+       attempts are marred by corner-cases that make user interface limiting
+       and user experience dissatisfying. If we are to call this design
+       pattern of arttime as Keys for everything (KFE), it wouldn't be
+       surprising to learn that arttime might be the first application to
+       implement it reasonably.
+
+OPTIONS
+   Content settings
+       There are options to control content displayed on main screen at launch
+       time. This includes art and static text placed under it. arttime looks
+       for art files in a directory (artdir) relative to its own location:
+
+           artdir=<directory_of_arttime>/../share/arttime/textart/
+
+       -a <name>
+           name of a-art file from artdir (default: butterfly)
+
+       -b <name>
+           name of b-art file from artdir (none by default)
+
+       -t <str>
+           text placed under art (default: line-1 from a-art file)
+
+       --random
+           select and display a random art from arttime's collection. When
+           passed, user should not pass option -a or -b.
+
+   Timer settings
+       -g <time[;time;...;[loop[N]]]>
+           semicolon separated list of goal times you want to get notified at.
+           Each time can be relative to current time (like a timer) or
+           absolute (like an alarm). A loop mentioned as the last time in list
+           makes the application loop over the list of times forever. Or a
+           loopN at the end makes arttime loop over the list N times. Each
+           time in the list can be of a simple or complex format:
+
+            1. "2m 30s" (2 minutes and 30 seconds from now)
+
+            2. "May 3 1:15PM IST" (IST stands for Indian Standard Time),
+
+            3. "next monday 1PM" (1PM local time of coming Monday)
+
+            4. "next friday +10 hours" (10AM local time on coming Friday)
+
+           All times should be entered without quotes. Styles 2-4 are
+           currently supported only if GNU date(1) (or gdate(1)) is installed
+           on the system. macOS/BSD's default date command does not parse
+           complex time specifications like in 2-4. Please search the web for
+           instructions to install GNU date on your system if you have already
+           not done so. Arttime can tell whether you already have GNU date
+           installed or not, just press 'g', type 'help', and press Enter.
+
+       --hours <12|24>
+           show times in 12 or 24 hour format. The setting, like many others,
+           can be changed from within arttime with a keystroke. (default: 12)
+
+   Key feed settings
+       As discussed in section ORCHESTRATING, arttime can be fed keys from
+       various sources. A source is read till either it's end is reached or
+       user signals interrupt (Ctrl-c on most systems), whichever comes first.
+       Then control gets cleanly transferred to computer's keyboard. arttime
+       can be fed keystrokes from a file, standard input, pipe, or a fifo.
+
+       -k, --keypoem <name|file|fifo>
+           feed keystrokes from a keypoem file/fifo. The option can either be
+           passed a name of a file/fifo under keypoemdir:
+
+               keypoemdir=<directory_of_arttime>/../share/arttime/keypoems/
+
+           or full path to a keypoem file/fifo. Many keypoems are already
+           included with arttime's installation. They are organized by prefix
+           in name that is suggestive of function. Here's a representative
+           list of examples: learn.welcome_8b, timer.pomodoro4learn_8b,
+           anim.military, story.batscovid_8b. While entering command in zsh,
+           hitting the Tab key should help you complete keypoem names.
+
+   Style settings
+       --ac <num>
+           color of art,[3] value between 0-15 (default 1 (red))
+
+       --tc <num>
+           color of text under art,[3] value between 0-15 (default 2 (green))
+
+       --theme <light|dark>
+           when given, it overrides above color options (default dark)
+
+       --style <num>
+           style for text placed under art and progress bar. For instance,
+           value of 0 uses regular underline and value of 1 uses curly
+           underline. Style 1 uses more Unicode glyphs, and 0 is more ASCII
+           friendly. Not all terminal emulators support curly underlines.
+           Possible values: [0,1] (default 0)
+
+       --pa <str>
+           char/string to denote pending part of progress bar. If a string,
+           its length should be same as string passed to --pb. (default '-')
+
+       --pb <str>
+           char/string to denote completed part of progress bar. If a string,
+           its length should be same as string passed to --pa. (default '>')
+
+       --pl <num>
+           progress bar length (default 10)
+
+       [3] art and text can have colors embedded in them. Embedded colors
+       override those specified with options or by pressing 'c' at runtime.
+
+   Miscellaneous settings
+       --nolearn
+           arttime shows meaning of keys when it is launched. When this option
+           is passed, it goes on to directly display text art instead (a
+           butterfly by default). At runtime, pressing 'h' toggles between
+           showing art and the meaning of keys.
+
+       --version
+           Print version number of arttime, and exit
+
+       -m, --man
+           Show arttime's manual, and exit
+
+       -h, --help
+           Print help string, and exit
+
+ENVIRONMENT
+       TZ
+           Time zone identifier. Without this environment variable set,
+           arttime will show times in system's default timezone. Changing
+           timezone from within arttime is easy: press 'z' followed by Tab and
+           then let the application guide you to the desired timezone. If you
+           want to launch arttime with different timezone than system's
+           default, you can do so by first setting environment variable TZ to
+           appropriate time zone identifier. For instance, the following
+           invocation will launch arttime in India's timezone:
+
+               $ TZ=Asia/Kolkata arttime
+
+           Do not set TZ to abbreviated names like IST. Unlike our confident
+           usage of abbreviated timezone names, they are not unique across the
+           globe. For instance, IST can refer to Indian standard time or Irish
+           standard time. Also, every system can have slightly different
+           timezone identifiers that it understands. They are identified by
+           names of files under zoneinfodir: /usr/share/zoneinfo/. In above
+           example, we chose the identifier Asia/Kolkata because file Kolkata
+           resides under directory Asia which in turn is under zoneinfodir.
+
+EXIT STATUS
+       0
+           Success.
+
+       1
+           Failure (syntax or usage error; unexpected error).
+
+EXAMPLES
+           $ arttime
+               launches arttime, shows meaning of keys by default.
+               Then pressing 'h' toggles between that help page and
+               arttime's default art (which is a butterfly)
+           $ arttime --nolearn --random
+               displays a random art from arttime collection. Passing
+               --nolearn makes sure to not show keybindings upon launch
+           $ arttime --nolearn -t "Hello World - Butterfly"
+               prints default (butterfly) art with "Hello World - Butterfly"
+               under text art
+           $ arttime --nolearn -a winnepooh -b winnepooh2
+               set a-art and b-art to get a flip-flopping animation effect
+           $ arttime --nolearn -t "Hello World - Butterfly" --ac 2 --style 1
+               prints "Hello World --  Butterfly", sets art-color to 2
+               (green), and sets style to use more Unicode characters
+           $ printf "cccg10s\nmHello World\nh" | arttime
+               starts arttime in SCRIPT mode. Just like keypoem files,
+               keystrokes are read from pipe till the pipe ends or user
+               signals interrupt (mostly Ctrl-c). Then control gets
+               transferred to the keyboard. With the keystrokes shown here:
+               "ccc" changes color of art thrice to settle on blue;
+               "g10s\n" sets a 10 second timer; "mHello World\n"
+               changes message under art to "Hello World"; "h"
+               toggles help page to show text art.
+           $ arttime -k learn.welcome_8b
+               starts arttime in SCRIPT mode. Keystrokes are read from
+               keypoem file learn.welcome_8b in keypoemdir.
+               Suffix '8b' tells arttime to read the file at 8 bytes/sec.
+           $ arttime -k timer.pomodoro4etc
+               starts arttime in SCRIPT mode, reads keystrokes from
+               file timer.pomodoro4etc under keypoemdir. Essentially,
+               sets a pomodoro time management program, changes art to
+               a colored tomato, and sets a message under the art.
+               Press 'i' when screen settles to see your upcoming timers.
+
+CONTRIBUTING
+   Art
+       Arttime intends to be a repository for curating text art as such art
+       has its most natural home on a terminal and not wall of a museum. If
+       you are a text artist interested in adding your work to arttime's
+       collection, or know someone who would be interested, please feel free
+       to reach out. Arttime mainly accepts individual pieces of text art or
+       pairs of related text art for flip-flop animation like in Fig-4.
+
+       .---------------------------------------------------------------,
+       |                                                               |
+       | ANIMATION        _     _             _     _           jgs    |
+       |      PAIR       /\\.--/\\           //\--.//\                 |
+       |                 \_ _  \//\    |    /\\/  _ _/                 |
+       |               __/o o`     |   |   |     `o o\__               |
+       |              (/           |   |   |           \)              |
+       |               \__,        /   |   \        ,__/               |
+       |              __\-'       /    |    \       '-/__              |
+       |         .-'``\ /`"-=.-="`)    |    (`"=-.=-"`\ /``'-.         |
+       |       /`  _.-.'          \    |    /          '.-._  `\       |
+       |       \_."   ,`-._ /    /_\   |   /_\    \ _.-`,   "._/       |
+       |             /     /-.._/ |    |    | \_..-\     \             |
+       |            |     /    /  |    |    |  \    \     |            |
+       |           ,|    '.__.'   |    |    |   '.__.'    |,           |
+       |       _  /  \     .-"".  /    |    \  .""-.     /  \  _       |
+       |      / \/   /`-._|     |`     |     `|     |_.-`\   \/ \      |
+       |      \  \  /     \     |      |      |     /     \  /  /      |
+       |       \   /       \    |      |      |    /       \   /       |
+       |        '-'         `.  |      |      |  .'         '-'        |
+       |                 .-"`   \      |      /   `"-.                 |
+       |   FLIP          \__,.-'`             `'-.,__/          FLOP   |
+       |                                                               |
+       `---------------------------------------------------------------'
+                 Fig-4 art pair suitable for flip-flop animation
+
+   Package
+       Creating and maintaining a package for arttime should be simple, and
+       also a good learning exercise for those new to package management.
+       Please feel free to reach out if you have any questions.
+
+   Feeder
+       As explained in section ORCHESTRATING, it is quite straightforward to
+       write a custom feeder to display dynamic information in arttime.
+       Moreover, such a feeder can be written in any programming language of
+       choice. If you have created a feeder that displays dynamic information
+       of common interest (like news feeds, system metrics, stocks, weather,
+       etc) please get in touch. Arttime project intends to maintain a
+       separate webpage with links to useful feeder programs. Here's a
+       high-level specification for writing feeders:
+
+        1. Create a fifo when feeder is launched
+
+        2. Wait for arttime to start reading from it
+
+        3. Feed keys into fifo as you would have typed them [4]
+
+        4. Don't crash if arttime hangs-up, goto to 2 instead
+
+        5. If needed, send the sequence 'ky' to signal end of feed [4]
+
+        6. Delete the fifo before feeder exits for whatever reason
+
+       [4] Use capitalized versions like 'A' (set a-art), 'B' (set b-art), 'G'
+       (set goal), 'M' (set message), 'Z' (set timezone) for prompt-free
+       silent updates. These capitalized versions of keys don't work in normal
+       mode when arttime is connected to computer's keyboard. Meaning of keys
+       in SCRIPT mode is slightly different from their meaning in normal mode.
+       For instance, while in SCRIPT mode and on main screen, a sequence 'ky'
+       from the feed signals that feed is over. In contrast, pressing 'k' in
+       normal mode from main screen would open a utility to select a keypoem.
+
+HISTORY
+       .-----------jgs,  arttime is authored and maintained by Aman Mehra
+       |   .-""""-.   |  and has received contributions from others in
+       |  ////||\\\\  |  opensource community. The project was started in
+       |  |/    _ \|  |  2022 with the aim to revive ASCII art on modern
+       | (  e  (@)  ) |  terminal emulators while providing functionality
+       |  |   C    |  |  of a nifty timer and information feed projector.
+       |   \  ==  /   |  It should work on all POSIX systems with minimal
+       |    `|--|`    |  additional shell utilities. Currently tested to
+       `--------------'  work on Linux, macOS, FreeBSD, and Windows WSL2.
+                         You can reach out at github.com/poetaman/arttime
+                         or githubaman@gmail.com depending on context.
+
+RESOURCES
+       Main webpage: https://github.com/poetaman/arttime
+
+       Supplementary wiki: https://github.com/poetaman/arttime/wiki
+
+       Issue tracker: https://github.com/poetaman/arttime/issues
+
+       Discussion: https://github.com/poetaman/arttime/discussions
+
+LICENSE
+       Copyright (C) 2022-present Aman Mehra. All text art is a Copyright (C)
+       of individual artists. Usage of arttime and it's derivates is bound by
+       terms of CFLA. For usual development process, arttime is available
+       under GPL3. For more detailed information, please refer the documents
+       titled LICENSE_ART, LICENSE_CODE, and LICENSE_ADDENDUM_CFLA at
+       https://github.com/poetaman/arttime.
+
+Arttime 2.3.0                     2024-01-20                        ARTTIME(1)

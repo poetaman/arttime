@@ -48,6 +48,8 @@ allopts=(
     '--pb:char/str to denote complete part of progress bar'
     '--pl:progressbar length (integer) in chunks of pa/pb strings'
     '--version:print version number of arttime and exit'
+    '-m:show arttime manual, and exit'
+    '--man:show arttime manual, and exit'
     '-h:print arttime help and exit'
     '--help:print arttime help and exit'
 )
@@ -127,7 +129,7 @@ case $prevword in
         )
         _describe "theme (more will be added in future)" styles
         ;;
-    "-t"|"-g"|"--pl"|"--pa"|"--pb"|"-h"|"--help"|"--version"|"--random")
+    "-t"|"-g"|"--pl"|"--pa"|"--pb"|"-h"|"--help"|"--version"|"--random"|"-m"|"--man")
         return
         ;;
     *)

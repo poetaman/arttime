@@ -1,0 +1,138 @@
+[33m[4mARTPRINT[0m[4m[24m([32m1[0m)                     [31mArtprint Manual                    [33m[4mARTPRINT[0m[4m[24m([32m1[0m)
+
+[34m[1mNAME[0m
+       artprint - print text art from arttime's collection
+
+[34m[1mSYNOPSIS[0m
+       artprint [[35m[4mOPTION[0m[4m[24m]...
+
+[34m[1mDESCRIPTION[0m
+       artprint prints text art with optional title/subtitle in center of
+       terminal screen, or indented according to page height/width passed as
+       optional arguments.
+
+       Why artprint? To provide a consistent display of text art in multiple
+       CLI applications. While artprint is a program in the [35m[4marttime[0m[4m[24m(1)
+       repository and used by arttime to print art on screen, it's use is not
+       limited to arttime. One can utilize artprint to bring the beauty of
+       text art to other aspects of development environment.
+
+       Future versions of artprint might have bigger interface changes than
+       arttime. If you do integrate artprint in your development environment,
+       please check that your integration works well after upgrading arttime.
+       While artprint can be used independent of arttime, it is shipped as
+       part of arttime's releases. Upgrading arttime to a newer version can
+       bring changes to artprint that break the way you were using it in past.
+
+[34m[1mOPTIONS[0m
+       There are options to set art, titles, their colors, styling, and etc.
+       artprint looks for text art files in a directory ([36m[1martdir[0m[1m[22m) relative to
+       its own location. Directory path has name 'arttime' instead of
+       'artprint' as artprint is part of [35m[4marttime[0m[4m[24m(1) project.
+
+           [36m[1martdir[0m[1m[22m=<directory_of_arttime>/../share/arttime/textart/
+
+       [36m[1m-a [35m[4m[22m<name>[0m
+           name of [36m[1ma-art [0m[1m[22mfile from [36m[1martdir [0m[1m[22m(default: [35m[4mbutterfly[0m[4m[24m)
+
+       [36m[1m-t [35m[4m[22m<str>[0m
+           title message placed under art (default: line-1 from [36m[1ma-art [0m[1m[22mfile)
+
+       [36m[1m-s [35m[4m[22m<str>[0m
+           sub-title message (default: none, not printed unless specified)
+
+       [36m[1m--random[0m
+           select and display a random art from arttime's collection. When
+           passed, user should not pass option [36m[1m-a[0m[1m[22m.
+
+       [36m[1m--ac [35m[4m[22m<num>[0m
+           art color,[31m[1m[1] [0m[1m[22mvalue between 0-15 (default [35m[4m1[24m [0m(red))
+
+       [36m[1m--tc [35m[4m[22m<num>[0m
+           title color,[31m[1m[1] [0m[1m[22mvalue between 0-15 (default [35m[4m2[24m [0m(green))
+
+       [36m[1m--sc [35m[4m[22m<num>[0m
+           sub-title color,[31m[1m[1] [0m[1m[22mvalue between 0-15 (default [35m[4m6[24m [0m(cyan))
+
+       [36m[1m--theme [35m[4m[22m<light|dark>[0m
+           when given it overrides above color options (default [35m[4mdark[0m[4m[24m)
+
+       [36m[1m--style [35m[4m[22m<num>[0m
+           style for title and sub-title strings. For instance, value of [35m[4m0[0m
+           uses regular underline and value of [35m[4m1[24m [0muses curly underlines. Style
+           [35m[4m1[24m [0muses more Unicode glyphs, and [35m[4m0[24m [0mis more ASCII friendly. Not all
+           terminal emulators support curly underlines. Possible values: [[35m[4m0[0m[4m[24m,[35m[4m1[0m[4m[24m]
+           (default: [35m[4m0[0m[4m[24m)
+
+       [36m[1m--width [35m[4m[22m<num>[0m
+           width of page (default: terminal width)
+
+       [36m[1m--height [35m[4m[22m<num>|"term"[0m
+           height of page. Also accepts a special string "term" to calculate
+           tty height in it's environment. (default: [35m[4m0[0m[4m[24m)
+
+       [36m[1m--version[0m
+           Print version number of [35m[4marttime[0m[4m[24m(1), and exit. Artprint doesn't have
+           it's own version number.
+
+       [36m[1m-m, --man[0m
+           Show artprint's manual, and exit
+
+       [36m[1m-h, --help[0m
+           Print help string, and exit
+
+       [31m[1m[1] [0m[1m[22mart and text can have colors embedded in them. Embedded colors
+       override those specified with options.
+
+[34m[1mEXIT STATUS[0m
+       [36m[1m0[0m
+           Success.
+
+       [36m[1m1[0m
+           Failure (syntax or usage error; unexpected error).
+
+[34m[1mEXAMPLES[0m
+           $ [36m[1martprint[0m
+               prints default art ([35m[4mbutterfly[0m[4m[24m). Title is set from
+               line-1 of art file.
+           $ [36m[1martprint --random[0m
+               prints a random art from arttime collection
+           $ [36m[1martprint -a trex -t "Hello World"[0m
+               prints "Hello World" under the trex ASCII art
+           $ [36m[1martprint -a trex -t "Hello World" --ac 2[0m
+               prints "Hello World" under the trex ASCII art
+               colored in green (number [35m[4m2[0m[4m[24m)
+
+[34m[1mRESOURCES[0m
+       [36m[1mMan pages: [35m[4m[22marttime[0m[4m[24m(1)
+
+       [36m[1mMain webpage: [32m[22mhttps://github.com/poetaman/arttime[0m
+
+       [36m[1mSupplementary wiki: [32m[22mhttps://github.com/poetaman/arttime/wiki[0m
+
+       [36m[1mIssue tracker: [32m[22mhttps://github.com/poetaman/arttime/issues[0m
+
+       [36m[1mDiscussion: [32m[22mhttps://github.com/poetaman/arttime/discussions[0m
+
+[34m[1mHISTORY[0m
+       .-----------jgs,  arttime is authored and maintained by [36m[1mAman Mehra[0m
+       |   [32m.-""""-.   [0m|  and has received contributions from others in
+       |  [32m////||\\\\  [0m|  opensource community. The project was started in
+       |  [32m|/    _ \|  [0m|  2022 with the aim to revive ASCII art on modern
+       | [33m(  [36me  [32m([36m@[32m)  [33m) [0m|  terminal emulators while providing functionality
+       |  [32m|   [33mC    [32m|  [0m|  of a nifty timer and information feed projector.
+       |   [32m\  [31m==  [32m/   [0m|  It should work on all POSIX systems with minimal
+       |    [32m`|--|`    [0m|  additional shell utilities. Currently tested to
+       `--------------'  work on [35m[4mLinux[0m[4m[24m, [35m[4mmacOS[0m[4m[24m, [35m[4mFreeBSD[0m[4m[24m, and [35m[4mWindows[24m [4mWSL2[0m[4m[24m.
+                         You can reach out at [32mgithub.com/poetaman/arttime[0m
+                         or [32mgithubaman@gmail.com [0mdepending on context.
+
+[34m[1mLICENSE[0m
+       Copyright (C) 2022-present Aman Mehra. All text art is a Copyright (C)
+       of individual artists. Usage of sources in arttime project and it's
+       derivates is bound by terms of CFLA. For usual development process,
+       code is available under GPL3. For more detailed information, please
+       refer the documents titled LICENSE_ART, LICENSE_CODE, and
+       LICENSE_ADDENDUM_CFLA at [32mhttps://github.com/poetaman/arttime[0m.
+
+[33mArtprint 2.3.0                    [31m2024-01-20                       [33m[4mARTPRINT[0m[4m[24m([32m1[0m)
