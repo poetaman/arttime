@@ -148,6 +148,9 @@ elif [[ ! -z $man_arg[-1] ]]; then
             echo "E: command 'man' not found"
             exit 1
         fi
+    else
+        echo "E: artprint manual not found"
+        exit 1
     fi
 elif [[ ! -z $version_arg[-1] ]]; then
     echo "$arttime_version"

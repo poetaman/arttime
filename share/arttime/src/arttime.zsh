@@ -207,6 +207,7 @@ if [[ ! -z $help_arg[-1] ]]; then
     printhelp
     exit 0
 elif [[ ! -z $man_arg[-1] ]]; then
+    setopt monitor
     docdir="$bindir/../share/arttime/doc"
     mandir="$bindir/../share/man/man1"
     if [[ -f $docdir/arttime.1.ans ]]; then
@@ -243,6 +244,9 @@ elif [[ ! -z $man_arg[-1] ]]; then
             echo "E: command 'man' not found"
             exit 1
         fi
+    else
+        echo "E: arttime manual not found"
+        exit 1
     fi
 elif [[ ! -z $version_arg[-1] ]]; then
     echo "$arttime_version"
