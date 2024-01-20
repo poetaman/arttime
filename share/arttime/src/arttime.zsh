@@ -222,7 +222,7 @@ elif [[ ! -z $man_arg[-1] ]]; then
     if command -v less &>/dev/null; then
         export LESS=""
         export LESS_TERMCAP_md=$(echoti setaf 4; echoti bold)
-        export LESS_TERMCAP_us=$(echoti setaf 5; echoti sitm)
+        export LESS_TERMCAP_us=$(echoti setaf 5; echoti sitm 2>/dev/null)
         export LESS_TERMCAP_ue=$(echoti sgr0)
     fi
     export MANWIDTH=80
@@ -842,9 +842,9 @@ function slurp {
 }
 
 
-tputset_str=$(echoti rmam; echoti civis; echoti smcup)
+tputset_str=$(echoti rmam 2>/dev/null; echoti civis; echoti smcup)
 function tputset { printf "$tputset_str"; }
-tputreset_str=$(echoti rmcup; echoti smam; echoti cnorm)
+tputreset_str=$(echoti rmcup; echoti smam 2>/dev/null; echoti cnorm)
 function tputreset { printf "$tputreset_str"; }
 
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
@@ -1645,7 +1645,7 @@ function artselector2 {
         echo $bartarray  | tr ' ' '\n' | column -c$(echoti cols)
         printf '\n'
     else
-        echoti smam
+        echoti smam 2>/dev/null
         printf '%s  ' $bartarray
         printf '\n\n'
     fi

@@ -126,7 +126,7 @@ elif [[ ! -z $man_arg[-1] ]]; then
     if command -v less &>/dev/null; then
         export LESS=""
         export LESS_TERMCAP_md=$(echoti setaf 4; echoti bold)
-        export LESS_TERMCAP_us=$(echoti setaf 5; echoti sitm)
+        export LESS_TERMCAP_us=$(echoti setaf 5; echoti sitm 2>/dev/null)
         export LESS_TERMCAP_ue=$(echoti sgr0)
     fi
     export MANWIDTH=80
