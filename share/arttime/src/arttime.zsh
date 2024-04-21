@@ -174,7 +174,7 @@ Option summary:
     --version
         Print version number of arttime, and exit
     -m, --man
-        Show arttime's manual, and exit
+        Open arttime's manual
     -h, --help
         Print help string, and exit
 

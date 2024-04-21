@@ -80,7 +80,7 @@ Option summary:
     --version
         Print version number of *arttime*, and exit
     -m, --man
-        Show artprint's manual, and exit
+        Open artprint's manual
     -h, --help
         Print help string, and exit
 
