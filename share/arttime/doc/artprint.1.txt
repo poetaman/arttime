@@ -130,9 +130,9 @@ HISTORY
 LICENSE
        Copyright (C) 2022-present Aman Mehra. All text art is a Copyright (C)
        of individual artists. Usage of sources in arttime project and it's
-       derivates is bound by terms of CFLA. For usual development process,
+       derivatives is bound by terms of CFLA. For usual development process,
        code is available under GPL3. For more detailed information, please
        refer the documents titled LICENSE_ART, LICENSE_CODE, and
        LICENSE_ADDENDUM_CFLA at https://github.com/poetaman/arttime.
 
-Artprint 2.3.0                    2024-01-20                       ARTPRINT(1)
+Artprint 2.3.0                    2024-04-21                       ARTPRINT(1)
