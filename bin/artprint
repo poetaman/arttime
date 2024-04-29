@@ -245,14 +245,18 @@ else
     }
 fi
 
-textwidth=0;
-textheight=0;
+typeset -a textwidths
+textwidth=0
+textheight=0
+linewidth=0
 if [[ $filterexternal = "0" ]] then
     #textwidth=$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$art | wc -L)
     #textheight=$(wc -l <<<$art)
     while IFS= read -r line; do
-        if [[ "${#line}" -gt $textwidth ]]; then
-            textwidth=${#line};
+        linewidth=${#line}
+        textwidths+=($linewidth)
+        if [[ $linewidth -gt $textwidth ]]; then
+            textwidth=$linewidth;
         fi;
         textheight=$((textheight+1))
     done <<<$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$art);
@@ -260,9 +264,11 @@ else
     #textwidth=$(ansifilter --ignore-csi <<<$art | wc -L)
     #textheight=$(wc -l <<<$art)
     while IFS= read -r line; do
-        if [[ "${#line}" -gt $textwidth ]]; then
-            textwidth=${#line};
-        fi; 
+        linewidth=${#line}
+        textwidths+=($linewidth)
+        if [[ $linewidth -gt $textwidth ]]; then
+            textwidth=$linewidth;
+        fi;
         textheight=$((textheight+1))
     done <<<$(ansifilter --ignore-csi <<<$art);
 fi
@@ -303,9 +309,12 @@ if [[ -z $artcolor ]]; then
 else
     printf "\e[0m\e[38;5;${artcolor}m" #\e[1m
 fi
+typeset -i index
+index=1
 pr -t $prshiftopt <<<"$art" | while IFS= read -r line; do
-    artlinewidth=$(findtextwidth $line)
-    printf "%s%$((termwidth-${artlinewidth}-1))s$tchar\n" "$line" " "
+    artlinewidth=$textwidths[$index]
+    index=$((index+1))
+    printf "%s%$((termwidth-shiftwidth-artlinewidth-1))s$tchar\n" "$line" " "
 done
 
 #echo "$textwidth, $shiftwidth"
