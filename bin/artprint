@@ -234,7 +234,7 @@ fi
 if ! command -v ansifilter &> /dev/null; then
     filterexternal="0"
     function findtextwidth {
-        local textnoansi=$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$1)
+        local textnoansi=$(sed -e 's/'$'\x1b''\[[0-9;]*m//g' <<<$1)
         echo "${#textnoansi}"
     }
 else
@@ -259,7 +259,7 @@ if [[ $filterexternal = "0" ]] then
             textwidth=$linewidth;
         fi;
         textheight=$((textheight+1))
-    done <<<$(sed -e 's/\x1b\[[0-9;]*m//g' <<<$art);
+    done <<<$(sed -e 's/'$'\x1b''\[[0-9;]*m//g' <<<$art);
 else
     #textwidth=$(ansifilter --ignore-csi <<<$art | wc -L)
     #textheight=$(wc -l <<<$art)
