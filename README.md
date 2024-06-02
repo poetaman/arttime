@@ -134,10 +134,10 @@ Arttime might also be available as a package or build receipe in your favorite s
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/arttime.svg)](https://repology.org/project/arttime/versions)
 
-For Debian, Ubuntu, etc Linuxes that use ``apt``, please download and install latest .deb package: [arttime_2.3.2-1_all.deb](https://github.com/poetaman/arttime/releases/download/v2.3.2/arttime_2.3.2-1_all.deb). Instructions:
+For Debian, Ubuntu, etc Linuxes that use ``apt``, please download and install latest .deb package: [arttime_2.3.4-1_all.deb](https://github.com/poetaman/arttime/releases/download/v2.3.4/arttime_2.3.4-1_all.deb). Instructions:
 ```
-$ mv arttime_2.3.2-1_all.deb /tmp
-$ sudo apt install /tmp/arttime_2.3.2-1_all.deb
+$ mv arttime_2.3.4-1_all.deb /tmp
+$ sudo apt install /tmp/arttime_2.3.4-1_all.deb
 ```
 
 
