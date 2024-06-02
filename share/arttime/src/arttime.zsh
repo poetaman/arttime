@@ -2056,7 +2056,7 @@ function usr1input_handler {
                         pausegoals="1"
                         pausestart="$currenttimearray[1]"
                         pausestartstr="$currenttimearray[2]"
-                        accumulatedsprinttime=$((currenttimearray[1]-sprintstarttime))
+                        accumulatedsprinttime=$((accumulatedsprinttime+currenttimearray[1]-sprintstarttime))
                         goaltime=""
                     fi
                 else
