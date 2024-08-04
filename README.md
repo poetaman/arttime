@@ -182,4 +182,5 @@ docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm zshusers/zsh:5.8 zsh -c '
 3. [aewan](http://aewan.sourceforge.net): free ascii text coloring tool. Project seems stalled, but works. Tested on Linux VM running on aarch64 Macbook.
 
 Arttime stargazers with known locations (August 2024):
-<img width="1176" alt="arttime_stargazers" src="https://github.com/user-attachments/assets/cab40628-ba8b-4aca-9fe5-a70e8ce70bc5">
+![arttime_stargazers](https://github.com/user-attachments/assets/4ab8b5f0-468f-4669-951b-9458b0a3ba0a)
+
