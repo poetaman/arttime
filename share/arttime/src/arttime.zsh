@@ -841,10 +841,20 @@ function slurp {
     fi
 }
 
+tput_smam=$(echoti smam 2>/dev/null)
+if [[ -z $tput_smam ]] && [[ $TERM =~ ^(tmux|screen).*$ ]]; then
+    tput_smam="[?7h";
+fi
 
-tputset_str=$(echoti rmam 2>/dev/null; echoti civis; echoti smcup)
+tput_rmam=$(echoti rmam 2>/dev/null)
+if [[ -z $tput_rmam ]] && [[ $TERM =~ ^(tmux|screen).*$ ]]; then
+    tput_rmam="[?7l";
+fi
+
+
+tputset_str=$(printf "$tput_rmam"; echoti civis; echoti smcup)
 function tputset { printf "$tputset_str"; }
-tputreset_str=$(echoti rmcup; echoti smam 2>/dev/null; echoti cnorm)
+tputreset_str=$(echoti rmcup; printf "$tput_smam"; echoti cnorm)
 function tputreset { printf "$tputreset_str"; }
 
 regexpart='[[:space:]]*([0-9]+)([dhms])[[:space:]]*'
@@ -1645,7 +1655,7 @@ function artselector2 {
         echo $bartarray  | tr ' ' '\n' | column -c$(echoti cols)
         printf '\n'
     else
-        echoti smam 2>/dev/null
+        printf "$tput_smam"
         printf '%s  ' $bartarray
         printf '\n\n'
     fi
