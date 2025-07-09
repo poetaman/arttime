@@ -724,10 +724,7 @@ if [[ -t 0 ]]; then
         fi
     fi
 else
-    unset streamfd
-    exec {streamfd}>&0
-    exec 0>&-
-    exec 0>&1
+    streamfd=0
     streamclosed="0"
 fi
 setmodestr
