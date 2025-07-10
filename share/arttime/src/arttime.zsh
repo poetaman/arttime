@@ -724,7 +724,9 @@ if [[ -t 0 ]]; then
         fi
     fi
 else
-    streamfd=0
+    unset streamfd
+    exec {streamfd}<&0
+    exec 0<>$TTY
     streamclosed="0"
 fi
 setmodestr
