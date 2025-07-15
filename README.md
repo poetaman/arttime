@@ -24,7 +24,7 @@ Contents
 # arttime
 Beauty of text-art meets functionality of a feature-rich clock / timer / pattern-based time manager in terminal. In addition to its functional/productivity features, ``arttime`` brings curated text-art to otherwise artless terminal emulators of starving developers and other users who can use terminal. It is a cross-platform application with native notifications/sounds that runs well on macOS, Linux, BSD Unixes, and Windows WSL.
 
-Arttime is rooted in Unix philosophy. You can also feed keystrokes into it from a file, pipe, string or unrelated process instead of just typing them; control gets cleanly transferred to your keyboard when the respective file, pipe, or string ends. Among other features, this allows using arttime to display dynamic information like system metrics, weather, stock market feed, and etc using a simple external feeder program.
+Arttime is rooted in Unix philosophy. You can also feed keystrokes into it from a file, pipe<sup>[1]</sup>, string or unrelated process instead of just typing them; control gets cleanly transferred to your keyboard when the respective file, pipe, or string ends. Among other features, this allows using arttime to display dynamic information like system metrics, weather, stock market feed, and etc using a simple external feeder program. <sup>[1]</sup> Note: Check the most portably functional syntax for pipes involving arttime at [arttime wiki](https://github.com/poetaman/arttime/wiki).
 
 ## Purpose/features
 - Bring curated text/ascii art to artless terminals, currently 500+ high-quality ASCII, ANSI, PETSCII, Unicode text art to choose from
