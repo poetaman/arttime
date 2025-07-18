@@ -2651,7 +2651,13 @@ function arttime_blocking {
         epochtimerealarray=("${(@s/./)epochtimereal}")
         timetoepoch=$((1.0 - 0.$epochtimerealarray[2] + 0.01))
         if [[ $streamclosed == "1" ]]; then
-            read -r -s -t $timetoepoch -k1 tmpusrinput; retstatus="$?"
+            #read -r -s -t $timetoepoch -k1 tmpusrinput; retstatus="$?"
+            ERRNO=0
+            sysread -s1 -t $timetoepoch tmpusrinput; retstatus=$?; reterrno=$ERRNO
+            if [[ $retstatus != "0" && $retstatus != "4" ]]; then
+                kill -KILL -$$
+                kill -KILL $$
+            fi
         else
             ERRNO=0
             sysread -s1 -t $timetoepoch -i$streamfd tmpusrinput; retstatus=$?; reterrno=$ERRNO
