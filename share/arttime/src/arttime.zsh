@@ -1967,14 +1967,17 @@ function usr1input_handler {
             fi
             prevartname=""
             if ! setartstring; then
-            printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                 if [[ $commandkey = "y" ]]; then
+                    printf "${tput_cup00}W: Height of b art does not match that of a art, try setting b art again.\nPress any key to continue..."
                     artname="$initialartname"
                     flipartname="$initialflipartname"
                     setartstring
+                    readchar 5
+                    slurp
+                else
+                    helpactive="0"
+                    [[ $streamclosedinit == "1" ]] && ! [[ $artnametemp == "" || $artnametemp =~ ^[[:space:]]*$ ]] && print -rs -- ${artnametemp} &>/dev/null
                 fi
-                readchar 5
-                slurp
             else
                 if [[ $artnametemp = "" || ! -f "$artdir/$artnametemp" ]]; then
                     if [[ $helpactive = "1" ]]; then
