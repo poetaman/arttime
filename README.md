@@ -149,7 +149,7 @@ Docker being a containerized environment can be a preferred way of trying applic
 
 arttime will start in UTC timezone unless you have environment variable TZ set to a preferred timezone before running the following command. For a normal [installation](#installation) (not docker), arttime automatically starts in users timezone. There is no clean and portable docker interface to inherit host timezone. You can change the timezone from within arttime, after it launches, by pressing ``z`` and following the instructions (e.g.: California time can be set by entering ``US/Pacific`` [tab based auto-completion hints are provided] after pressing ``z``).
 ```
-docker run -e TERM -e LC_ALL=C.UTF-8 -e TZ -it --rm alpine:latest sh -c '
+docker run -e LC_ALL=C.UTF-8 -e TZ -it --rm alpine:latest sh -c '
   apk add --no-cache coreutils zsh curl fzf less tzdata
   ln -fs /usr/share/zoneinfo/UTC /etc/localtime
   export SHELL=$(command -v zsh)
