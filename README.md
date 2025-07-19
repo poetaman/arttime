@@ -145,18 +145,16 @@ If you don't see your favorite distribution and would like to volunteer then get
 
 
 ## Try arttime in docker?
-Docker being a containerized environment can be a preferred way of trying applications for some geeks. With docker already installed you can give arttime a quick try in a docker container, ***though without arttime's sounds/notifications***. Copy-Paste-Enter the following command in a terminal application after starting [Docker Desktop](https://www.docker.com) on your computer. Note: arttime, its committers or artists don't endorse docker™ in any form or manner. It's presented here only for geeks who know what they are doing and prefer to try it in a container before installing; for everybody else its recommended to jump directly to [Installation](#installation).
+Docker being a containerized environment can be a preferred way of trying applications for some geeks. With docker already installed you can give arttime a quick try in a docker container, ***though without arttime's sounds/notifications***. Copy-Paste-Enter the following command in a terminal application after starting [Docker Desktop](https://www.docker.com) on your computer. Note: arttime, its committers or artists don't endorse docker™ in any form or manner. It's presented here only for geeks who know what they are doing and prefer to try it in a container before installing; for others it is recommended to jump directly to [Installation](#installation).
+
+```
+docker run -e TZ --rm -it poetaman/arttime:latest
+```
 
 arttime will start in UTC timezone unless you have environment variable TZ set to a preferred timezone before running the following command. For a normal [installation](#installation) (not docker), arttime automatically starts in users timezone. There is no clean and portable docker interface to inherit host timezone. You can change the timezone from within arttime, after it launches, by pressing ``z`` and following the instructions (e.g.: California time can be set by entering ``US/Pacific`` [tab based auto-completion hints are provided] after pressing ``z``).
-```
-docker run -e TZ -it --rm alpine:latest sh -c '
-  apk add --no-cache coreutils zsh curl fzf less tzdata
-  ln -fs /usr/share/zoneinfo/UTC /etc/localtime
-  export SHELL=$(command -v zsh); export LC_ALL=C.UTF-8
-  curl -fsSL https://gist.githubusercontent.com/poetaman/bdc598ee607e9767fe33da50e993c650/raw/d0146d258a30daacb9aee51deca9410d106e4237/arttime_online_installer.sh | TERM=xterm-256color zsh
-  TERM=xterm-256color ~/.local/bin/arttime
-  echo "For more information, please check https://github.com/poetaman/arttime"'
-```
+
+The above command should work on computers with x86-64, aarch64, and riscv64 architectures. If your computer uses a different architecture, please follow an alternative technique listed on [arttime docker page](https://hub.docker.com/r/poetaman/arttime).
+
 
 # Troubleshooting
 - Some art does not render correctly?
