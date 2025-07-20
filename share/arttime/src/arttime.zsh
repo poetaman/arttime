@@ -900,9 +900,9 @@ function setgoaltime {
         local goaltime3=$(getseconds $match[5] $match[6])
         local goaltime4=$(getseconds $match[7] $match[8])
         goaltime=$(( currenttime+goaltime1+goaltime2+goaltime3+goaltime4 ))
-    elif goaltime=$($datecmd -d $goal '+%s' 2>/dev/null ); then
+    elif goaltime=$(TZ=$tzlongcurrent $datecmd -d $goal '+%s' 2>/dev/null ); then
         if [[ $goaltime -gt $currenttime ]]; then
-        elif goaltime=$($datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
+        elif goaltime=$(TZ=$tzlongcurrent $datecmd -d "$goal +1days" '+%s' 2>/dev/null); then
             if [[ $goaltime -gt $currenttime ]]; then
                 goalstatus="1"
                 #echoti cup 0 0
