@@ -2658,6 +2658,9 @@ function arttime_blocking {
             ERRNO=0
             sysread -s1 -t $timetoepoch tmpusrinput; retstatus=$?; reterrno=$ERRNO
             if [[ $retstatus != "0" && $retstatus != "4" ]]; then
+                tputreset
+                sttyresetext
+                echo "[31mError[0m: Pipes involving arttime must be surrounded by parentheses ().\n       Restart the last shell command with pipe in (), you won't get this error.\n       Examples involving pipe are at https://github.com/poetaman/arttime/wiki.\n"
                 kill -KILL -$$
                 kill -KILL $$
             fi
