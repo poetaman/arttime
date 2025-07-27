@@ -218,7 +218,7 @@
        from different sources at launchtime. Such examples are shown with
        animated GIFs on webpages mentioned in section [36m[1mRESOURCES[0m[1m[22m.
 
-           $ [36m[1mprintf 'mhello world\njjjjjjjjy' | arttime[0m
+           $ [36m[1m(printf 'mhello world\njjjjjjjjy' | arttime)[0m
                pipe keystrokes into arttime
            $ [36m[1marttime -k /path/to/config4[0m
                read keystrokes from a file named config4
@@ -428,7 +428,7 @@
            $ [36m[1marttime --nolearn -t "Hello World - Butterfly" --ac 2 --style 1[0m
                prints [35m[4m"Hello[24m [4mWorld[24m [4m--[24m  [4mButterfly"[0m[4m[24m, sets art-color to [35m[4m2[0m
                (green), and sets style to use more Unicode characters
-           $ [36m[1mprintf "cccg10s\nmHello World\nh" | arttime[0m
+           $ [36m[1m(printf "cccg10s\nmHello World\nh" | arttime)[0m
                starts arttime in [36m[1mSCRIPT [0m[1m[22mmode. Just like keypoem files,
                keystrokes are read from pipe till the pipe ends or user
                signals interrupt (mostly [35m[4mCtrl-c[0m[4m[24m). Then control gets
@@ -549,4 +549,4 @@
        titled LICENSE_ART, LICENSE_CODE, and LICENSE_ADDENDUM_CFLA at
        [32mhttps://github.com/poetaman/arttime[0m.
 
-[33mArttime 2.3.4                     [31m2024-06-02                        [33m[4mARTTIME[0m[4m[24m([32m1[0m)
+[33mArttime 2.4.0                     [31m2025-07-27                        [33m[4mARTTIME[0m[4m[24m([32m1[0m)

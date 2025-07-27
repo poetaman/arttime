@@ -135,4 +135,4 @@ LICENSE
        refer the documents titled LICENSE_ART, LICENSE_CODE, and
        LICENSE_ADDENDUM_CFLA at https://github.com/poetaman/arttime.
 
-Artprint 2.3.4                    2024-06-02                       ARTPRINT(1)
+Artprint 2.4.0                    2025-07-27                       ARTPRINT(1)

@@ -218,7 +218,7 @@ ORCHESTRATING
        from different sources at launchtime. Such examples are shown with
        animated GIFs on webpages mentioned in section RESOURCES.
 
-           $ printf 'mhello world\njjjjjjjjy' | arttime
+           $ (printf 'mhello world\njjjjjjjjy' | arttime)
                pipe keystrokes into arttime
            $ arttime -k /path/to/config4
                read keystrokes from a file named config4
@@ -428,7 +428,7 @@ EXAMPLES
            $ arttime --nolearn -t "Hello World - Butterfly" --ac 2 --style 1
                prints "Hello World --  Butterfly", sets art-color to 2
                (green), and sets style to use more Unicode characters
-           $ printf "cccg10s\nmHello World\nh" | arttime
+           $ (printf "cccg10s\nmHello World\nh" | arttime)
                starts arttime in SCRIPT mode. Just like keypoem files,
                keystrokes are read from pipe till the pipe ends or user
                signals interrupt (mostly Ctrl-c). Then control gets
@@ -549,4 +549,4 @@ LICENSE
        titled LICENSE_ART, LICENSE_CODE, and LICENSE_ADDENDUM_CFLA at
        https://github.com/poetaman/arttime.
 
-Arttime 2.3.4                     2024-06-02                        ARTTIME(1)
+Arttime 2.4.0                     2025-07-27                        ARTTIME(1)
