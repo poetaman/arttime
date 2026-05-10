@@ -23,7 +23,7 @@ zmodload zsh/datetime
 zmodload zsh/terminfo
 zmodload zsh/system
 zmodload zsh/complist
-autoload -Uz compinit; compinit
+autoload -Uz compinit; compinit -u
 setopt nomonitor
 setopt extendedglob
 setopt globcomplete
