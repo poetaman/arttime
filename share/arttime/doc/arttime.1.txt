@@ -549,4 +549,4 @@ LICENSE
        titled LICENSE_ART, LICENSE_CODE, and LICENSE_ADDENDUM_CFLA at
        https://github.com/poetaman/arttime.
 
-Arttime 2.4.0                     2025-07-27                        ARTTIME(1)
+Arttime 2.5.0                     2026-08-17                        ARTTIME(1)
